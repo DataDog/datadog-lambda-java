@@ -6,9 +6,9 @@ package com.datadoghq.datadog_lambda_layer_java;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-public class LibraryTest {
+public class MetricsTest {
     @Test public void testSomeLibraryMethod() {
-        Library classUnderTest = new Library();
-        assertTrue("someLibraryMethod should return 'true'", classUnderTest.someLibraryMethod());
+        DDMetric ddm = new DDMetric("foo", 24.3);
+        assertEquals("{\"v\":24.3,\"m\":\"foo\"}", ddm.toJson());
     }
 }
