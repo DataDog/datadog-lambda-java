@@ -90,7 +90,7 @@ public class LambdaInstrumenterTest {
         Assert.assertEquals(37.1, jsonObject.get("v"));
     }
 
-    @Test public void TestLambdaInstrumentorCountsColdStartErrorsProperly(){
+    @Test public void TestLambdaInstrumentorCountsColdStartErrors(){
         ColdStart.resetColdStart();
         ObjectMetricWriter omw = new ObjectMetricWriter();
         MetricWriter.setMetricWriter(omw);
