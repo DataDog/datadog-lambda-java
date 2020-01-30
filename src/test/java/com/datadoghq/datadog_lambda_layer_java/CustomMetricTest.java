@@ -21,7 +21,7 @@ public class CustomMetricTest {
             e.printStackTrace();
         }
         CustomMetric ddm = new CustomMetric("foo", 24.3, null, customTime);
-        assertEquals("{\"t\":{},\"e\":1559152800,\"v\":24.3,\"m\":\"foo\"}", ddm.toJson());
+        assertEquals("{\"t\":[],\"e\":1559152800,\"v\":24.3,\"m\":\"foo\"}", ddm.toJson());
     }
 
 
@@ -40,7 +40,7 @@ public class CustomMetricTest {
         ddm.write();
 
         assertNotNull(smw.getMetricsWritten());
-        assertEquals("{\"t\":{},\"e\":1559152800,\"v\":24.3,\"m\":\"foo\"}",smw.getMetricsWritten());
+        assertEquals("{\"t\":[],\"e\":1559152800,\"v\":24.3,\"m\":\"foo\"}",smw.getMetricsWritten());
     }
 
     /**

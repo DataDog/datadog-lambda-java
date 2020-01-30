@@ -6,8 +6,8 @@ import java.util.*;
 
 public class LambdaInstrumenter {
     private String ENHANCED_PREFIX = "aws.lambda.enhanced.";
-    private String INVOCATION = "invocation";
-    private String ERROR = "error";
+    private String INVOCATION = "invocations";
+    private String ERROR = "errors";
 
     /**
      * The Datadog Lambda Instrumenter is used for getting information about your Lambda function into Datadog.

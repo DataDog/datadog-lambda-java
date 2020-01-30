@@ -1,6 +1,7 @@
 package com.datadoghq.datadog_lambda_layer_java;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Assert;
@@ -15,6 +16,15 @@ public class LambdaInstrumenterTest {
         ColdStart.resetColdStart();
     }
 
+    private boolean JSONArrayContains(JSONArray j, String needle){
+        for (Object jo: j){
+            if(jo.toString().equals(needle)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Test public void TestLambdaInstrumentor(){
         ColdStart.resetColdStart();
         EnhancedMetricTest.MockContext mc = new EnhancedMetricTest.MockContext();
@@ -25,15 +35,15 @@ public class LambdaInstrumenterTest {
         Assert.assertNotNull(omw.CM);
 
         JSONObject writtenMetric = new JSONObject(omw.CM.toJson());
-        Assert.assertEquals( "aws.lambda.enhanced.invocation", writtenMetric.get("m").toString());
-        JSONObject jsonTags = (JSONObject) writtenMetric.get("t");
-        Assert.assertTrue((boolean) jsonTags.get("cold_start"));
+        Assert.assertEquals( "aws.lambda.enhanced.invocations", writtenMetric.get("m").toString());
+        JSONArray jsonTags = (JSONArray) writtenMetric.get("t");
+        Assert.assertTrue(JSONArrayContains(jsonTags, "cold_start:true"));
 
         LambdaInstrumenter li2 = new LambdaInstrumenter(mc);
 
         JSONObject writtenMetric2 = new JSONObject(omw.CM.toJson());
-        JSONObject jsonTags2 = (JSONObject) writtenMetric2.get("t");
-        Assert.assertFalse((boolean) jsonTags2.get("cold_start"));
+        JSONArray jsonTags2 = (JSONArray) writtenMetric2.get("t");
+        Assert.assertTrue(JSONArrayContains(jsonTags2, "cold_start:false"));
     }
 
     @Test public void TestLambdaInstrumentorWithNullContext(){
@@ -62,7 +72,7 @@ public class LambdaInstrumenterTest {
         li.recordError(mc);
 
         JSONObject jsonObject = new JSONObject(omw.CM.toJson());
-        Assert.assertEquals("aws.lambda.enhanced.error", jsonObject.getString("m"));
+        Assert.assertEquals("aws.lambda.enhanced.errors", jsonObject.getString("m"));
     }
 
     @Test public void TestLambdaInstrumentorCustomMetric(){

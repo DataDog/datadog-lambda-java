@@ -3,6 +3,8 @@ package com.datadoghq.datadog_lambda_layer_java;
 
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
@@ -44,12 +46,18 @@ public class CustomMetric {
      * @return the Metric's JSON representation
      */
     public String toJson(){
+        //First we need to turn the tags into an array of colon-delimited strings
+        ArrayList<String> tagsList = new java.util.ArrayList<String>();
+        if (this.tags != null) {
+            this.tags.forEach((k, v) -> tagsList.add(String.format("%s:%s", k, v.toString())));
+        }
+
         long unixTime  = this.time.getTime() / 1000; // To Unix seconds instead of millis
         JSONObject jo = new JSONObject()
                 .put("e", unixTime)
                 .put("m", this.name)
                 .put("v", this.value)
-                .put("t", this.tags);
+                .put("t", tagsList);
         return jo.toString();
     }
 
