@@ -1,10 +1,9 @@
-package com.datadoghq.datadog_lambda_layer_java;
+package com.datadoghq.datadog_lambda_java;
 
 
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 

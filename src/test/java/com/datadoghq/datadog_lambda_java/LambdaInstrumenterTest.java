@@ -1,14 +1,11 @@
-package com.datadoghq.datadog_lambda_layer_java;
+package com.datadoghq.datadog_lambda_java;
 
-import com.amazonaws.services.lambda.runtime.Context;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Map;
 
 public class LambdaInstrumenterTest {
     @Before

@@ -1,4 +1,4 @@
-package com.datadoghq.datadog_lambda_layer_java;
+package com.datadoghq.datadog_lambda_java;
 
 import com.amazonaws.services.lambda.runtime.ClientContext;
 import com.amazonaws.services.lambda.runtime.CognitoIdentity;
