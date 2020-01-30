@@ -25,6 +25,11 @@ TODO
   own spans?)
   - [ ] Include sampling info
   - [ ] Write traces to logs on logger flush
+- [ ] Build and Deploy
+  - [x] Test & build jar with Gradle
+  - [ ] Scripts to automate testing and jar building (Dockerize)
+  - [ ] (Script to?) push new version to Maven Central
+  - [ ] Document dev/build/release/deploy steps in SLS-team wiki
 
 Installation
 ------------
