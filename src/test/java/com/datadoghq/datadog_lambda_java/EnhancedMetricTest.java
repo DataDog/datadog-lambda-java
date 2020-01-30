@@ -8,6 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Map;
+import java.util.UUID;
 
 public class EnhancedMetricTest {
 
@@ -26,10 +27,14 @@ public class EnhancedMetricTest {
     }
 
     static class MockContext implements Context {
+        String requestID;
+        public MockContext(){
+            requestID = UUID.randomUUID().toString();
+        }
 
         @Override
         public String getAwsRequestId() {
-            return "c224f41c-2384-4318-a7d5-879c2bbd4762";
+            return requestID;
         }
 
         @Override

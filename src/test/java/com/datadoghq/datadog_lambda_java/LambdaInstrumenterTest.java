@@ -1,5 +1,6 @@
 package com.datadoghq.datadog_lambda_java;
 
+import com.amazonaws.services.lambda.runtime.Context;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
@@ -36,7 +37,8 @@ public class LambdaInstrumenterTest {
         JSONArray jsonTags = (JSONArray) writtenMetric.get("t");
         Assert.assertTrue(JSONArrayContains(jsonTags, "cold_start:true"));
 
-        LambdaInstrumenter li2 = new LambdaInstrumenter(mc);
+        EnhancedMetricTest.MockContext mc2 = new EnhancedMetricTest.MockContext();
+        LambdaInstrumenter li2 = new LambdaInstrumenter(mc2);
 
         JSONObject writtenMetric2 = new JSONObject(omw.CM.toJson());
         JSONArray jsonTags2 = (JSONArray) writtenMetric2.get("t");
@@ -50,6 +52,7 @@ public class LambdaInstrumenterTest {
         LambdaInstrumenter li =new LambdaInstrumenter(null);
         Assert.assertNotNull(omw.CM);
     }
+
     @Test public void TestLambdaInstrumentorFlush(){
         ObjectMetricWriter omw = new ObjectMetricWriter();
         MetricWriter.setMetricWriter(omw);
@@ -85,6 +88,22 @@ public class LambdaInstrumenterTest {
         JSONObject jsonObject = new JSONObject(omw.CM.toJson());
         Assert.assertEquals("my_custom_metric", jsonObject.get("m"));
         Assert.assertEquals(37.1, jsonObject.get("v"));
+    }
+
+    @Test public void TestLambdaInstrumentorCountsColdStartErrors(){
+        ColdStart.resetColdStart();
+        ObjectMetricWriter omw = new ObjectMetricWriter();
+        MetricWriter.setMetricWriter(omw);
+
+        Context mc1 = new EnhancedMetricTest.MockContext();
+        LambdaInstrumenter li =new LambdaInstrumenter(mc1);
+        li.recordError(mc1);
+
+        JSONObject thisMetric = new JSONObject(omw.CM.toJson());
+        Assert.assertEquals("aws.lambda.enhanced.errors", thisMetric.get("m").toString());
+
+        JSONArray theseTags = (JSONArray) thisMetric.get("t");
+        Assert.assertTrue(JSONArrayContains(theseTags, "cold_start:true"));
     }
 
     @After

@@ -1,23 +1,29 @@
 package com.datadoghq.datadog_lambda_java;
 
+import com.amazonaws.services.lambda.runtime.Context;
+
 class ColdStart {
-    private static boolean isColdStart = true;
+    private static String coldRequestID;
 
     /**
-     * Gets the cold_start status. The very first time we try to get cold_start, we expect cold_start to be true.
-     * Otherwise, we expect it to be false.
+     * Gets the cold_start status. The very first request to be made against this Lambda should be considered cold.
+     * All others are warm.
      * @return true on the very first invocation, false otherwise
      */
-    public synchronized static boolean getColdStart(){
-        if (isColdStart){
-            isColdStart = false;
+    public synchronized static boolean getColdStart(Context cxt){
+        String reqId = cxt.getAwsRequestId();
+        if (coldRequestID == null) {
+            coldRequestID = reqId;
+            return true;
+        }
+        if (coldRequestID.equals(reqId)){
             return true;
         }
         return false;
     }
 
     public synchronized static void resetColdStart(){
-        isColdStart = true;
+        coldRequestID = null;
     }
 
 }
