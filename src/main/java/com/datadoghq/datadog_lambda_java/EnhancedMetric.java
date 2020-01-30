@@ -21,7 +21,7 @@ class EnhancedMetric {
         m.put("region", region);
         m.put("account_id", accountId);
         m.put("memorysize", ctx.getMemoryLimitInMB());
-        m.put("cold_start", ColdStart.getColdStart());
+        m.put("cold_start", ColdStart.getColdStart(ctx));
         m.put("runtime", runtime);
         return m;
     }
