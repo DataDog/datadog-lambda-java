@@ -17,7 +17,7 @@ TODO
 
 - [x] Implement custom metrics
 - [x] Implement enhanced metrics 
-- [ ] Implement internal log levels/output
+- [x] Implement internal log levels/output
 - [ ] Implement tracing
   - [ ] Get DD Trace Context from API Gateway Request, if possible, and add a dummy
   segment to the X-Ray trace.
