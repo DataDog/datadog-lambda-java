@@ -46,9 +46,7 @@ public class LambdaInstrumenter {
     private void recordEnhanced(String basename, Context cxt){
         String metricName = ENHANCED_PREFIX + basename;
         Map<String, Object> tags = null;
-        if (cxt != null) {
-            tags = EnhancedMetric.makeTagsFromContext(cxt);
-        }
+        tags = EnhancedMetric.makeTagsFromContext(cxt);
         new CustomMetric(metricName, 1,tags).write();
     }
 }
