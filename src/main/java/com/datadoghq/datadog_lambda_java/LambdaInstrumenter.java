@@ -1,6 +1,8 @@
 package com.datadoghq.datadog_lambda_java;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayV2ProxyRequestEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 
 import java.util.*;
 
@@ -15,6 +17,26 @@ public class LambdaInstrumenter {
      *            Metrics require this to run.
      */
     public LambdaInstrumenter(Context cxt){
+        recordEnhanced(INVOCATION, cxt);
+    }
+
+    /**
+     *
+     * @param event The APIGatewayV2ProxyRequestEvent provided by APIGateway.
+     * @param cxt The Lambda runtime context object provided to your handler by AWS. Can be null, but Enhanced Lambda
+     *            Metrics require this to run.
+     */
+    public LambdaInstrumenter(APIGatewayV2ProxyRequestEvent event, Context cxt){
+        recordEnhanced(INVOCATION, cxt);
+    }
+
+    /**
+     *
+     * @param event The APIGatewayProxyRequestEvent provided by APIGateway.
+     * @param cxt The Lambda runtime context object provided to your handler by AWS. Can be null, but Enhanced Lambda
+     *            Metrics require this to run.
+     */
+    public LambdaInstrumenter(APIGatewayProxyRequestEvent event, Context cxt){
         recordEnhanced(INVOCATION, cxt);
     }
 
