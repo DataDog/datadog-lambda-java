@@ -17,10 +17,10 @@ TODO
 
 - [x] Implement custom metrics
 - [x] Implement enhanced metrics 
-- [ ] Implement internal log levels/output
+- [x] Implement internal log levels/output
 - [ ] Implement tracing
-  - [ ] Start span on Lambda invocation
-  - [ ] Get DD Trace Context from API Gateway Request, if possible
+  - [ ] Get DD Trace Context from API Gateway Request, if possible, and add a dummy
+  segment to the X-Ray trace.
   - [ ] Wrapper for adding trace context into HTTP requests (break them off into their 
   own spans?)
   - [ ] Include sampling info

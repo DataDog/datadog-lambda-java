@@ -11,6 +11,10 @@ class ColdStart {
      * @return true on the very first invocation, false otherwise
      */
     public synchronized static boolean getColdStart(Context cxt){
+        if (cxt == null){
+            DDLogger.getLoggerImpl().debug("Unable to determine cold_start: context was null");
+            return false;
+        }
         String reqId = cxt.getAwsRequestId();
         if (coldRequestID == null) {
             coldRequestID = reqId;
