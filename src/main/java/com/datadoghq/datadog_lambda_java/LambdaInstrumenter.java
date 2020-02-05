@@ -6,38 +6,42 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 
 import java.util.*;
 
+/**
+ * The Lambda Instrumenter is used for getting information about your Lambda into Datadog.
+ */
 public class LambdaInstrumenter {
     private String ENHANCED_PREFIX = "aws.lambda.enhanced.";
     private String INVOCATION = "invocations";
     private String ERROR = "errors";
 
     /**
-     * The Datadog Lambda Instrumenter is used for getting information about your Lambda function into Datadog.
-     * @param cxt The Lambda runtime context object provided to your handler by AWS. Can be null, but Enhanced Lambda
-     *            Metrics require this to run.
+     * Create a new Lambda instrumenter given some Lambda context
+     * @param cxt Enhanced Metrics pulls information from the Lambda context.
      */
     public LambdaInstrumenter(Context cxt){
         recordEnhanced(INVOCATION, cxt);
     }
 
     /**
-     *
-     * @param event The APIGatewayV2ProxyRequestEvent provided by APIGateway.
-     * @param cxt The Lambda runtime context object provided to your handler by AWS. Can be null, but Enhanced Lambda
-     *            Metrics require this to run.
+     * Create a trace-enabled Lambda instrumenter given an APIGatewayProxyRequestEvent and a Lambda context
+     * @param req Your Datadog trace headers are pulled from the request and sent to XRay for consumption by the
+     *            Datadog Xray Crawler
+     * @param cxt Enhanced Metrics pulls information from the Lambda context.
      */
-    public LambdaInstrumenter(APIGatewayV2ProxyRequestEvent event, Context cxt){
+    public LambdaInstrumenter(APIGatewayProxyRequestEvent req, Context cxt){
         recordEnhanced(INVOCATION, cxt);
+        new Tracing(req).submitDummySpan();
     }
 
     /**
-     *
-     * @param event The APIGatewayProxyRequestEvent provided by APIGateway.
-     * @param cxt The Lambda runtime context object provided to your handler by AWS. Can be null, but Enhanced Lambda
-     *            Metrics require this to run.
+     * Create a trace-enabled Lambda instrumenter given an APIGatewayV2ProxyEventRequest and a Lambda context
+     * @param req Your Datadog trace headers are pulled from the request and sent to XRay for consumption by the
+     *            Datadog Xray Crawler
+     * @param cxt Enhanced Metrics pulls information from the Lambda context.
      */
-    public LambdaInstrumenter(APIGatewayProxyRequestEvent event, Context cxt){
+    public LambdaInstrumenter(APIGatewayV2ProxyRequestEvent req, Context cxt){
         recordEnhanced(INVOCATION, cxt);
+        new Tracing(req).submitDummySpan();
     }
 
     /**
