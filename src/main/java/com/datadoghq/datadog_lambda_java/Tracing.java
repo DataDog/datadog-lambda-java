@@ -3,13 +3,12 @@ package com.datadoghq.datadog_lambda_java;
 import java.io.IOException;
 import java.net.*;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2ProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
-import com.amazonaws.xray.AWSXRay;
-import com.amazonaws.xray.entities.Segment;
-import com.amazonaws.xray.entities.Subsegment;
 import org.json.JSONObject;
 
 
@@ -37,7 +36,7 @@ public class Tracing {
 
     public boolean submitSegment(){
         if(this.ctx == null){
-            DDLogger.getLoggerImpl().debug("Cannot submit a dummy span on a null context. Is the DD tracing context being initialized correctly?");
+            DDLogger.getLoggerImpl().debug("Cannot submit a fake span on a null context. Is the DD tracing context being initialized correctly?");
             return false;
         }
 
@@ -53,10 +52,13 @@ class ErsatzSegment {
         this.id = id;
     }
 
-    public void setStart_time(Long start_time) {
+    public void setStart_time(Double start_time) {
         this.start_time = start_time;
     }
 
+    public void setEnd_time(Double end_time) {
+        this.end_time = end_time;
+    }
     public void setParent_id(String parent_id) {
         this.parent_id = parent_id;
     }
@@ -65,65 +67,62 @@ class ErsatzSegment {
         this.trace_id = trace_id;
     }
 
-    public void setDdt(DDTraceContext ddt) {
-        this.ddt = ddt;
-    }
-
     private String name;
     private String id;
-    private Long start_time;
-    private boolean in_progress;
+    private Double start_time;
+    private Double end_time;
     private String type;
     private String parent_id;
     private String trace_id;
     private DDTraceContext ddt;
 
-    public ErsatzSegment(){
-        this.name = "datadog-trace-metadata";
-        this.in_progress = true;
-        this.type = "subsegment";
-    }
-
     public ErsatzSegment(DDTraceContext ctx){
-        this.name = "datadog-trace-metadata";
-        this.start_time = new Date().getTime()/1000;
-        this.in_progress = true;
+        this.start_time = ((double) new Date().getTime()) /1000d;
+        this.name = "datadog-metadata";
         this.type = "subsegment";
+
+        byte[] idBytes = new byte[8];
+        Random rnd = new Random();
+        rnd.nextBytes(idBytes);
+        this.id = "";
+        for (byte b : idBytes){
+            this.id = this.id + String.format("%02x", b);
+        }
 
         //Root=1-5e41a79d-e6a0db584029dba86a594b7e;Parent=8c34f5ad8f92d510;Sampled=1
         String traceId = System.getenv("_X_AMZN_TRACE_ID");
         if (traceId != null) {
             String[] traceParts = traceId.split(";");
-
             this.trace_id = traceParts[0].split("=")[1];
             this.parent_id = traceParts[1].split("=")[1];
-            this.id = this.parent_id;
         } else {
             DDLogger.getLoggerImpl().error("Unable to find trace context _X_AMZN_TRACE_ID in the environment variables");
         }
+        this.end_time = ((double) new Date().getTime()) /1000d;
 
         this.ddt = ctx;
     }
 
-    public byte[] toJSONBytes(){
+    public String toJSON(){
         JSONObject dd = new JSONObject();
         JSONObject tr = new JSONObject();
 
-        tr.put("trace", ddt.toString());
+        tr.put("trace", ddt.toJSON());
         dd.put("datadog", tr);
 
         JSONObject wholeThing = new JSONObject()
                 .put("name", this.name)
                 .put("id", this.id)
                 .put("start_time", this.start_time)
-                .put("in_progress", this.in_progress)
+                .put("end_time", this.end_time)
                 .put("metadata", dd)
                 .put("type", this.type)
                 .put("parent_id", this.parent_id)
                 .put("trace_id", this.trace_id);
 
         DDLogger.getLoggerImpl().debug(wholeThing.toString());
-        return wholeThing.toString().getBytes();
+        System.out.println(wholeThing.toString());
+        return wholeThing.toString();
     }
 
     public boolean sendToXRay(){
@@ -135,6 +134,7 @@ class ErsatzSegment {
         String s_daemon_port;
         String daemon_address_port = System.getenv("AWS_XRAY_DAEMON_ADDRESS");
         if (daemon_address_port != null) {
+            System.out.println("XRay daemon env var is " + daemon_address_port);
             s_daemon_ip = daemon_address_port.split(":")[0];
             s_daemon_port = daemon_address_port.split(":")[1];
         } else {
@@ -159,8 +159,14 @@ class ErsatzSegment {
             return false;
         }
 
-        byte[] payload = this.toJSONBytes();
-        DatagramPacket packet = new DatagramPacket(payload, payload.length, daemon_address, daemon_port);//bytes, length, address, port
+        JSONObject prefix  = new JSONObject()
+                .put("format", "json")
+                .put("version", 1);
+        String s_message = this.toJSON();
+        String s_payload = prefix.toString() + "\n" + s_message;
+
+        byte[] payload = s_payload.getBytes();
+        DatagramPacket packet = new DatagramPacket(payload, payload.length, daemon_address, daemon_port);
 
         DatagramSocket socket;
         try {
@@ -175,7 +181,6 @@ class ErsatzSegment {
             DDLogger.getLoggerImpl().error("Couldn't send packet! " + e.getMessage());
             return false;
         }
-        DDLogger.getLoggerImpl().debug("Ersatz segment sent");
         return true;
     }
 
@@ -208,6 +213,7 @@ class DDTraceContext {
             DDLogger.getLoggerImpl().debug("Unable to extract DD Context from null headers");
             throw new Exception("null headers!");
         }
+        headers = toLowerKeys(headers);
 
         if (headers.get(ddTraceKey) == null) {
             DDLogger.getLoggerImpl().debug("Headers missing the DD Trace ID");
@@ -223,17 +229,32 @@ class DDTraceContext {
 
         if (headers.get(ddSamplingKey) == null){
             DDLogger.getLoggerImpl().debug("Headers missing the DD Sampling Priority");
-            throw new Exception("Missing Sampling Priority");
+            headers.put(ddSamplingKey, "1");
         }
         this.samplingPriority = headers.get(ddSamplingKey);
     }
 
+    private  Map<String,String> toLowerKeys(Map<String,String> headers){
+        Map<String, String> headers2  = new HashMap<String, String>();
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            String k = entry.getKey();
+            String v = entry.getValue();
+            headers2.put(k,v);
+            headers2.put(k.toLowerCase(), v);
+        }
+        return headers2;
+    }
 
     public String toString(){
+        JSONObject jo = this.toJSON();
+        return jo.toString();
+    }
+
+    public JSONObject toJSON(){
         JSONObject jo = new JSONObject();
         jo.put("trace-id", this.getTraceID());
         jo.put("parent-id", this.getParentID());
         jo.put("sampling-priority", this.getSamplingPriority());
-        return jo.toString();
+        return jo;
     }
 }

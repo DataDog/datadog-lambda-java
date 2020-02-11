@@ -46,4 +46,26 @@ public class DDTraceContextTest {
         assertEquals("baz", ddt.getSamplingPriority());
     }
 
+    @Test
+    public void testDDTraceContextConstructor_constructsDDTraceContextWithMixedCaseHeaders(){
+        Map<String, String> dummyHeaders = new HashMap<String, String>();
+        String ddTraceKey = "X-Datadog-Trace-Id";
+        String ddParentKey = "X-Datadog-Parent-Id";
+        String ddSamplingKey = "X-Datadog-Sampling-Priority";
+
+        dummyHeaders.put(ddTraceKey, "foo");
+        dummyHeaders.put(ddParentKey, "bar");
+        dummyHeaders.put(ddSamplingKey, "baz");
+
+        DDTraceContext ddt = null;
+        try {
+            ddt = new DDTraceContext(dummyHeaders);
+        } catch (Exception e) {
+            assertNull("Should not reach this exception", e);
+        }
+
+        assertEquals("foo", ddt.getTraceID());
+        assertEquals("bar", ddt.getParentID());
+        assertEquals("baz", ddt.getSamplingPriority());
+    }
 }

@@ -30,7 +30,7 @@ public class LambdaInstrumenter {
      */
     public LambdaInstrumenter(APIGatewayProxyRequestEvent req, Context cxt){
         recordEnhanced(INVOCATION, cxt);
-        DDLogger.getLoggerImpl().debug("Segment submission status: ", new Tracing(req).submitSegment());
+        new Tracing(req).submitSegment();
     }
 
     /**
@@ -40,10 +40,8 @@ public class LambdaInstrumenter {
      * @param cxt Enhanced Metrics pulls information from the Lambda context.
      */
     public LambdaInstrumenter(APIGatewayV2ProxyRequestEvent req, Context cxt){
-        DDLogger.getLoggerImpl().error("Test error");
-        DDLogger.getLoggerImpl().debug("Test debug");
         recordEnhanced(INVOCATION, cxt);
-        DDLogger.getLoggerImpl().debug("Segment submission status: ", new Tracing(req).submitSegment());
+        new Tracing(req).submitSegment();
     }
 
     /**
