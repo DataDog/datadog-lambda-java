@@ -23,7 +23,7 @@ public class ErsatzSegmentTest {
         es.setTrace_id("1-5e41b3ba-9b515c884a780c0c63b74010");
         es.setId("30652c287aaff114");
 
-        String segJSON = es.toJSON();
+        String segJSON = es.toJSONString();
         String expextedStr = "{\"start_time\":1.5E9,\"metadata\":{\"datadog\":{\"trace\":{\"trace-id\":\"abcdef\",\"sampling-priority\":\"1\",\"parent-id\":\"ghijk\"}}},\"trace_id\":\"1-5e41b3ba-9b515c884a780c0c63b74010\",\"parent_id\":\"30652c287aaff114\",\"name\":\"datadog-metadata\",\"end_time\":1.500000001E9,\"id\":\"30652c287aaff114\",\"type\":\"subsegment\"}";
         Assert.assertEquals(expextedStr, segJSON);
 

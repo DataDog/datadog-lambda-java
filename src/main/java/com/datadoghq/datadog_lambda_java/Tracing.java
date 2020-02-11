@@ -103,11 +103,11 @@ class ErsatzSegment {
         this.ddt = ctx;
     }
 
-    public String toJSON(){
+    public String toJSONString(){
         JSONObject dd = new JSONObject();
         JSONObject tr = new JSONObject();
 
-        tr.put("trace", ddt.toJSON());
+        tr.put("trace", this.ddt.toJSON());
         dd.put("datadog", tr);
 
         JSONObject wholeThing = new JSONObject()
@@ -120,8 +120,6 @@ class ErsatzSegment {
                 .put("parent_id", this.parent_id)
                 .put("trace_id", this.trace_id);
 
-        DDLogger.getLoggerImpl().debug(wholeThing.toString());
-        System.out.println(wholeThing.toString());
         return wholeThing.toString();
     }
 
@@ -133,10 +131,15 @@ class ErsatzSegment {
         String s_daemon_ip;
         String s_daemon_port;
         String daemon_address_port = System.getenv("AWS_XRAY_DAEMON_ADDRESS");
-        if (daemon_address_port != null) {
-            System.out.println("XRay daemon env var is " + daemon_address_port);
+        if (daemon_address_port != null){
+            if (daemon_address_port.split(":").length != 2){
+                DDLogger.getLoggerImpl().error("Unexpected AWS_XRAY_DAEMON_ADDRESS value: ", daemon_address_port);
+                return false;
+            }
             s_daemon_ip = daemon_address_port.split(":")[0];
             s_daemon_port = daemon_address_port.split(":")[1];
+            DDLogger.getLoggerImpl().debug("AWS XRay Address: ", s_daemon_ip);
+            DDLogger.getLoggerImpl().debug("AWS XRay Port: ", s_daemon_port);
         } else {
             DDLogger.getLoggerImpl().error("Unable to get AWS_XRAY_DAEMON_ADDRESS from environment vars");
             return false;
@@ -162,7 +165,7 @@ class ErsatzSegment {
         JSONObject prefix  = new JSONObject()
                 .put("format", "json")
                 .put("version", 1);
-        String s_message = this.toJSON();
+        String s_message = this.toJSONString();
         String s_payload = prefix.toString() + "\n" + s_message;
 
         byte[] payload = s_payload.getBytes();
@@ -228,8 +231,8 @@ class DDTraceContext {
         this.parentID = headers.get(ddParentKey);
 
         if (headers.get(ddSamplingKey) == null){
-            DDLogger.getLoggerImpl().debug("Headers missing the DD Sampling Priority");
-            headers.put(ddSamplingKey, "1");
+            DDLogger.getLoggerImpl().debug("Headers missing the DD Sampling Priority. Defaulting to '2'");
+            headers.put(ddSamplingKey, "2");
         }
         this.samplingPriority = headers.get(ddSamplingKey);
     }
@@ -243,11 +246,6 @@ class DDTraceContext {
             headers2.put(k.toLowerCase(), v);
         }
         return headers2;
-    }
-
-    public String toString(){
-        JSONObject jo = this.toJSON();
-        return jo.toString();
     }
 
     public JSONObject toJSON(){
