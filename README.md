@@ -19,11 +19,10 @@ TODO
 - [x] Implement enhanced metrics 
 - [x] Implement internal log levels/output
 - [ ] Implement tracing
-  - [ ] Get DD Trace Context from API Gateway Request, if possible, and add a dummy
+  - [x] Get DD Trace Context from API Gateway Request, if possible, and add a dummy
   segment to the X-Ray trace.
   - [ ] Wrapper for adding trace context into HTTP requests (break them off into their 
   own spans?)
-  - [ ] Include sampling info
   - [ ] Write traces to logs on logger flush
 - [ ] Build and Deploy
   - [x] Test & build jar with Gradle
