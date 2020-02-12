@@ -9,6 +9,7 @@ import java.util.Random;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2ProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
+import jdk.jshell.spi.ExecutionControl;
 import org.json.JSONObject;
 
 
@@ -40,14 +41,14 @@ public class Tracing {
             return false;
         }
 
-        ErsatzSegment es = new ErsatzSegment(ctx);
+        ConverterSubsegment es = new ConverterSubsegment(ctx);
         return es.sendToXRay();
     }
 
 }
 
 
-class ErsatzSegment {
+class ConverterSubsegment {
     public void setId(String id) {
         this.id = id;
     }
@@ -76,7 +77,7 @@ class ErsatzSegment {
     private String trace_id;
     private DDTraceContext ddt;
 
-    public ErsatzSegment(DDTraceContext ctx){
+    public ConverterSubsegment(DDTraceContext ctx){
         this.start_time = ((double) new Date().getTime()) /1000d;
         this.name = "datadog-metadata";
         this.type = "subsegment";
@@ -89,18 +90,33 @@ class ErsatzSegment {
             this.id = this.id + String.format("%02x", b);
         }
 
-        //Root=1-5e41a79d-e6a0db584029dba86a594b7e;Parent=8c34f5ad8f92d510;Sampled=1
-        String traceId = System.getenv("_X_AMZN_TRACE_ID");
-        if (traceId != null) {
-            String[] traceParts = traceId.split(";");
-            this.trace_id = traceParts[0].split("=")[1];
-            this.parent_id = traceParts[1].split("=")[1];
-        } else {
-            DDLogger.getLoggerImpl().error("Unable to find trace context _X_AMZN_TRACE_ID in the environment variables");
+        try {
+            populateTraceAndParentFromEnvironment();
+        } catch (Exception e) {
+            DDLogger.getLoggerImpl().debug(e.getMessage());
         }
         this.end_time = ((double) new Date().getTime()) /1000d;
 
         this.ddt = ctx;
+    }
+
+    private void populateTraceAndParentFromEnvironment() throws Exception{
+        //Root=1-5e41a79d-e6a0db584029dba86a594b7e;Parent=8c34f5ad8f92d510;Sampled=1
+        String traceId = System.getenv("_X_AMZN_TRACE_ID");
+        if (traceId == null){
+            throw new Exception("No _X_AMZN_TRACE_ID environment variable");
+        }
+        String[] traceParts = traceId.split(";");
+        if(traceParts.length != 3){
+            throw new Exception("Malformed _X_AMZN_TRACE_ID: " + traceId);
+        }
+
+        try {
+            trace_id = traceParts[0].split("=")[1];
+            parent_id = traceParts[1].split("=")[1];
+        } catch (Exception e){
+            throw new Exception("Malformed _X_AMZN_TRACE_ID: " + traceId);
+        }
     }
 
     public String toJSONString(){
