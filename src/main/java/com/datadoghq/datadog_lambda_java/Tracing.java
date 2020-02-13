@@ -24,6 +24,10 @@ public class Tracing {
         this.ctx = getContextFromHeaders(req.getHeaders());
     }
 
+    public Tracing(Headerable req){
+        this.ctx = getContextFromHeaders(req.getHeaders());
+    }
+
     private static DDTraceContext getContextFromHeaders(Map<String,String> headers){
         DDTraceContext ctx = null;
         try{

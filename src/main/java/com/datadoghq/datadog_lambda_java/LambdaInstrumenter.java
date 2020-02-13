@@ -45,6 +45,17 @@ public class LambdaInstrumenter {
     }
 
     /**
+     * Create a trace-enabled Lambda instrumenter given a custom request object. Please note that your custom request
+     * object MUST implement Headerable.
+     * @param req A custom request object that implements Headerable. Datadog trace headers are pulled from this request object.
+     * @param cxt Enhanced Metrics pulls information from the Lambda context.
+     */
+    public LambdaInstrumenter(Headerable req, Context cxt){
+        recordEnhanced(INVOCATION, cxt);
+        new Tracing(req).submitSegment();
+    }
+
+    /**
      * recordCustomMetric allows the user to record their own custom metric that will be sent to Datadog.
      * @param name The metric's name
      * @param value The metric's value
