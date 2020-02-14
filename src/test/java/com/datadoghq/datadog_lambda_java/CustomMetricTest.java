@@ -13,10 +13,10 @@ import static org.junit.Assert.*;
 
 public class CustomMetricTest {
     @Test public void testCustomMetrics() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
         Date customTime = new Date();
         try {
-            customTime = sdf.parse("2019-05-29T14:00:00Z");
+            customTime = sdf.parse("2019-05-29T18:00:00Z");
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -26,10 +26,10 @@ public class CustomMetricTest {
 
 
     @Test public void testCustomMetricWrite(){
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
         Date customTime = new Date();
         try {
-            customTime = sdf.parse("2019-05-29T14:00:00Z");
+            customTime = sdf.parse("2019-05-29T18:00:00Z");
         } catch (ParseException e) {
             e.printStackTrace();
         }

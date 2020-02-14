@@ -20,11 +20,8 @@ repositories {
 
 dependencies {
     implementation 'com.amazonaws:aws-lambda-java-log4j:1.0.0'
+    implementation 'com.amazonaws:aws-lambda-java-events:2.2.7'
     implementation 'org.json:json:20190722'
-
-
-    // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    implementation 'com.google.guava:guava:28.1-jre'
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
