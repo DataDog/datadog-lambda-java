@@ -2,5 +2,5 @@ Component,Origin,License,Copyright
 aws-lambda-java-log4j, https://github.com/aws/aws-lambda-java-libs/tree/master/aws-lambda-java-log4j2, Apache-2.0,
 aws-lambda-java-events, https://github.com/aws/aws-lambda-java-libs/tree/master/aws-lambda-java-events, Apache-2.0,
 junit 4, https://github.com/junit-team/junit4, Eclipse Public License 1.0, Copyright © 2002-2020 JUnit
-json, https://github.com/stleary/JSON-java, JSON, Copyright (c) 2002 JSON.org
+json, https://github.com/stleary/JSON-java, JSON, Copyright © 2002 JSON.org
 jetbrains java annotations, https://github.com/JetBrains/java-annotations, Apache-2.0, 
