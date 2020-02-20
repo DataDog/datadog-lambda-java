@@ -5,4 +5,4 @@ junit 4, https://github.com/junit-team/junit4, Eclipse Public License 1.0, Copyr
 json, https://github.com/stleary/JSON-java, JSON, Copyright © 2002 JSON.org
 jetbrains java annotations, https://github.com/JetBrains/java-annotations, Apache-2.0, 
 apache java http client, https://hc.apache.org/httpcomponents-client-4.5.x/, Apache-2.0,
-OKHttp Client, https://square.github.io/okhttp/, Apache-2.0
+OKHttp Client, https://square.github.io/okhttp/, Apache-2.0,
