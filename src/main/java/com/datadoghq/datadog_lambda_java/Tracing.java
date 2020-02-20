@@ -71,6 +71,7 @@ public class Tracing {
         return es.sendToXRay();
     }
 
+
 }
 
 
@@ -214,9 +215,9 @@ class DDTraceContext {
         return samplingPriority;
     }
 
-    private String ddTraceKey = "x-datadog-trace-id";
-    private String ddParentKey = "x-datadog-parent-id";
-    private String ddSamplingKey = "x-datadog-sampling-priority";
+    public String ddTraceKey = "x-datadog-trace-id";
+    public String ddParentKey = "x-datadog-parent-id";
+    public String ddSamplingKey = "x-datadog-sampling-priority";
 
     public DDTraceContext(){
     }
@@ -336,5 +337,11 @@ class XRayTraceContext{
             keyValues.put("X-Amzn-Trace-Id", this.traceIdHeader);
         }
         return keyValues;
+    }
+
+    public String getAPMParentID(){
+        String lastSixteen = "0x" + this.parent_id.substring(this.parent_id.length()-16);
+        Long l_ApmId = Long.decode(lastSixteen);
+        return l_ApmId.toString();
     }
 }
