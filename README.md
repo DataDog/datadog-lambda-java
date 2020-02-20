@@ -58,6 +58,84 @@ Environment Variables
 - `DD_LOG_LEVEL`: The level at which the Datadog library will emit its own log messages.
 Possible values are `debug`, `info`, `warn` or `error`.
 
+Distributed Tracing
+-------------------
+
+Wrap your outbound HTTP requests with trace headers to see your lambda in context in APM.
+The Lambda Java Client Library supports adding headers to the following HTTP Clients:
+
+- java.net.HttpUrlConnection
+- Apache HTTP Client
+- OKHttp3
+
+Don't see your favorite client? Open an issue and request it. Datadog is adding to 
+this library all the time.
+
+### HttpUrlConnection example
+
+```java
+public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
+    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
+        LambdaInstrumenter li = new LambdaInstrumenter(request, lambda);
+ 
+        URL url = new URL("https://example.com");
+        HttpURLConnection hc = (HttpURLConnection)url.openConnection();
+
+        //Add the distributed tracing headers
+        hc = (HttpURLConnection) li.addTraceHeaders(hc);
+
+        hc.connect();
+    
+        return 7;
+    }
+}
+```
+
+### Apache HTTP Client example
+
+```java
+public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
+    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
+        LambdaInstrumenter li = new LambdaInstrumenter(request, lambda);
+    
+        HttpClient client = HttpClientBuilder.create().build();
+        HttpGet hg = new HttpGet("https://example.com");
+    
+        //Add the distributed tracing headers
+        hg = (HttpGet) li.addTraceHeaders(hg);
+
+        HttpResponse hr = client.execute(hg);
+        return 7;
+    }
+}
+```
+
+
+### OKHttp3 Client example
+
+
+```java
+public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
+    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
+        LambdaInstrumenter li = new LambdaInstrumenter(request, lambda);
+    
+        HttpClient client = HttpClientBuilder.create().build();
+        OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
+        Request okHttpRequest = new Request.Builder()
+            .url("https://example.com")
+            .build();
+
+        //Add the distributed tracing headers
+        okHttpRequest = li.addTraceHeaders(okHttpRequest);
+
+        Response resp = okHttpClient.newCall(okHttpRequest).execute();
+
+        return 7;
+    }
+}
+```
+
+
 
 Custom Non-Proxy API Gateway Event support
 ------------------------------------------
