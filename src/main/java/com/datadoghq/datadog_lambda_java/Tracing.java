@@ -311,6 +311,18 @@ class XRayTraceContext{
         this.traceIdHeader = traceId;
     }
 
+    public void setTraceIdHeader(String traceIdHeader) {
+        this.traceIdHeader = traceIdHeader;
+    }
+
+    public void setTrace_id(String trace_id) {
+        this.trace_id = trace_id;
+    }
+
+    public void setParent_id(String parent_id) {
+        this.parent_id = parent_id;
+    }
+
     public String getTrace_id() {
         return trace_id;
     }
