@@ -75,6 +75,16 @@ public class Tracing {
     protected Map<String,String> makeOutboundHttpTraceHeaders(){
         Map<String, String> traceHeaders  = new HashMap<String, String>();
 
+        String apmParent  = this.xrt.getAPMParentID();
+        if(this.cxt == null
+                || this.xrt == null
+                || this.cxt.getTraceID() == null
+                || this.cxt.getSamplingPriority() == null
+                || apmParent == null){
+            DDLogger.getLoggerImpl().debug("Cannot make outbound trace headers -- some required fields are null");
+            return traceHeaders;
+        }
+
         traceHeaders.put(this.cxt.ddTraceKey, this.cxt.getTraceID());
         traceHeaders.put(this.cxt.ddSamplingKey, this.cxt.getSamplingPriority());
         traceHeaders.put(this.cxt.ddParentKey, this.xrt.getAPMParentID());
