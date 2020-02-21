@@ -75,7 +75,10 @@ public class Tracing {
     protected Map<String,String> makeOutboundHttpTraceHeaders(){
         Map<String, String> traceHeaders  = new HashMap<String, String>();
 
-        String apmParent  = this.xrt.getAPMParentID();
+        String apmParent = null;
+        if (this.xrt != null) {
+            apmParent = this.xrt.getAPMParentID();
+        }
         if(this.cxt == null
                 || this.xrt == null
                 || this.cxt.getTraceID() == null
