@@ -340,8 +340,14 @@ class XRayTraceContext{
     }
 
     public String getAPMParentID(){
-        String lastSixteen = "0x" + this.parent_id.substring(this.parent_id.length()-16);
-        Long l_ApmId = Long.decode(lastSixteen);
-        return l_ApmId.toString();
+        try {
+            String lastSixteen = this.parent_id.substring(this.parent_id.length()-16);
+            Long l_ApmId;
+            l_ApmId = Long.parseUnsignedLong(lastSixteen, 16);
+            return Long.toUnsignedString(l_ApmId);
+        }catch (Exception e){
+            DDLogger.getLoggerImpl().debug("Problem converting XRay Parent ID to APM Parent ID: "+ e.getMessage());
+            return null;
+        }
     }
 }
