@@ -13,34 +13,34 @@ import org.json.JSONObject;
 
 public class Tracing {
 
-    private DDTraceContext ctx;
-    private XRayTraceContext xrt;
+    protected DDTraceContext cxt;
+    protected XRayTraceContext xrt;
 
     public Tracing(){
         this.xrt = new XRayTraceContext();
     }
 
     public Tracing(APIGatewayV2ProxyRequestEvent req){
-        this.ctx = populateDDContext(req.getHeaders());
+        this.cxt = populateDDContext(req.getHeaders());
         this.xrt = new XRayTraceContext();
     }
 
     public Tracing(APIGatewayProxyRequestEvent req){
-        this.ctx = populateDDContext(req.getHeaders());
+        this.cxt = populateDDContext(req.getHeaders());
         this.xrt = new XRayTraceContext();
     }
 
     public Tracing(Headerable req){
-        this.ctx = populateDDContext(req.getHeaders());
+        this.cxt = populateDDContext(req.getHeaders());
         this.xrt = new XRayTraceContext();
     }
 
 
     public DDTraceContext getDDContext() {
-        if (this.ctx == null) {
+        if (this.cxt == null) {
             return new DDTraceContext();
         }
-        return this.ctx;
+        return this.cxt;
     }
 
     public XRayTraceContext getXrayContext() {
@@ -62,16 +62,25 @@ public class Tracing {
 
 
     protected boolean submitSegment(){
-        if(this.ctx == null){
+        if(this.cxt == null){
             DDLogger.getLoggerImpl().debug("Cannot submit a fake span on a null context. Is the DD tracing context being initialized correctly?");
             return false;
         }
 
-        ConverterSubsegment es = new ConverterSubsegment(this.ctx, this.xrt);
+        ConverterSubsegment es = new ConverterSubsegment(this.cxt, this.xrt);
         return es.sendToXRay();
     }
 
 
+    protected Map<String,String> makeOutboundHttpTraceHeaders(){
+        Map<String, String> traceHeaders  = new HashMap<String, String>();
+
+        traceHeaders.put(this.cxt.ddTraceKey, this.cxt.getTraceID());
+        traceHeaders.put(this.cxt.ddSamplingKey, this.cxt.getSamplingPriority());
+        traceHeaders.put(this.cxt.ddParentKey, this.xrt.getAPMParentID());
+
+        return traceHeaders;
+    }
 }
 
 
@@ -126,8 +135,8 @@ class ConverterSubsegment {
                 .put("end_time", this.end_time)
                 .put("metadata", dd)
                 .put("type", this.type)
-                .put("parent_id", this.xrt.getParent_id())
-                .put("trace_id", this.xrt.getTrace_id());
+                .put("parent_id", this.xrt.getParentId())
+                .put("trace_id", this.xrt.getTraceId());
 
         return wholeThing.toString();
     }
@@ -199,9 +208,9 @@ class ConverterSubsegment {
 }
 
 class DDTraceContext {
-    private String traceID;
-    private String parentID;
-    private String samplingPriority;
+    protected String traceID;
+    protected String parentID;
+    protected String samplingPriority;
 
     public String getTraceID() {
         return traceID;
@@ -215,9 +224,9 @@ class DDTraceContext {
         return samplingPriority;
     }
 
-    public String ddTraceKey = "x-datadog-trace-id";
-    public String ddParentKey = "x-datadog-parent-id";
-    public String ddSamplingKey = "x-datadog-sampling-priority";
+    protected String ddTraceKey = "x-datadog-trace-id";
+    protected String ddParentKey = "x-datadog-parent-id";
+    protected String ddSamplingKey = "x-datadog-sampling-priority";
 
     public DDTraceContext(){
     }
@@ -286,8 +295,8 @@ class DDTraceContext {
 
 class XRayTraceContext{
     String traceIdHeader;
-    String trace_id;
-    String parent_id;
+    String traceId;
+    String parentId;
 
     public XRayTraceContext(){
         //Root=1-5e41a79d-e6a0db584029dba86a594b7e;Parent=8c34f5ad8f92d510;Sampled=1
@@ -303,8 +312,8 @@ class XRayTraceContext{
         }
 
         try {
-            trace_id = traceParts[0].split("=")[1];
-            parent_id = traceParts[1].split("=")[1];
+            this.traceId = traceParts[0].split("=")[1];
+            parentId = traceParts[1].split("=")[1];
         } catch (Exception e){
             DDLogger.getLoggerImpl().error("Malformed _X_AMZN_TRACE_ID value: "+ traceId);
             return;
@@ -316,20 +325,20 @@ class XRayTraceContext{
         this.traceIdHeader = traceIdHeader;
     }
 
-    public void setTrace_id(String trace_id) {
-        this.trace_id = trace_id;
+    public void setTraceId(String traceId) {
+        this.traceId = traceId;
     }
 
-    public void setParent_id(String parent_id) {
-        this.parent_id = parent_id;
+    public void setParentId(String parentId) {
+        this.parentId = parentId;
     }
 
-    public String getTrace_id() {
-        return trace_id;
+    public String getTraceId() {
+        return traceId;
     }
 
-    public String getParent_id() {
-        return parent_id;
+    public String getParentId() {
+        return parentId;
     }
     public Map<String,String> getKeyValues(){
         Map<String, String> keyValues  = new HashMap<String, String>();
@@ -341,7 +350,7 @@ class XRayTraceContext{
 
     public String getAPMParentID(){
         try {
-            String lastSixteen = this.parent_id.substring(this.parent_id.length()-16);
+            String lastSixteen = this.parentId.substring(this.parentId.length()-16);
             Long l_ApmId;
             l_ApmId = Long.parseUnsignedLong(lastSixteen, 16);
             return Long.toUnsignedString(l_ApmId);

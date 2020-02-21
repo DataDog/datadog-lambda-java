@@ -17,8 +17,8 @@ public class ConverterSubsegmentTest {
 
         DDTraceContext ddt = new DDTraceContext(headers);
         XRayTraceContext xrt = new XRayTraceContext();
-        xrt.setParent_id("30652c287aaff114");
-        xrt.setTrace_id("1-5e41b3ba-9b515c884a780c0c63b74010");
+        xrt.setParentId("30652c287aaff114");
+        xrt.setTraceId("1-5e41b3ba-9b515c884a780c0c63b74010");
         xrt.setTraceIdHeader("foo bar baz");
         ConverterSubsegment es = new ConverterSubsegment(ddt, xrt);
         es.setStart_time(1_500_000_000D);

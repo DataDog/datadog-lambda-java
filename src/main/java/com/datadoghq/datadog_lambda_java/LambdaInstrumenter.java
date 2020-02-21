@@ -107,7 +107,7 @@ public class LambdaInstrumenter {
             return urlConnection;
         }
 
-        Map<String,String> traceHeaders = makeTraceHeaders(this.tracing.getDDContext(), this.tracing.getXrayContext());
+        Map<String,String> traceHeaders = tracing.makeOutboundHttpTraceHeaders();
         traceHeaders.forEach(urlConnection::setRequestProperty);
 
         return urlConnection;
@@ -124,7 +124,7 @@ public class LambdaInstrumenter {
             return httpRequest;
         }
 
-        Map<String,String> traceHeaders = makeTraceHeaders(this.tracing.getDDContext(), this.tracing.getXrayContext());
+        Map<String,String> traceHeaders = tracing.makeOutboundHttpTraceHeaders();
         traceHeaders.forEach(httpRequest::setHeader);
 
         return httpRequest;
@@ -140,22 +140,12 @@ public class LambdaInstrumenter {
         if (this.tracing == null) {
             return request;
         }
-        Map<String,String> traceHeaders = makeTraceHeaders(this.tracing.getDDContext(), this.tracing.getXrayContext());
+        Map<String,String> traceHeaders = tracing.makeOutboundHttpTraceHeaders();
 
         Request.Builder rb = request.newBuilder();
         traceHeaders.forEach(rb::addHeader);
 
         return rb.build();
-    }
-
-    private Map<String,String> makeTraceHeaders(DDTraceContext ctx, XRayTraceContext xrt){
-        Map<String, String> traceHeaders  = new HashMap<String, String>();
-
-        traceHeaders.put(ctx.ddTraceKey, ctx.getTraceID());
-        traceHeaders.put(ctx.ddSamplingKey, ctx.getSamplingPriority());
-        traceHeaders.put(ctx.ddParentKey, xrt.getAPMParentID());
-
-        return traceHeaders;
     }
 
 }
