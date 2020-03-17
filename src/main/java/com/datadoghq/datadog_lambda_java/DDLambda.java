@@ -96,6 +96,19 @@ public class DDLambda {
     }
 
     /**
+     * openConnection calls openConnection on the provided URL, adds the Datadog trace headers, and then returns the
+     * resulting URLConnection. This duplicates the usual workflow with a java.net.URLConnection
+     * @param url the URL to which you want to open a connection.
+     * @return a newly opened URLConnection with Datadog trace headers.
+     * @throws IOException
+     */
+    public URLConnection makeUrlConnection(URL url) throws IOException {
+        URLConnection uc = url.openConnection();
+        return addTraceHeaders(uc);
+    }
+
+
+    /**
      * Adds Datadog trace headers to a java.net.URLConnection, so you can trace downstream HTTP requests.
      * @param urlConnection the URLConnection that will have the trace headers added to it.
      * @return Returns a mutated URLConnection with the new trace headers.
@@ -111,19 +124,6 @@ public class DDLambda {
 
         return urlConnection;
     }
-
-    /**
-     * openConnection calls openConnection on the provided URL, adds the Datadog trace headers, and then returns the
-     * resulting URLConnection. This duplicates the usual workflow with a java.net.URLConnection
-     * @param url the URL to which you want to open a connection.
-     * @return a newly opened URLConnection with Datadog trace headers.
-     * @throws IOException
-     */
-    public URLConnection openConnection(URL url) throws IOException {
-        URLConnection uc = url.openConnection();
-        return addTraceHeaders(uc);
-    }
-
 
     /**
      * Creates an Apache HttpGet instrumented with Datadog trace headers. Please note, this does not _execute_ the HttpGet,

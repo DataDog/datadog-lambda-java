@@ -5,29 +5,6 @@ The Datadog Lambda Java Client Library enables distributed tracing between serve
 and serverless environments, as well as letting you send custom metrics to the
 Datadog API.
 
-Features
---------
-
-- [x] Custom Metrics
-- [x] Enhanced Metrics
-- [x] Distributed Tracing
-
-TODO
-----
-
-- [x] Implement custom metrics
-- [x] Implement enhanced metrics 
-- [x] Implement internal log levels/output
-- [x] Implement tracing
-  - [x] Get DD Trace Context from API Gateway Request, if possible, and add a dummy
-  segment to the X-Ray trace.
-  - [x] Wrapper for adding trace context into HTTP requests - creates new trace parent for
-  the x-ray tracer, but does not record a separate span for the outgoing request.
-- [ ] Build and Deploy
-  - [x] Test & build jar with Gradle
-  - [x] CI checks
-  - [ ] (Script to?) push new version to Maven Central
-  - [ ] Document dev/build/release/deploy steps in SLS-team wiki
 
 Installation
 ------------
@@ -50,6 +27,25 @@ dependencies {
 }
 ```
 
+Usage
+-----
+
+Create a new `DDLambda` with your request (optional, but recommended) and Lambda context. 
+
+```java
+public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
+    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
+        DDLambda dd = new DDLambda(request, lambda); //Records your lambda invocation, 
+   
+        int work = DoWork();
+        dd.metric("work.done", work);
+        
+        return work;
+    }
+}
+```
+
+
 Environment Variables
 ---------------------
 
@@ -60,7 +56,8 @@ Distributed Tracing
 -------------------
 
 Wrap your outbound HTTP requests with trace headers to see your lambda in context in APM.
-The Lambda Java Client Library supports adding headers to the following HTTP Clients:
+The Lambda Java Client Library provides instrumented HTTP connection objects as well as helper methods for
+instrumenting HTTP connections made with any of the following libraries:
 
 - java.net.HttpUrlConnection
 - Apache HTTP Client
@@ -69,12 +66,29 @@ The Lambda Java Client Library supports adding headers to the following HTTP Cli
 Don't see your favorite client? Open an issue and request it. Datadog is adding to 
 this library all the time.
 
-### HttpUrlConnection example
+### HttpUrlConnection examples
 
 ```java
 public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
     public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
-        LambdaInstrumenter li = new LambdaInstrumenter(request, lambda);
+        DDLambda dd = new DDLambda(request, lambda);
+ 
+        URL url = new URL("https://example.com");
+        HttpURLConnection instrumentedUrlConnection = li.makeUrlConnection(url); //Trace headers included
+
+        instrumentedUrlConnection.connect();
+    
+        return 7;
+    }
+}
+```
+
+Alternatively, if you want to do something more complex:
+
+```java
+public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
+    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
+        DDLambda dd = new DDLambda(request, lambda);
  
         URL url = new URL("https://example.com");
         HttpURLConnection hc = (HttpURLConnection)url.openConnection();
@@ -89,12 +103,29 @@ public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, AP
 }
 ```
 
-### Apache HTTP Client example
+### Apache HTTP Client examples
 
 ```java
 public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
     public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
-        LambdaInstrumenter li = new LambdaInstrumenter(request, lambda);
+        DDLambda dd = new DDLambda(request, lambda);
+    
+        HttpClient client = HttpClientBuilder.create().build();
+    
+        HttpGet hg = li.makeHttpGet("https://example.com"); //Trace headers included
+
+        HttpResponse hr = client.execute(hg);
+        return 7;
+    }
+}
+```
+
+Alternatively, if you want to do something more complex:
+
+```java
+public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
+    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
+        DDLambda dd = new DDLambda(request, lambda);
     
         HttpClient client = HttpClientBuilder.create().build();
         HttpGet hg = new HttpGet("https://example.com");
@@ -109,13 +140,33 @@ public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, AP
 ```
 
 
-### OKHttp3 Client example
+### OKHttp3 Client examples
 
 
 ```java
 public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
     public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
-        LambdaInstrumenter li = new LambdaInstrumenter(request, lambda);
+        DDLambda dd = new DDLambda(request, lambda);
+    
+        HttpClient client = HttpClientBuilder.create().build();
+        OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
+        Request okHttpRequest = li.makeRequestBuilder() // Trace headers included
+            .url("https://example.com")
+            .build(); 
+
+        Response resp = okHttpClient.newCall(okHttpRequest).execute();
+
+        return 7;
+    }
+}
+```
+
+Alternatively:
+
+```java
+public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
+    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
+        DDLambda dd = new DDLambda(request, lambda);
     
         HttpClient client = HttpClientBuilder.create().build();
         OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
