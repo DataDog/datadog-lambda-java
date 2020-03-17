@@ -53,15 +53,6 @@ public class LambdaInstrumenterTest {
         Assert.assertNotNull(omw.CM);
     }
 
-    @Test public void TestLambdaInstrumentorFlush(){
-        ObjectMetricWriter omw = new ObjectMetricWriter();
-        MetricWriter.setMetricWriter(omw);
-
-        DDLambda li =new DDLambda(null);
-        Assert.assertNotNull(omw.CM);
-        Assert.assertNull(omw.CM);
-    }
-
     @Test public void TestLambdaInstrumentorError(){
         EnhancedMetricTest.MockContext mc = new EnhancedMetricTest.MockContext();
         ObjectMetricWriter omw = new ObjectMetricWriter();
