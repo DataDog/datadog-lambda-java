@@ -10,7 +10,7 @@ Features
 
 - [x] Custom Metrics
 - [x] Enhanced Metrics
-- [ ] Distributed Tracing
+- [x] Distributed Tracing
 
 TODO
 ----
@@ -18,16 +18,14 @@ TODO
 - [x] Implement custom metrics
 - [x] Implement enhanced metrics 
 - [x] Implement internal log levels/output
-- [ ] Implement tracing
+- [x] Implement tracing
   - [x] Get DD Trace Context from API Gateway Request, if possible, and add a dummy
   segment to the X-Ray trace.
-  - [ ] Wrapper for adding trace context into HTTP requests (break them off into their 
-  own spans?)
-  - [ ] Write traces to logs on logger flush
+  - [x] Wrapper for adding trace context into HTTP requests - creates new trace parent for
+  the x-ray tracer, but does not record a separate span for the outgoing request.
 - [ ] Build and Deploy
   - [x] Test & build jar with Gradle
-  - [ ] Scripts to automate testing and jar building (Dockerize)
-  - [ ] CI checks
+  - [x] CI checks
   - [ ] (Script to?) push new version to Maven Central
   - [ ] Document dev/build/release/deploy steps in SLS-team wiki
 
