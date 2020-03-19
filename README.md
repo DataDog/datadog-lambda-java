@@ -1,11 +1,8 @@
 Datadog Lambda Java Client Library 
 ============================================
 
-![CircleCI](https://img.shields.io/circleci/build/github/DataDog/datadog-lambda-layer-js)
-[![Code Coverage](https://img.shields.io/codecov/c/github/DataDog/datadog-lambda-layer-js)](https://codecov.io/gh/DataDog/datadog-lambda-layer-js)
-[![NPM](https://img.shields.io/npm/v/datadog-lambda-js)](https://www.npmjs.com/package/datadog-lambda-js)
 [![Slack](https://img.shields.io/badge/slack-%23serverless-blueviolet?logo=slack)](https://datadoghq.slack.com/channels/serverless/)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](https://github.com/DataDog/datadog-lambda-layer-js/blob/master/LICENSE)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](https://github.com/DataDog/datadog-lambda-java/blob/master/LICENSE)
 
 The Datadog Lambda Java Client Library enables distributed tracing between serverful
 and serverless environments, as well as letting you send custom metrics to the
@@ -74,25 +71,25 @@ To connect logs and traces, set the environment variable `DD_LOGS_INJECTION` to 
 
 ## Custom Metrics
 
-Custom metrics can be submitted using the `metric` function. The metrics are submitted as [distribution metrics](https://docs.datadoghq.com/graphing/metrics/distributions/).
+Custom metrics can be submitted using the `metric` function. The metrics are submitted as 
+[distribution metrics](https://docs.datadoghq.com/graphing/metrics/distributions/).
 
-**IMPORTANT NOTE:** If you have already been submitting the same custom metric as non-distribution metric (e.g., gauge, count, or histogram) without using the Datadog Lambda Layer, you MUST pick a new metric name to use for `sendDistributionMetric`. Otherwise that existing metric will be converted to a distribution metric and the historical data prior to the conversion will be no longer queryable.
+**IMPORTANT NOTE:** If you have already been submitting the same custom metric as non-distribution metric
+ (e.g., gauge, count, or histogram) without using the Datadog Lambda Layer, you MUST pick a new metric
+  name to use for `metric`. Otherwise that existing metric will be converted to a distribution metric 
+  and the historical data prior to the conversion will be no longer queryable.
 
-```typescript
-//////////////////////////////////////////////
-//////////////////////////////////////////////
-//Update to JAVA Code! Have Chris take a look.
-//////////////////////////////////////////////
-//////////////////////////////////////////////
-
-const { sendDistributionMetric } = require("datadog-lambda-js");
-
-sendDistributionMetric(
-  "coffee_house.order_value", // Metric name
-  12.45, // The Value
-  "product:latte",
-  "order:online", // Associated tags
-);
+```java
+public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
+    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
+        DDLambda dd = new DDLambda(request, lambda); //Records your lambda invocation, 
+   
+        int work = DoWork();
+        dd.metric("work.done", work); // Submit a custom metric about this work you've done.
+        
+        return work;
+    }
+}
 ```
 
 Distributed Tracing
@@ -297,7 +294,11 @@ A minimum viable mapping template would look something like this:
 Sampling
 --------
 
-The traces for your Lambda function are converted by Datadog from AWS X-Ray traces. X-Ray needs to sample the traces that the Datadog tracing agent decides to sample, in order to collect as many complete traces as possible. You can create X-Ray sampling rules to ensure requests with header `x-datadog-sampling-priority:1` or `x-datadog-sampling-priority:2` via API Gateway always get sampled by X-Ray.
+The traces for your Lambda function are converted by Datadog from AWS X-Ray traces. X-Ray needs to 
+sample the traces that the Datadog tracing agent decides to sample, in order to collect as many 
+complete traces as possible. You can create X-Ray sampling rules to ensure requests with header 
+`x-datadog-sampling-priority:1` or `x-datadog-sampling-priority:2` via API Gateway always get sampled 
+by X-Ray.
 
 These rules can be created using the following AWS CLI command.
 
