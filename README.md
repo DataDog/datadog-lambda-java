@@ -51,7 +51,8 @@ public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, AP
 ```
 
 
-## Environment Variables
+Environment Variables
+---------------------
 
 You can set the following environment variables via the AWS CLI or Serverless Framework
 
@@ -61,15 +62,15 @@ How much logging datadog-lambda-layer-js should do. Set this to "debug" for exte
 
 ### DD_ENHANCED_METRICS
 
-If you set the value of this variable to "true" then the Lambda layer will increment a Lambda integration metric called `aws.lambda.enhanced.invocations` with each invocation and `aws.lambda.enhanced.errors` if the invocation results in an error. These metrics are tagged with the function name, region, account, runtime, memorysize, and `cold_start:true|false`.
+Defaults to `true`. Set to `false` to disable enhanced metrics.
 
-### DD_LOGS_INJECTION
+If this value is `true` then the Lambda layer will increment a Lambda 
+integration metric called `aws.lambda.enhanced.invocations` with each invocation and 
+`aws.lambda.enhanced.errors` if the invocation results in an error. These metrics are tagged with the 
+function name, region, account, runtime, memorysize, and `cold_start:true|false`.
 
-*Always assume TRUE: Confirm with Tian*
-
-To connect logs and traces, set the environment variable `DD_LOGS_INJECTION` to `true` if `console` is used for logging. For other logging libraries, see instructions for [automatic](https://docs.datadoghq.com/tracing/advanced/connect_logs_and_traces/?tab=nodejs#automatic-trace-id-injection) and [manual](https://docs.datadoghq.com/tracing/advanced/connect_logs_and_traces/?tab=nodejs#manual-trace-id-injection) trace id injection.
-
-## Custom Metrics
+Custom Metrics
+--------------
 
 Custom metrics can be submitted using the `metric` function. The metrics are submitted as 
 [distribution metrics](https://docs.datadoghq.com/graphing/metrics/distributions/).

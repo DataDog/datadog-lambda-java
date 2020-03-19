@@ -11,19 +11,17 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import okhttp3.Request;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.DefaultBackoffStrategy;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.params.HttpParams;
 
 /**
  * The DDLambda instrumenter is used for getting information about your Lambda into Datadog.
  */
 public class DDLambda {
+    private String ENHANCED_ENV = "DD_ENHANCED_METRICS";
     private String ENHANCED_PREFIX = "aws.lambda.enhanced.";
     private String INVOCATION = "invocations";
     private String ERROR = "errors";
     private Tracing tracing;
+    private boolean enhanced = true;
 
     /**
      * Create a new DDLambda instrumenter given some Lambda context
@@ -31,6 +29,7 @@ public class DDLambda {
      */
     public DDLambda(Context cxt){
         this.tracing = new Tracing();
+        this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
     }
 
@@ -41,6 +40,7 @@ public class DDLambda {
      * @param cxt Enhanced Metrics pulls information from the Lambda context.
      */
     public DDLambda(APIGatewayProxyRequestEvent req, Context cxt){
+        this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
         this.tracing = new Tracing(req);
         this.tracing.submitSegment();
@@ -53,6 +53,7 @@ public class DDLambda {
      * @param cxt Enhanced Metrics pulls information from the Lambda context.
      */
     public DDLambda(APIGatewayV2ProxyRequestEvent req, Context cxt){
+        this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
         this.tracing = new Tracing(req);
         this.tracing.submitSegment();
@@ -65,9 +66,22 @@ public class DDLambda {
      * @param cxt Enhanced Metrics pulls information from the Lambda context.
      */
     public DDLambda(Headerable req, Context cxt){
+        this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
         this.tracing = new Tracing(req);
         this.tracing.submitSegment();
+    }
+
+    private boolean checkEnhanced(){
+        String sysEnhanced = System.getenv(ENHANCED_ENV);
+        if (sysEnhanced == null){
+            return true;
+        }
+
+        if (sysEnhanced.toLowerCase() == "false"){
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -89,9 +103,12 @@ public class DDLambda {
     }
 
     private void recordEnhanced(String basename, Context cxt){
-        String metricName = ENHANCED_PREFIX + basename;
+        String metricName = basename;
         Map<String, Object> tags = null;
-        tags = EnhancedMetric.makeTagsFromContext(cxt);
+        if (this.enhanced) {
+            metricName = ENHANCED_PREFIX + basename;
+            tags = EnhancedMetric.makeTagsFromContext(cxt);
+        }
         new CustomMetric(metricName, 1,tags).write();
     }
 
