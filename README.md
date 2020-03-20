@@ -3,32 +3,32 @@ Datadog Lambda Java Client Library
 
 [![Slack](https://img.shields.io/badge/slack-%23serverless-blueviolet?logo=slack)](https://datadoghq.slack.com/channels/serverless/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](https://github.com/DataDog/datadog-lambda-java/blob/master/LICENSE)
+![](https://github.com/DataDog/datadog-lambda-java/workflows/Test%20on%20Master%20branch/badge.svg)
 
-The Datadog Lambda Java Client Library for Java (8 and 11) enables [enhanced lambda metrics](https://docs.datadoghq.com/integrations/amazon_lambda/?tab=awsconsole#real-time-enhanced-lambda-metrics) and [distributed tracing](https://docs.datadoghq.com/integrations/amazon_lambda/?tab=awsconsole#tracing-with-datadog-apm) between serverful and serverless environments, as well as letting you send [custom metrics](https://docs.datadoghq.com/integrations/amazon_lambda/?tab=awsconsole#custom-metrics) to the Datadog API.
+The Datadog Lambda Java Client Library for Java (8 and 11) enables [enhanced lambda metrics]
+(https://docs.datadoghq.com/integrations/amazon_lambda/?tab=awsconsole#real-time-enhanced-lambda-metrics) 
+and [distributed tracing](https://docs.datadoghq.com/integrations/amazon_lambda/?tab=awsconsole#tracing-with-datadog-apm) 
+between serverful and serverless environments, as well as letting you send 
+[custom metrics](https://docs.datadoghq.com/integrations/amazon_lambda/?tab=awsconsole#custom-metrics) 
+to the Datadog API.
 
 
 Installation
 ------------
 
-This library is provided as a Java Library via Maven Central.
+This library will be distributed through MavenCentral. Please check back for more information.
 
-### Maven
+If you wish, you may clone this repository this repository and build it by following 
+these steps:
 
-Something something `pom.xml`.
-
-```$xml
-<blah>
+```
+$ git clone https://github.com/DataDog/datadog-lambda-java.git
+$ cd datadog-lambda-java
+$ ./gradlew test
+$ ./gradlew shadowJar
 ```
 
-### Gradle
-
-Include the following dependency in your `build.gradle`.
-
-```groovy
-dependencies {
-        implementation 'com.datadoghq.datadog-lambda-layer-java:0.1.0'
-}
-```
+The build artifact will be saved to `build/libs/datadog-lambda-layer-java-all.jar`.
 
 Usage
 -----
