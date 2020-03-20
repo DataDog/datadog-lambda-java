@@ -16,11 +16,13 @@ public class ConverterSubsegmentTest {
         headers.put("x-datadog-sampling-priority", "1");
 
         DDTraceContext ddt = new DDTraceContext(headers);
-        ConverterSubsegment es = new ConverterSubsegment(ddt);
+        XRayTraceContext xrt = new XRayTraceContext();
+        xrt.setParentId("30652c287aaff114");
+        xrt.setTraceId("1-5e41b3ba-9b515c884a780c0c63b74010");
+        xrt.setTraceIdHeader("foo bar baz");
+        ConverterSubsegment es = new ConverterSubsegment(ddt, xrt);
         es.setStart_time(1_500_000_000D);
         es.setEnd_time(1_500_000_001D);
-        es.setParent_id("30652c287aaff114");
-        es.setTrace_id("1-5e41b3ba-9b515c884a780c0c63b74010");
         es.setId("30652c287aaff114");
 
         String segJSON = es.toJSONString();

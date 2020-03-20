@@ -1,38 +1,16 @@
 Datadog Lambda Java Client Library 
 ============================================
 
-The Datadog Lambda Java Client Library enables distributed tracing between serverful
-and serverless environments, as well as letting you send custom metrics to the
-Datadog API.
+[![Slack](https://img.shields.io/badge/slack-%23serverless-blueviolet?logo=slack)](https://datadoghq.slack.com/channels/serverless/)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](https://github.com/DataDog/datadog-lambda-java/blob/master/LICENSE)
 
-Features
---------
+The Datadog Lambda Java Client Library for Java (8 and 11) enables [enhanced lambda metrics](https://docs.datadoghq.com/integrations/amazon_lambda/?tab=awsconsole#real-time-enhanced-lambda-metrics) and [distributed tracing](https://docs.datadoghq.com/integrations/amazon_lambda/?tab=awsconsole#tracing-with-datadog-apm) between serverful and serverless environments, as well as letting you send [custom metrics](https://docs.datadoghq.com/integrations/amazon_lambda/?tab=awsconsole#custom-metrics) to the Datadog API.
 
-- [x] Custom Metrics
-- [x] Enhanced Metrics
-- [ ] Distributed Tracing
-
-TODO
-----
-
-- [x] Implement custom metrics
-- [x] Implement enhanced metrics 
-- [x] Implement internal log levels/output
-- [ ] Implement tracing
-  - [x] Get DD Trace Context from API Gateway Request, if possible, and add a dummy
-  segment to the X-Ray trace.
-  - [ ] Wrapper for adding trace context into HTTP requests (break them off into their 
-  own spans?)
-  - [ ] Write traces to logs on logger flush
-- [ ] Build and Deploy
-  - [x] Test & build jar with Gradle
-  - [ ] Scripts to automate testing and jar building (Dockerize)
-  - [ ] CI checks
-  - [ ] (Script to?) push new version to Maven Central
-  - [ ] Document dev/build/release/deploy steps in SLS-team wiki
 
 Installation
 ------------
+
+This library is provided as a Java Library via Maven Central.
 
 ### Maven
 
@@ -52,11 +30,198 @@ dependencies {
 }
 ```
 
+Usage
+-----
+
+Create a new `DDLambda` with your request (optional, but recommended) and Lambda context. 
+
+```java
+public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
+    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
+        DDLambda dd = new DDLambda(request, lambda); //Records your lambda invocation, 
+   
+        int work = DoWork();
+        dd.metric("work.done", work);
+        
+        return work;
+    }
+}
+```
+
+
 Environment Variables
 ---------------------
 
-- `DD_LOG_LEVEL`: The level at which the Datadog library will emit its own log messages.
-Possible values are `debug`, `info`, `warn` or `error`.
+You can set the following environment variables via the AWS CLI or Serverless Framework
+
+### DD_LOG_LEVEL
+
+How much logging datadog-lambda-layer-js should do. Set this to "debug" for extensive logs.
+
+### DD_ENHANCED_METRICS
+
+Defaults to `true`. Set to `false` to disable enhanced metrics.
+
+If this value is `true` then the Lambda layer will increment a Lambda 
+integration metric called `aws.lambda.enhanced.invocations` with each invocation and 
+`aws.lambda.enhanced.errors` if the invocation results in an error. These metrics are tagged with the 
+function name, region, account, runtime, memorysize, and `cold_start:true|false`.
+
+Custom Metrics
+--------------
+
+Custom metrics can be submitted using the `metric` function. The metrics are submitted as 
+[distribution metrics](https://docs.datadoghq.com/graphing/metrics/distributions/).
+
+**IMPORTANT NOTE:** If you have already been submitting the same custom metric as non-distribution metric
+ (e.g., gauge, count, or histogram) without using the Datadog Lambda Layer, you MUST pick a new metric
+  name to use for `metric`. Otherwise that existing metric will be converted to a distribution metric 
+  and the historical data prior to the conversion will be no longer queryable.
+
+```java
+public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
+    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
+        DDLambda dd = new DDLambda(request, lambda); //Records your lambda invocation, 
+   
+        int work = DoWork();
+        dd.metric("work.done", work); // Submit a custom metric about this work you've done.
+        
+        return work;
+    }
+}
+```
+
+Distributed Tracing
+-------------------
+
+Wrap your outbound HTTP requests with trace headers to see your lambda in context in APM.
+The Lambda Java Client Library provides instrumented HTTP connection objects as well as helper methods for
+instrumenting HTTP connections made with any of the following libraries:
+
+- java.net.HttpUrlConnection
+- Apache HTTP Client
+- OKHttp3
+
+Don't see your favorite client? Open an issue and request it. Datadog is adding to 
+this library all the time.
+
+### HttpUrlConnection examples
+
+```java
+public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
+    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
+        DDLambda dd = new DDLambda(request, lambda);
+ 
+        URL url = new URL("https://example.com");
+        HttpURLConnection instrumentedUrlConnection = li.makeUrlConnection(url); //Trace headers included
+
+        instrumentedUrlConnection.connect();
+    
+        return 7;
+    }
+}
+```
+
+Alternatively, if you want to do something more complex:
+
+```java
+public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
+    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
+        DDLambda dd = new DDLambda(request, lambda);
+ 
+        URL url = new URL("https://example.com");
+        HttpURLConnection hc = (HttpURLConnection)url.openConnection();
+
+        //Add the distributed tracing headers
+        hc = (HttpURLConnection) li.addTraceHeaders(hc);
+
+        hc.connect();
+    
+        return 7;
+    }
+}
+```
+
+### Apache HTTP Client examples
+
+```java
+public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
+    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
+        DDLambda dd = new DDLambda(request, lambda);
+    
+        HttpClient client = HttpClientBuilder.create().build();
+    
+        HttpGet hg = li.makeHttpGet("https://example.com"); //Trace headers included
+
+        HttpResponse hr = client.execute(hg);
+        return 7;
+    }
+}
+```
+
+Alternatively, if you want to do something more complex:
+
+```java
+public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
+    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
+        DDLambda dd = new DDLambda(request, lambda);
+    
+        HttpClient client = HttpClientBuilder.create().build();
+        HttpGet hg = new HttpGet("https://example.com");
+    
+        //Add the distributed tracing headers
+        hg = (HttpGet) li.addTraceHeaders(hg);
+
+        HttpResponse hr = client.execute(hg);
+        return 7;
+    }
+}
+```
+
+
+### OKHttp3 Client examples
+
+
+```java
+public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
+    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
+        DDLambda dd = new DDLambda(request, lambda);
+    
+        HttpClient client = HttpClientBuilder.create().build();
+        OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
+        Request okHttpRequest = li.makeRequestBuilder() // Trace headers included
+            .url("https://example.com")
+            .build(); 
+
+        Response resp = okHttpClient.newCall(okHttpRequest).execute();
+
+        return 7;
+    }
+}
+```
+
+Alternatively:
+
+```java
+public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
+    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
+        DDLambda dd = new DDLambda(request, lambda);
+    
+        HttpClient client = HttpClientBuilder.create().build();
+        OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
+        Request okHttpRequest = new Request.Builder()
+            .url("https://example.com")
+            .build();
+
+        //Add the distributed tracing headers
+        okHttpRequest = li.addTraceHeaders(okHttpRequest);
+
+        Response resp = okHttpClient.newCall(okHttpRequest).execute();
+
+        return 7;
+    }
+}
+```
 
 
 Custom Non-Proxy API Gateway Event support
@@ -124,3 +289,90 @@ A minimum viable mapping template would look something like this:
     "headers": $loop,
 }
 ```
+
+Sampling
+--------
+
+The traces for your Lambda function are converted by Datadog from AWS X-Ray traces. X-Ray needs to 
+sample the traces that the Datadog tracing agent decides to sample, in order to collect as many 
+complete traces as possible. You can create X-Ray sampling rules to ensure requests with header 
+`x-datadog-sampling-priority:1` or `x-datadog-sampling-priority:2` via API Gateway always get sampled 
+by X-Ray.
+
+These rules can be created using the following AWS CLI command.
+
+```bash
+aws xray create-sampling-rule --cli-input-json file://datadog-sampling-priority-1.json
+aws xray create-sampling-rule --cli-input-json file://datadog-sampling-priority-2.json
+```
+
+The file content for `datadog-sampling-priority-1.json`:
+
+```json
+{
+  "SamplingRule": {
+    "RuleName": "Datadog-Sampling-Priority-1",
+    "ResourceARN": "*",
+    "Priority": 9998,
+    "FixedRate": 1,
+    "ReservoirSize": 100,
+    "ServiceName": "*",
+    "ServiceType": "AWS::APIGateway::Stage",
+    "Host": "*",
+    "HTTPMethod": "*",
+    "URLPath": "*",
+    "Version": 1,
+    "Attributes": {
+      "x-datadog-sampling-priority": "1"
+    }
+  }
+}
+```
+
+The file content for `datadog-sampling-priority-2.json`:
+
+```json
+{
+  "SamplingRule": {
+    "RuleName": "Datadog-Sampling-Priority-2",
+    "ResourceARN": "*",
+    "Priority": 9999,
+    "FixedRate": 1,
+    "ReservoirSize": 100,
+    "ServiceName": "*",
+    "ServiceType": "AWS::APIGateway::Stage",
+    "Host": "*",
+    "HTTPMethod": "*",
+    "URLPath": "*",
+    "Version": 1,
+    "Attributes": {
+      "x-datadog-sampling-priority": "2"
+    }
+  }
+}
+```
+
+
+Opening Issues
+--------------
+
+If you encounter a bug with this package, we want to hear about it. Before opening a new issue, 
+search the existing issues to avoid duplicates.
+
+When opening an issue, include the Datadog Lambda Layer version, Java version, and stack trace if 
+available. In addition, include the steps to reproduce when appropriate.
+
+You can also open an issue for a feature request.
+
+Contributing
+------------
+
+If you find an issue with this package and have a fix, please feel free to open a pull request 
+following the [procedures](https://github.com/DataDog/dd-lambda-layer-js/blob/master/CONTRIBUTING.md).
+
+License
+-------
+
+Unless explicitly stated otherwise all files in this repository are licensed under the Apache License Version 2.0.
+
+This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2020 Datadog, Inc.

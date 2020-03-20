@@ -28,7 +28,7 @@ public class LambdaInstrumenterTest {
         EnhancedMetricTest.MockContext mc = new EnhancedMetricTest.MockContext();
         ObjectMetricWriter omw = new ObjectMetricWriter();
         MetricWriter.setMetricWriter(omw);
-        LambdaInstrumenter li = new LambdaInstrumenter(mc);
+        DDLambda li = new DDLambda(mc);
 
         Assert.assertNotNull(omw.CM);
 
@@ -38,7 +38,7 @@ public class LambdaInstrumenterTest {
         Assert.assertTrue(JSONArrayContains(jsonTags, "cold_start:true"));
 
         EnhancedMetricTest.MockContext mc2 = new EnhancedMetricTest.MockContext();
-        LambdaInstrumenter li2 = new LambdaInstrumenter(mc2);
+        DDLambda li2 = new DDLambda(mc2);
 
         JSONObject writtenMetric2 = new JSONObject(omw.CM.toJson());
         JSONArray jsonTags2 = (JSONArray) writtenMetric2.get("t");
@@ -49,18 +49,8 @@ public class LambdaInstrumenterTest {
         ObjectMetricWriter omw = new ObjectMetricWriter();
         MetricWriter.setMetricWriter(omw);
 
-        LambdaInstrumenter li =new LambdaInstrumenter(null);
+        DDLambda li =new DDLambda(null);
         Assert.assertNotNull(omw.CM);
-    }
-
-    @Test public void TestLambdaInstrumentorFlush(){
-        ObjectMetricWriter omw = new ObjectMetricWriter();
-        MetricWriter.setMetricWriter(omw);
-
-        LambdaInstrumenter li =new LambdaInstrumenter(null);
-        Assert.assertNotNull(omw.CM);
-        li.flush();
-        Assert.assertNull(omw.CM);
     }
 
     @Test public void TestLambdaInstrumentorError(){
@@ -68,8 +58,8 @@ public class LambdaInstrumenterTest {
         ObjectMetricWriter omw = new ObjectMetricWriter();
         MetricWriter.setMetricWriter(omw);
 
-        LambdaInstrumenter li =new LambdaInstrumenter(mc);
-        li.recordError(mc);
+        DDLambda li =new DDLambda(mc);
+        li.error(mc);
 
         JSONObject jsonObject = new JSONObject(omw.CM.toJson());
         Assert.assertEquals("aws.lambda.enhanced.errors", jsonObject.getString("m"));
@@ -79,10 +69,9 @@ public class LambdaInstrumenterTest {
         ObjectMetricWriter omw = new ObjectMetricWriter();
         MetricWriter.setMetricWriter(omw);
 
-        LambdaInstrumenter li =new LambdaInstrumenter(null);
-        li.flush();
+        DDLambda li =new DDLambda(null);
 
-        li.recordCustomMetric("my_custom_metric", 37.1, null);
+        li.metric("my_custom_metric", 37.1, null);
         Assert.assertNotNull(omw.CM);
 
         JSONObject jsonObject = new JSONObject(omw.CM.toJson());
@@ -96,8 +85,8 @@ public class LambdaInstrumenterTest {
         MetricWriter.setMetricWriter(omw);
 
         Context mc1 = new EnhancedMetricTest.MockContext();
-        LambdaInstrumenter li =new LambdaInstrumenter(mc1);
-        li.recordError(mc1);
+        DDLambda li =new DDLambda(mc1);
+        li.error(mc1);
 
         JSONObject thisMetric = new JSONObject(omw.CM.toJson());
         Assert.assertEquals("aws.lambda.enhanced.errors", thisMetric.get("m").toString());
