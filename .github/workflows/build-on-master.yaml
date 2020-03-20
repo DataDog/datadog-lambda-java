@@ -1,7 +1,8 @@
 name: Test on Master branch
-on: push:
-        branches:
-                - master
+on: 
+        push:
+                branches:
+                        - master
 jobs:
   gradle:
     strategy:
