@@ -17,7 +17,7 @@ Installation
 
 This library will be distributed through MavenCentral. Please check back for more information.
 
-If you wish, you may clone this repository this repository and build it by following 
+If you wish, you may clone this repository and build it by following 
 these steps:
 
 ```
