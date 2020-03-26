@@ -10,12 +10,14 @@ plugins {
     // Apply the java-library plugin to add support for Java Library
     id 'java-library'
     id 'com.github.johnrengelman.shadow' version '5.2.0'
+    id "com.jfrog.bintray" version "1.8.4"
 }
 
 repositories {
     // Use jcenter for resolving dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
+    mavenCentral()
 }
 
 dependencies {
@@ -30,3 +32,48 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     implementation 'org.jetbrains:annotations:15.0'
 }
+
+group = 'com.datadoghq'
+version = '0.0.1'
+sourceCompatibility = '11'
+targetCompatibility = '11'
+
+allprojects {
+    repositories {
+        jcenter()
+    }
+    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
+    apply plugin: 'java'
+}
+
+publishing {
+    publications {
+        MyPublication(MavenPublication) {
+            from components.java
+            groupId 'com.datadoghq'
+            artifactId 'datadog-lambda-java'
+            version '0.0.1'
+        }
+    }
+}
+
+bintray {
+    user = bintrayUser
+    key = bintrayKey
+    publications = ['MyPublication']
+    pkg {
+        repo = 'datadog-maven'
+        name = 'datadog-lambda-java'
+        userOrg = 'datadog'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/DataDog/datadog-lambda-java.git'
+        version {
+            name = '0.0.1'
+            desc = 'Datadog Lambda Java runtime library'
+            vcsTag = '0.0.1'
+            attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin']
+        }
+    }
+}
+

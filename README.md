@@ -15,19 +15,42 @@ to the Datadog API.
 Installation
 ------------
 
-This library will be distributed through MavenCentral. Please check back for more information.
+For the time being, this library will be distributed through JFrog [Bintray](https://bintray.com/beta/#/datadog/datadog-maven/datadog-lambda-java).
+ 
+### Maven
 
-If you wish, you may clone this repository this repository and build it by following 
-these steps:
+Include the following dependency in your `pom.xml`
 
+```xml
+  <repositories>
+        <repository>
+            <id>datadog-maven</id>
+            <url>https://dl.bintray.com/datadog/datadog-maven</url>
+        </repository>     
+  </repositories>
+
+
+<dependency>
+	<groupId>com.datadoghq</groupId>
+	<artifactId>datadog-lambda-java</artifactId>
+	<version>0.0.1</version>
+	<type>pom</type>
+</dependency>
 ```
-$ git clone https://github.com/DataDog/datadog-lambda-java.git
-$ cd datadog-lambda-java
-$ ./gradlew test
-$ ./gradlew shadowJar
-```
 
-The build artifact will be saved to `build/libs/datadog-lambda-layer-java-all.jar`.
+### Gradle
+
+Include the following in your `build.gradle`
+
+```groovy
+repositories {
+    maven { url "https://dl.bintray.com/datadog/datadog-maven" }
+}
+
+dependencies {
+     implementation 'com.datadoghq:datadog-lambda-java:0.0.1'
+}
+```
 
 Usage
 -----
