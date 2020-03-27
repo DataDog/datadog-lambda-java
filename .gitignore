@@ -29,3 +29,6 @@ hs_err_pid*
 build
 gradle.properties
 keyring
+
+# Ignore intelliJ files
+.idea
