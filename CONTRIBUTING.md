@@ -11,7 +11,7 @@ git clone git@github.com:your-username/datadog-lambda-java.git
 Make your change, update tests and ensure the tests pass (install Docker if you haven't):
 
 ```bash
-./scripts/run_tests.sh
+./gradlew test
 ```
 
 Push to your fork and [submit a pull request][pr].
