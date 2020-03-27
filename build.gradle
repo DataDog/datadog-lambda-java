@@ -35,8 +35,6 @@ dependencies {
 
 group = 'com.datadoghq'
 version = '0.0.1'
-sourceCompatibility = '11'
-targetCompatibility = '11'
 
 allprojects {
     repositories {
