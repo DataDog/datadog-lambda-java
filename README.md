@@ -1,4 +1,4 @@
-Datadog Lambda Java Client Library 
+datadog-lambda-java
 ============================================
 
 [![Slack](https://img.shields.io/badge/slack-%23serverless-blueviolet?logo=slack)](https://datadoghq.slack.com/channels/serverless/)
