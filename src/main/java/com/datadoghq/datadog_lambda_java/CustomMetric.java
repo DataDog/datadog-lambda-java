@@ -1,10 +1,10 @@
 package com.datadoghq.datadog_lambda_java;
 
-
-import org.json.JSONObject;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -52,12 +52,14 @@ public class CustomMetric {
         }
 
         long unixTime  = this.time.getTime() / 1000; // To Unix seconds instead of millis
-        JSONObject jo = new JSONObject()
-                .put("e", unixTime)
-                .put("m", this.name)
-                .put("v", this.value)
-                .put("t", tagsList);
-        return jo.toString();
+        Map<String, Object> metricMap  = new HashMap<String, Object>();
+        metricMap.put("e", unixTime);
+        metricMap.put("m", this.name);
+        metricMap.put("v", this.value);
+        metricMap.put("t", tagsList);
+
+        Gson g = new Gson();
+        return g.toJson(metricMap);
     }
 
     /**
