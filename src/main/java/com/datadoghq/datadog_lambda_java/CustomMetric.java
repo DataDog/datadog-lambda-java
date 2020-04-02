@@ -3,10 +3,8 @@ package com.datadoghq.datadog_lambda_java;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 /**

@@ -1,7 +1,6 @@
 package com.datadoghq.datadog_lambda_java;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
