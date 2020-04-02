@@ -1,26 +1,17 @@
 package com.datadoghq.datadog_lambda_java;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.google.gson.Gson;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+
 public class LambdaInstrumenterTest {
     @Before
     public void setUp() throws Exception {
         ColdStart.resetColdStart();
-    }
-
-    private boolean JSONArrayContains(JSONArray j, String needle){
-        for (Object jo: j){
-            if(jo.toString().equals(needle)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Test public void TestLambdaInstrumentor(){
@@ -32,17 +23,17 @@ public class LambdaInstrumenterTest {
 
         Assert.assertNotNull(omw.CM);
 
-        JSONObject writtenMetric = new JSONObject(omw.CM.toJson());
-        Assert.assertEquals( "aws.lambda.enhanced.invocations", writtenMetric.get("m").toString());
-        JSONArray jsonTags = (JSONArray) writtenMetric.get("t");
-        Assert.assertTrue(JSONArrayContains(jsonTags, "cold_start:true"));
+        Gson g = new Gson();
+        PersistedCustomMetric writtenMetric = g.fromJson(omw.CM.toJson(), PersistedCustomMetric.class);
+
+        Assert.assertEquals( "aws.lambda.enhanced.invocations", writtenMetric.metric.toString());
+        Assert.assertTrue(writtenMetric.tags.contains("cold_start:true"));
 
         EnhancedMetricTest.MockContext mc2 = new EnhancedMetricTest.MockContext();
         DDLambda li2 = new DDLambda(mc2);
 
-        JSONObject writtenMetric2 = new JSONObject(omw.CM.toJson());
-        JSONArray jsonTags2 = (JSONArray) writtenMetric2.get("t");
-        Assert.assertTrue(JSONArrayContains(jsonTags2, "cold_start:false"));
+        PersistedCustomMetric writtenMetric2 = g.fromJson(omw.CM.toJson(), PersistedCustomMetric.class);
+        Assert.assertTrue(writtenMetric2.tags.contains("cold_start:false"));
     }
 
     @Test public void TestLambdaInstrumentorWithNullContext(){
@@ -61,8 +52,9 @@ public class LambdaInstrumenterTest {
         DDLambda li =new DDLambda(mc);
         li.error(mc);
 
-        JSONObject jsonObject = new JSONObject(omw.CM.toJson());
-        Assert.assertEquals("aws.lambda.enhanced.errors", jsonObject.getString("m"));
+        Gson g = new Gson();
+        PersistedCustomMetric pcm = g.fromJson(omw.CM.toJson(), PersistedCustomMetric.class);
+        Assert.assertEquals("aws.lambda.enhanced.errors", pcm.metric);
     }
 
     @Test public void TestLambdaInstrumentorCustomMetric(){
@@ -74,9 +66,10 @@ public class LambdaInstrumenterTest {
         li.metric("my_custom_metric", 37.1, null);
         Assert.assertNotNull(omw.CM);
 
-        JSONObject jsonObject = new JSONObject(omw.CM.toJson());
-        Assert.assertEquals("my_custom_metric", jsonObject.get("m"));
-        Assert.assertEquals(37.1, jsonObject.get("v"));
+        Gson g = new Gson();
+        PersistedCustomMetric pcm = g.fromJson(omw.CM.toJson(), PersistedCustomMetric.class);
+        Assert.assertEquals("my_custom_metric", pcm.metric);
+        Assert.assertEquals(Double.valueOf(37.1), pcm.value);
     }
 
     @Test public void TestLambdaInstrumentorCountsColdStartErrors(){
@@ -88,11 +81,11 @@ public class LambdaInstrumenterTest {
         DDLambda li =new DDLambda(mc1);
         li.error(mc1);
 
-        JSONObject thisMetric = new JSONObject(omw.CM.toJson());
-        Assert.assertEquals("aws.lambda.enhanced.errors", thisMetric.get("m").toString());
+        Gson g  = new Gson();
+        PersistedCustomMetric pcm = g.fromJson(omw.CM.toJson(), PersistedCustomMetric.class);
+        Assert.assertEquals("aws.lambda.enhanced.errors", pcm.metric);
 
-        JSONArray theseTags = (JSONArray) thisMetric.get("t");
-        Assert.assertTrue(JSONArrayContains(theseTags, "cold_start:true"));
+        Assert.assertTrue(pcm.tags.contains("cold_start:true"));
     }
 
     @After

@@ -6,10 +6,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 
-import static org.junit.Assert.*;
 
 public class DDLoggerTest {
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();

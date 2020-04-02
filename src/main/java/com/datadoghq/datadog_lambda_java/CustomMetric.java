@@ -1,7 +1,9 @@
 package com.datadoghq.datadog_lambda_java;
 
 import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -45,21 +47,8 @@ public class CustomMetric {
      * @return the Metric's JSON representation
      */
     public String toJson(){
-        //First we need to turn the tags into an array of colon-delimited strings
-        ArrayList<String> tagsList = new java.util.ArrayList<String>();
-        if (this.tags != null) {
-            this.tags.forEach((k, v) -> tagsList.add(String.format("%s:%s", k, v.toString())));
-        }
-
-        long unixTime  = this.time.getTime() / 1000; // To Unix seconds instead of millis
-        Map<String, Object> metricMap  = new HashMap<String, Object>();
-        metricMap.put("e", unixTime);
-        metricMap.put("m", this.name);
-        metricMap.put("v", this.value);
-        metricMap.put("t", tagsList);
-
-        Gson g = new Gson();
-        return g.toJson(metricMap);
+        PersistedCustomMetric pcm = new PersistedCustomMetric(this.name, this.value, this.tags, this.time);
+        return pcm.toJsonString();
     }
 
     /**
@@ -68,5 +57,38 @@ public class CustomMetric {
     public void write(){
         MetricWriter writer = MetricWriter.getMetricWriterImpl();
         writer.write(this);
+    }
+}
+
+class PersistedCustomMetric{
+    public PersistedCustomMetric(String m, double v, Map<String, Object>t, Date e){
+        this.metric = m;
+        this.value = v;
+
+        //First we need to turn the tags into an array of colon-delimited strings
+        ArrayList<String> tagsList = new java.util.ArrayList<String>();
+        if (t != null) {
+            t.forEach((k, val) -> tagsList.add(String.format("%s:%s", k, val.toString())));
+        }
+        this.tags = tagsList;
+        long unixTime  = e.getTime() / 1000; // To Unix seconds instead of millis
+        this.eventTime = unixTime;
+    }
+
+    @SerializedName("m")
+    public String metric;
+
+    @SerializedName("v")
+    public Double value;
+
+    @SerializedName("t")
+    public ArrayList<String> tags;
+
+    @SerializedName("e")
+    public long eventTime;
+
+    public String toJsonString(){
+        Gson g  =  new Gson();
+        return g.toJson(this);
     }
 }

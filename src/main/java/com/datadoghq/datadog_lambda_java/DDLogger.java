@@ -1,8 +1,11 @@
 package com.datadoghq.datadog_lambda_java;
 
+import com.google.gson.Gson;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 class DDLogger {
     public enum level {
@@ -53,11 +56,14 @@ class DDLogger {
             }
         }
 
-        JSONObject logJSON = new JSONObject()
-                .put("level", l.toString())
-                .put("message", argsSB.toString());
+        Map<String, String> structuredLog  = new HashMap<String, String>();
+        structuredLog.put("level", l.toString());
+        structuredLog.put("message", argsSB.toString());
 
-        System.out.println(logJSON.toString());
+        Gson g = new Gson();
+
+        System.out.println(g.toJson(structuredLog));
+
     }
 
     public void setLevel(level l){

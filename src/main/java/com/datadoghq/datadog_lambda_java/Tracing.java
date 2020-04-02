@@ -9,7 +9,7 @@ import java.util.Random;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2ProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
-import org.json.JSONObject;
+import com.google.gson.Gson;
 
 public class Tracing {
 
@@ -97,6 +97,7 @@ public class Tracing {
 }
 
 
+
 class ConverterSubsegment {
     public void setId(String id) {
         this.id = id;
@@ -135,23 +136,22 @@ class ConverterSubsegment {
     }
 
     public String toJSONString(){
-        JSONObject dd = new JSONObject();
-        JSONObject tr = new JSONObject();
 
-        tr.put("trace", this.ddt.toJSON());
-        dd.put("datadog", tr);
+        XraySubsegment.XraySubsegmentBuilder xrb = new XraySubsegment.XraySubsegmentBuilder();
+        XraySubsegment xrs = xrb.name(this.name)
+                .id(this.id)
+                .startTime(this.start_time)
+                .endTime(this.end_time)
+                .type(this.type)
+                .parentId(this.xrt.getParentId())
+                .traceId(this.xrt.getTraceId())
+                .ddTraceId(this.ddt.getTraceID())
+                .ddSamplingPriority(this.ddt.getSamplingPriority())
+                .ddParentId(this.ddt.getParentID())
+                .build();
 
-        JSONObject wholeThing = new JSONObject()
-                .put("name", this.name)
-                .put("id", this.id)
-                .put("start_time", this.start_time)
-                .put("end_time", this.end_time)
-                .put("metadata", dd)
-                .put("type", this.type)
-                .put("parent_id", this.xrt.getParentId())
-                .put("trace_id", this.xrt.getTraceId());
-
-        return wholeThing.toString();
+        Gson g = new Gson();
+        return g.toJson(xrs);
     }
 
     public boolean sendToXRay(){
@@ -193,11 +193,14 @@ class ConverterSubsegment {
             return false;
         }
 
-        JSONObject prefix  = new JSONObject()
-                .put("format", "json")
-                .put("version", 1);
+        Map<String, Object> prefixMap  = new HashMap<String, Object>();
+        prefixMap.put("format", "json");
+        prefixMap.put("version", 1);
+
         String s_message = this.toJSONString();
-        String s_payload = prefix.toString() + "\n" + s_message;
+
+        Gson g = new Gson();
+        String s_payload = g.toJson(prefixMap) + "\n" + s_message;
 
         byte[] payload = s_payload.getBytes();
         DatagramPacket packet = new DatagramPacket(payload, payload.length, daemon_address, daemon_port);
@@ -281,8 +284,8 @@ class DDTraceContext {
         return headers2;
     }
 
-    public JSONObject toJSON(){
-        JSONObject jo = new JSONObject();
+    public Map<String, String> toJSONMap(){
+        Map<String, String> jo  = new HashMap<String, String>();
         jo.put("trace-id", this.getTraceID());
         jo.put("parent-id", this.getParentID());
         jo.put("sampling-priority", this.getSamplingPriority());
