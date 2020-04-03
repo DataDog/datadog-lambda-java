@@ -78,7 +78,7 @@ You can set the following environment variables via the AWS CLI or Serverless Fr
 
 ### DD_LOG_LEVEL
 
-How much logging datadog-lambda-layer-js should do. Set this to "debug" for extensive logs.
+How much logging datadog-lambda-java should do. Set this to "debug" for extensive logs.
 
 ### DD_ENHANCED_METRICS
 
