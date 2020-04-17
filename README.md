@@ -196,7 +196,7 @@ public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, AP
         HttpGet hg = new HttpGet("https://example.com");
     
         //Add the distributed tracing headers
-        hg = (HttpGet) li.addTraceHeaders(hg);
+        hg = (HttpGet) dd.addTraceHeaders(hg);
 
         HttpResponse hr = client.execute(hg);
         return 7;
