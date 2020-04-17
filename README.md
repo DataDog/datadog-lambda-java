@@ -15,7 +15,7 @@ to the Datadog API.
 Installation
 ------------
 
-For the time being, this library will be distributed through JFrog [Bintray](https://bintray.com/beta/#/datadog/datadog-maven/datadog-lambda-java).
+This library will be distributed through JFrog [Bintray](https://bintray.com/beta/#/datadog/datadog-maven/datadog-lambda-java).
  
 ### Maven
 
@@ -159,7 +159,7 @@ public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, AP
         HttpURLConnection hc = (HttpURLConnection)url.openConnection();
 
         //Add the distributed tracing headers
-        hc = (HttpURLConnection) li.addTraceHeaders(hc);
+        hc = (HttpURLConnection) dd.addTraceHeaders(hc);
 
         hc.connect();
     
@@ -177,7 +177,7 @@ public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, AP
     
         HttpClient client = HttpClientBuilder.create().build();
     
-        HttpGet hg = li.makeHttpGet("https://example.com"); //Trace headers included
+        HttpGet hg = dd.makeHttpGet("https://example.com"); //Trace headers included
 
         HttpResponse hr = client.execute(hg);
         return 7;
@@ -215,7 +215,7 @@ public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, AP
     
         HttpClient client = HttpClientBuilder.create().build();
         OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
-        Request okHttpRequest = li.makeRequestBuilder() // Trace headers included
+        Request okHttpRequest = dd.makeRequestBuilder() // Trace headers included
             .url("https://example.com")
             .build(); 
 
@@ -240,7 +240,7 @@ public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, AP
             .build();
 
         //Add the distributed tracing headers
-        okHttpRequest = li.addTraceHeaders(okHttpRequest);
+        okHttpRequest = dd.addTraceHeaders(okHttpRequest);
 
         Response resp = okHttpClient.newCall(okHttpRequest).execute();
 
