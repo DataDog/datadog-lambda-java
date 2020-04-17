@@ -139,7 +139,7 @@ public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, AP
         DDLambda dd = new DDLambda(request, lambda);
  
         URL url = new URL("https://example.com");
-        HttpURLConnection instrumentedUrlConnection = li.makeUrlConnection(url); //Trace headers included
+        HttpURLConnection instrumentedUrlConnection = dd.makeUrlConnection(url); //Trace headers included
 
         instrumentedUrlConnection.connect();
     
