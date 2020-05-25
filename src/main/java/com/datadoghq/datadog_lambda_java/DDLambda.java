@@ -95,6 +95,18 @@ public class DDLambda {
     }
 
     /**
+     * metric allows the user to record their own custom metric that will be sent to Datadog.
+     * also allows user to set his/her own date.
+     * @param name The metric's name
+     * @param value The metric's value
+     * @param tags A map of tags to be assigned to the metric
+     * @param date The date under which the metric value will appear in datadog
+     */
+    public void metric(String name, double value, Map<String, Object> tags, Date date){
+        new CustomMetric(name, value, tags, date).write();
+    }
+
+    /**
      * error increments the aws.lambda.enhanced.error metric in Datadog.
      * @param cxt The AWS Context provided to your handler
      */
