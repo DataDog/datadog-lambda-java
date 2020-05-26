@@ -33,7 +33,7 @@ Include the following dependency in your `pom.xml`
 <dependency>
 	<groupId>com.datadoghq</groupId>
 	<artifactId>datadog-lambda-java</artifactId>
-	<version>0.0.2</version>
+	<version>0.0.3</version>
 	<type>pom</type>
 </dependency>
 ```
@@ -48,7 +48,7 @@ repositories {
 }
 
 dependencies {
-     implementation 'com.datadoghq:datadog-lambda-java:0.0.2'
+     implementation 'com.datadoghq:datadog-lambda-java:0.0.3'
 }
 ```
 
@@ -116,6 +116,8 @@ public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, AP
     }
 }
 ```
+
+Optionally, `dd.metric` can take a user-defined Date in the fourth argument.
 
 Distributed Tracing
 -------------------
