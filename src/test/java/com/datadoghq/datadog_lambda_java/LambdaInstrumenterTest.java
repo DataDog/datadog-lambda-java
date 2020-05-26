@@ -1,5 +1,7 @@
 package com.datadoghq.datadog_lambda_java;
 
+import java.util.Date;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.google.gson.Gson;
 import org.junit.After;
@@ -70,6 +72,25 @@ public class LambdaInstrumenterTest {
         PersistedCustomMetric pcm = g.fromJson(omw.CM.toJson(), PersistedCustomMetric.class);
         Assert.assertEquals("my_custom_metric", pcm.metric);
         Assert.assertEquals(Double.valueOf(37.1), pcm.value);
+    }
+
+    @Test public void TestLambdaInstrumentorCustomMetricWithDate(){
+        ObjectMetricWriter omw = new ObjectMetricWriter();
+        MetricWriter.setMetricWriter(omw);
+
+        Date date = new Date();
+        date.setTime(1590420166419L);
+        DDLambda li =new DDLambda(null);
+
+        li.metric("my_custom_metric", 37.1, null, date);
+        Assert.assertNotNull(omw.CM);
+
+        Gson g = new Gson();
+        PersistedCustomMetric pcm = g.fromJson(omw.CM.toJson(), PersistedCustomMetric.class);
+        Assert.assertEquals("my_custom_metric", pcm.metric);
+        Assert.assertEquals(Double.valueOf(37.1), pcm.value);
+        Assert.assertEquals(Double.valueOf(37.1), pcm.value);
+        Assert.assertEquals(1590420166, pcm.eventTime);
     }
 
     @Test public void TestLambdaInstrumentorCountsColdStartErrors(){
