@@ -33,7 +33,7 @@ Include the following dependency in your `pom.xml`
 <dependency>
 	<groupId>com.datadoghq</groupId>
 	<artifactId>datadog-lambda-java</artifactId>
-	<version>0.0.3</version>
+	<version>0.0.4</version>
 	<type>pom</type>
 </dependency>
 ```
@@ -48,7 +48,7 @@ repositories {
 }
 
 dependencies {
-     implementation 'com.datadoghq:datadog-lambda-java:0.0.3'
+     implementation 'com.datadoghq:datadog-lambda-java:0.0.4'
 }
 ```
 
