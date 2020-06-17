@@ -21,9 +21,13 @@ public class EnhancedMetricTest {
         Assert.assertTrue(tags.containsKey("memorysize"));
         Assert.assertTrue(tags.containsKey("cold_start"));
         Assert.assertTrue(tags.containsKey("runtime"));
+        Assert.assertTrue(tags.containsKey("resource"));
+        Assert.assertTrue(tags.containsKey("executedversion"));
 
         Assert.assertEquals("us-east-1", tags.get("region"));
         Assert.assertEquals("172597598159", tags.get("account_id"));
+        Assert.assertEquals("1", tags.get("executedversion"));
+        Assert.assertEquals("lambda-sample-java-dev-helloJava11:my-alias", tags.get("resource"));
     }
 
     static class MockContext implements Context {
@@ -54,12 +58,12 @@ public class EnhancedMetricTest {
 
         @Override
         public String getFunctionVersion() {
-            return "$LATEST";
+            return "1";
         }
 
         @Override
         public String getInvokedFunctionArn() {
-            return "arn:aws:lambda:us-east-1:172597598159:function:lambda-sample-java-dev-helloJava11";
+            return "arn:aws:lambda:us-east-1:172597598159:function:lambda-sample-java-dev-helloJava11:my-alias";
         }
 
         @Override
