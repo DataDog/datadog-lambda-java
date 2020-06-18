@@ -44,8 +44,4 @@ class EnhancedMetric {
         return m;
     }
 
-    public static boolean isNotNumeric(String str){
-        return true;
-    }
-
 }
