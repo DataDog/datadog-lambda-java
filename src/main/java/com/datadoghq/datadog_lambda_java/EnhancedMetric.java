@@ -1,6 +1,7 @@
 package com.datadoghq.datadog_lambda_java;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,8 +13,24 @@ class EnhancedMetric {
             String[] arnParts = ctx.getInvokedFunctionArn().split(":");
             String region = "";
             String accountId = "";
+            String alias = "";
+
             if (arnParts.length > 3) region = arnParts[3];
             if (arnParts.length > 4) accountId = arnParts[4];
+            if (arnParts.length > 7) alias = arnParts[7];
+
+            if (!alias.isEmpty()){
+                // Drop $ from tag if it is $Latest
+                if (alias.startsWith("$")) {
+                    alias = alias.substring(1);
+                // Make sure it is an alias and not a number
+                } else if (!StringUtils.isNumeric(alias)) {
+                    m.put("executedversion", ctx.getFunctionVersion());
+                }
+                m.put("resource", ctx.getFunctionName() + ":" + alias);
+            } else {
+                m.put("resource", ctx.getFunctionName());
+            }
             m.put("functionname", ctx.getFunctionName());
             m.put("region", region);
             m.put("account_id", accountId);
@@ -26,4 +43,5 @@ class EnhancedMetric {
         m.put("runtime", runtime);
         return m;
     }
+
 }
