@@ -38,8 +38,8 @@ dependencies {
     implementation 'io.opentracing:opentracing-util:0.32.0'
     implementation 'io.opentracing:opentracing-api:0.32.0'
     implementation 'com.datadoghq:dd-trace-api:0.59.0'
-    implementation 'com.datadoghq:dd-java-agent:0.59.0'
-
+    //implementation 'com.datadoghq:dd-java-agent:0.60.0-SNAPSHOT'
+    implementation files('/Users/chris.agocs/go/src/github.com/DataDog/datadog-lambda-java/dd-java-agent-0.60.0-SNAPSHOT.jar')
 
 
     // Use JUnit test framework

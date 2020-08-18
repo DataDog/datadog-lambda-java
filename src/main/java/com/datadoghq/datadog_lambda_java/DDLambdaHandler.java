@@ -2,7 +2,6 @@ package com.datadoghq.datadog_lambda_java;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayV2ProxyRequestEvent;
 import com.amazonaws.xray.entities.TraceHeader;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
@@ -11,21 +10,16 @@ import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
-import io.opentracing.Tracer.SpanBuilder;
 import io.opentracing.log.Fields;
 import io.opentracing.propagation.Format;
 import io.opentracing.propagation.TextMapAdapter;
 import io.opentracing.tag.Tags;
 import io.opentracing.util.GlobalTracer;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,7 +55,10 @@ public class DDLambdaHandler implements RequestStreamHandler {
         }
 
         if (NEEDS_TO_ATTACH.getAndSet(false)) {
-            File agentJar = new File(System.getenv("LAMBDA_TASK_ROOT") + "/agent/dd-java-agent.jar");
+            //how are we supposed to get the dd-java-agent.jar here?
+            //TODO: meeting w/ APM Java about packaging this
+            //File agentJar = new File(System.getenv("LAMBDA_TASK_ROOT") + "/agent/dd-java-agent.jar");
+            File agentJar = new File(System.getenv("LAMBDA_TASK_ROOT") + "/lib/dd-java-agent-0.60.0-SNAPSHOT.jar");
             ByteBuddyAgent.attach(
                     agentJar,
                     ByteBuddyAgent.ProcessProvider.ForCurrentVm.INSTANCE,
@@ -104,7 +101,6 @@ public class DDLambdaHandler implements RequestStreamHandler {
 
         throw new IllegalArgumentException(
                 //TODO: log
-                //TODO: It might not be necessary to implement handleRequest? Verify...
                 "Handler '" + target + "'does not implement 'handleRequest'");
     }
 
@@ -145,24 +141,13 @@ public class DDLambdaHandler implements RequestStreamHandler {
         Object parameter = parameterMapper.fromJson(new Buffer().readFrom(inputStream));
 
         DDLogger logger = DDLogger.getLoggerImpl();
-        Map<String, String> headers;
-        // TODO other events with headers?
+        Map<String, String> headers = Collections.emptyMap();
         // TODO: make it so we only reflectively determine what sort of thing parameters is once, store result in singleton enum
-        DDLambda ddl = null;
-        if (parameter instanceof APIGatewayV2ProxyRequestEvent) {
-            logger.debug("request is an instance of APIGatewayV2ProxyRequestEvent");
-            ddl = new DDLambda((APIGatewayV2ProxyRequestEvent)parameter, context);
-            headers = ((APIGatewayV2ProxyRequestEvent) parameter).getHeaders();
-        } else {
-            if (parameter instanceof Headerable){
-                logger.debug("request implements Headerable");
-                ddl = new DDLambda((Headerable) parameter, context);
-            } else {
-                logger.debug("request is neither an API Gateway V2 request nor is it Headerable");
-                ddl = new DDLambda(context);
-            }
-            headers = Collections.emptyMap();
-        }
+        // Right now, parameters will always be a map<string, string>. We should be able to do one of two things:
+        // - Either reflectively determine the input type of the customer's handler
+        // - or take a best guess at the type of the handler by trying to gson deserialize it into different things
+        // To discuss: create a bunch of abstract classes, one of which DDTraced handlers must implement?
+        DDLambda ddl = new DDLambda(context);
 
         Span span = buildSpan(headers);
         try (Scope scope = tracer.activateSpan(span);
