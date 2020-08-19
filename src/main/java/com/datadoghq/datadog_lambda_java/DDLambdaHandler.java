@@ -57,8 +57,7 @@ public class DDLambdaHandler implements RequestStreamHandler {
         if (NEEDS_TO_ATTACH.getAndSet(false)) {
             //how are we supposed to get the dd-java-agent.jar here?
             //TODO: meeting w/ APM Java about packaging this
-            //File agentJar = new File(System.getenv("LAMBDA_TASK_ROOT") + "/agent/dd-java-agent.jar");
-            File agentJar = new File(System.getenv("LAMBDA_TASK_ROOT") + "/lib/dd-java-agent-0.60.0-SNAPSHOT.jar");
+            File agentJar = new File(System.getenv("LAMBDA_TASK_ROOT") + "/lib/dd-java-agent-0.60.1.jar");
             ByteBuddyAgent.attach(
                     agentJar,
                     ByteBuddyAgent.ProcessProvider.ForCurrentVm.INSTANCE,
