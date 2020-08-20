@@ -22,11 +22,22 @@ repositories {
 
 dependencies {
     implementation 'com.amazonaws:aws-lambda-java-log4j:1.0.0'
-    implementation 'com.amazonaws:aws-lambda-java-events:2.2.7'
+    implementation 'com.amazonaws:aws-lambda-java-events:2.2.9'
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'org.apache.httpcomponents:httpclient:4.5.11'
     implementation 'com.squareup.okhttp3:okhttp:4.4.0'
     implementation 'org.apache.commons:commons-lang3:3.10'
+
+    //Tracing prototype
+    implementation 'com.amazonaws:aws-lambda-java-core:1.2.1'
+    implementation 'com.amazonaws:aws-xray-recorder-sdk-core:2.6.1'
+    implementation 'net.bytebuddy:byte-buddy-agent:1.10.10'
+    implementation 'net.java.dev.jna:jna:5.6.0'
+    implementation 'net.java.dev.jna:jna-platform:5.6.0'
+    implementation 'com.squareup.moshi:moshi:1.9.2'
+    implementation 'io.opentracing:opentracing-util:0.32.0'
+    implementation 'io.opentracing:opentracing-api:0.32.0'
+    implementation 'com.datadoghq:dd-trace-api:0.59.0'
 
 
     // Use JUnit test framework
@@ -38,7 +49,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 group = 'com.datadoghq'
-version = '0.0.5'
+version = '0.1.0-beta'
 
 allprojects {
     repositories {
@@ -55,7 +66,7 @@ publishing {
             from components.java
             groupId 'com.datadoghq'
             artifactId 'datadog-lambda-java'
-            version '0.0.5'
+            version '0.1.0-beta'
         }
     }
 }
@@ -71,7 +82,7 @@ bintray {
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/DataDog/datadog-lambda-java.git'
         version {
-            name = '0.0.5'
+            name = '0.1.0-beta'
             desc = 'Datadog Lambda Java runtime library'
             vcsTag = '0.0.5'
             attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin']
