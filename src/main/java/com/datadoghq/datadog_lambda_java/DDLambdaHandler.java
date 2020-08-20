@@ -120,6 +120,7 @@ public class DDLambdaHandler implements RequestStreamHandler {
         DDLogger logger = DDLogger.getLoggerImpl();
         logger.debug("request appears to be an input stream");
         DDLambda ddl = new DDLambda(context);
+        WrapperLocker.lock(); // prevent subsequent instantiations of DDLambda from recording invocation metrics
 
         try (Scope scope = tracer.activateSpan(span)) {
             targetMethod.invoke(instance, inputStream, outputStream, context);
@@ -131,6 +132,7 @@ public class DDLambdaHandler implements RequestStreamHandler {
 
             throw new RuntimeException(e);
         } finally {
+            WrapperLocker.unlock();
             span.finish();
         }
     }
