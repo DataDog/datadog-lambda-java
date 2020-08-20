@@ -1,4 +1,7 @@
-# datadog-lambda-java
+
+datadog-lambda-java + Tracing beta
+============================================
+
 
 [![Slack](https://img.shields.io/badge/slack-%23serverless-blueviolet?logo=slack)](https://datadoghq.slack.com/channels/serverless/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](https://github.com/DataDog/datadog-lambda-java/blob/master/LICENSE)
@@ -10,12 +13,117 @@ between serverful and serverless environments, as well as letting you send
 [custom metrics](https://docs.datadoghq.com/integrations/amazon_lambda/?tab=awsconsole#custom-metrics) 
 to the Datadog API.
 
+This version includes experimental tracing using the `dd-trace-java` agent.
 
-## Installation
+Important Caveats
+-----------------
 
-This library will be distributed through JFrog [Bintray](https://bintray.com/beta/#/datadog/datadog-maven/datadog-lambda-java). Follow the [installation instructions](https://docs.datadoghq.com/serverless/installation/java/), and view your function's enhanced metrics, traces and logs in Datadog. 
+### Handler Types
+
+Any handler wrapped with the `DDLambdaHandler` MUST have one of the following signatures:
+
+- `public void handleRequest(InputStream, OutputStream, Context)` (i.e. RequestStreamHandler)
+- `public * handleRequest(Map<String, Object>, Context)` (i.e. any return type is valid)
+
+Additional signatures will be implemented.
+
+### Memory Requirements
+
+The `dd-trace-java` agent incurs a significant cold start penalty. Runtimes configured with 
+less than 1024MB of memory are likely to experience cold starts > 30 seconds. We recommend 2048MB
+to 3008MB. Even at these high memory settings, you are likely to notice cold starts taking 6-10
+seconds longer than normal, so we recommend tuning your lambda environment to avoid them as much
+as possible.
+
+Installation
+------------
+
+This library will be distributed through JFrog [Bintray](https://bintray.com/beta/#/datadog/datadog-maven/datadog-lambda-java).
+ 
+### Maven
+
+Include the following dependency in your `pom.xml`
+
+```xml
+  <repositories>
+        <repository>
+            <id>datadog-maven</id>
+            <url>https://dl.bintray.com/datadog/datadog-maven</url>
+        </repository>     
+  </repositories>
+
+
+<dependency>
+	<groupId>com.datadoghq</groupId>
+	<artifactId>datadog-lambda-java</artifactId>
+	<version>0.1.0-beta</version>
+	<type>pom</type>
+</dependency>
+<dependency>
+   	<groupId>com.datadoghq</groupId>
+   	<artifactId>dd-java-agent</artifactId>
+   	<version>0.60.1</version>
+   	<type>pom</type> 
+</dependency>
+```
+
+### Gradle
+
+Include the following in your `build.gradle`
+
+```groovy
+repositories {
+    maven { url "https://dl.bintray.com/datadog/datadog-maven" }
+}
+
+dependencies {
+     implementation 'com.datadoghq:datadog-lambda-java:0.1.0-beta'
+     implementation 'com.datadoghq:dd-java-agent:0.60.1'
+}
+```
+
+Usage
+-----
+
+By including the `datadog-lambda-java` (+ Tracing) and the `dd-java-agent` libraries in your
+project, you've added a new Handler into your project for the AWS Lambda runtime to call. 
+Set your lambda function's handler to `com.datadoghq.datadog_lambda_java.DDLambdaHandler` so that
+Lambda will invoke the Datadog Lambda Handler, and set the `DD_LAMBDA_HANDLER` environment 
+variable to the fully qualified class name (method name optional) of your handler.
+
+In order to disable tracing, set the lambda function's handler to your handler.
+
+The .zip file that is uploaded to Lambda must contain `lib/dd-java-agent-0.60.1.jar`. The easiest
+way to achieve this is to use the Gradle build target below. If you are using the Serverless
+framework with the `aws-java-gradle` template, this is the default action.
+
+```groovy
+// Task for building the zip file for upload
+task buildZip(type: Zip) {
+    // Using the Zip API from gradle to build a zip file of all the dependencies
+    //
+    // The path to this zip file can be set in the serverless.yml file for the
+    // package/artifact setting for deployment to the S3 bucket
+    //
+    // Link: https://docs.gradle.org/current/dsl/org.gradle.api.tasks.bundling.Zip.html
+
+    // set the base name of the zip file
+    from compileJava
+    from processResources
+    into('lib') {
+        from configurations.runtimeClasspath
+    }
+}
+
+build.dependsOn buildZip
+``` 
 
 ## Environment Variables
+
+### DD_LAMBDA_HANDLER
+
+This is the fully qualified class name (optionally with method name) of your handler, so it 
+can be called by the Lambda runtime.
 
 ### DD_LOG_LEVEL
 

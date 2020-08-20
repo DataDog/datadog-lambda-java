@@ -12,6 +12,22 @@ import okhttp3.Request;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 
+class WrapperLocker{
+    private static boolean INVOCATION_RECORDED_BY_WRAPPER = false;
+
+    protected static boolean isLocked() {
+        return INVOCATION_RECORDED_BY_WRAPPER;
+    }
+
+    protected static void lock(){
+        INVOCATION_RECORDED_BY_WRAPPER = true;
+    }
+
+    protected static void unlock(){
+        INVOCATION_RECORDED_BY_WRAPPER = false;
+    }
+}
+
 /**
  * The DDLambda instrumenter is used for getting information about your Lambda into Datadog.
  */
@@ -115,6 +131,9 @@ public class DDLambda {
     }
 
     private void recordEnhanced(String basename, Context cxt){
+        if (WrapperLocker.isLocked()){
+            return;
+        }
         String metricName = basename;
         Map<String, Object> tags = null;
         if (this.enhanced) {
