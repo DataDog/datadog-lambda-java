@@ -93,6 +93,31 @@ variable to the fully qualified class name (method name optional) of your handle
 
 In order to disable tracing, set the lambda function's handler to your handler.
 
+The .zip file that is uploaded to Lambda must contain `lib/dd-java-agent-0.60.1.jar`. The easiest
+way to achieve this is to use the Gradle build target below. If you are using the Serverless
+framework with the `aws-java-gradle` template, this is the default action.
+
+```groovy
+// Task for building the zip file for upload
+task buildZip(type: Zip) {
+    // Using the Zip API from gradle to build a zip file of all the dependencies
+    //
+    // The path to this zip file can be set in the serverless.yml file for the
+    // package/artifact setting for deployment to the S3 bucket
+    //
+    // Link: https://docs.gradle.org/current/dsl/org.gradle.api.tasks.bundling.Zip.html
+
+    // set the base name of the zip file
+    from compileJava
+    from processResources
+    into('lib') {
+        from configurations.runtimeClasspath
+    }
+}
+
+build.dependsOn buildZip
+``` 
+
 ## Environment Variables
 
 ### DD_LAMBDA_HANDLER
