@@ -36,6 +36,7 @@ class EnhancedMetric {
             m.put("account_id", accountId);
             m.put("memorysize", ctx.getMemoryLimitInMB());
             m.put("cold_start", ColdStart.getColdStart(ctx));
+            m.put("datadog_lambda", BuildConfig.datadog_lambda_version);
         } else {
             DDLogger.getLoggerImpl().debug("Unable to enhance metrics: context was null.");
         }

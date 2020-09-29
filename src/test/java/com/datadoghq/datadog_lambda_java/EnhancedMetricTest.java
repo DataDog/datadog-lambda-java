@@ -23,6 +23,9 @@ public class EnhancedMetricTest {
         Assert.assertTrue(tags.containsKey("runtime"));
         Assert.assertTrue(tags.containsKey("resource"));
         Assert.assertTrue(tags.containsKey("executedversion"));
+        Assert.assertTrue(tags.containsKey("datadog_lambda"));
+        String datadog_lambda = tags.get("datadog_lambda").toString();
+        Assert.assertTrue(datadog_lambda.matches("[0-9]+.[0-9]+.[0-9]+"));
 
         Assert.assertEquals("us-east-1", tags.get("region"));
         Assert.assertEquals("172597598159", tags.get("account_id"));

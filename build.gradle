@@ -11,6 +11,7 @@ plugins {
     id 'java-library'
     id 'com.github.johnrengelman.shadow' version '5.2.0'
     id "com.jfrog.bintray" version "1.8.4"
+    id("com.github.gmazzo.buildconfig") version '2.0.2'
 }
 
 repositories {
@@ -55,7 +56,7 @@ publishing {
             from components.java
             groupId 'com.datadoghq'
             artifactId 'datadog-lambda-java'
-            version '0.0.5'
+            version version
         }
     }
 }
@@ -71,11 +72,14 @@ bintray {
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/DataDog/datadog-lambda-java.git'
         version {
-            name = '0.0.5'
+            name = version
             desc = 'Datadog Lambda Java runtime library'
-            vcsTag = '0.0.5'
+            vcsTag = version
             attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin']
         }
     }
 }
 
+buildConfig {
+    buildConfigField('String', 'datadog_lambda_version', '"' + version + '"')
+}
