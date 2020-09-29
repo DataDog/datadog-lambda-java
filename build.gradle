@@ -39,7 +39,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 group = 'com.datadoghq'
-version = '0.0.6'
+version= '0.0.6'
 
 allprojects {
     repositories {
@@ -56,7 +56,7 @@ publishing {
             from components.java
             groupId 'com.datadoghq'
             artifactId 'datadog-lambda-java'
-            version version
+            version project.version.toString()
         }
     }
 }
@@ -72,14 +72,14 @@ bintray {
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/DataDog/datadog-lambda-java.git'
         version {
-            name = version
+            name = project.version.toString()
             desc = 'Datadog Lambda Java runtime library'
-            vcsTag = version
+            vcsTag = project.version.toString()
             attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin']
         }
     }
 }
 
 buildConfig {
-    buildConfigField('String', 'datadog_lambda_version', '"' + version + '"')
+    buildConfigField('String', 'datadog_lambda_version', '"' + project.version.toString() + '"')
 }
