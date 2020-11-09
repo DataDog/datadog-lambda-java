@@ -1,5 +1,6 @@
 package com.datadoghq.datadog_lambda_java;
 
+import org.slf4j.MDC;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -31,6 +32,19 @@ public class DDLambda {
         this.tracing = new Tracing();
         this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
+        MDC.put("trace_id", getTraceLogCorrelationId());
+    }
+
+    /**
+     * Testing only: create a DDLambda instrumenter with a given context and xrayTraceInfo
+     * @param cxt Enhanced Metrics pulls information from the Lambda context.
+     * @param xrayTraceInfo This would normally be the contents of the "_X_AMZN_TRACE_ID" env var
+     */
+    protected DDLambda(Context cxt, String xrayTraceInfo){
+        this.tracing = new Tracing(xrayTraceInfo);
+        this.enhanced = checkEnhanced();
+        recordEnhanced(INVOCATION, cxt);
+        MDC.put("trace_id", getTraceLogCorrelationId());
     }
 
     /**
@@ -44,6 +58,7 @@ public class DDLambda {
         recordEnhanced(INVOCATION, cxt);
         this.tracing = new Tracing(req);
         this.tracing.submitSegment();
+        MDC.put("trace_id", getTraceLogCorrelationId());
     }
 
     /**
@@ -57,6 +72,7 @@ public class DDLambda {
         recordEnhanced(INVOCATION, cxt);
         this.tracing = new Tracing(req);
         this.tracing.submitSegment();
+        MDC.put("trace_id", getTraceLogCorrelationId());
     }
 
     /**
@@ -70,6 +86,7 @@ public class DDLambda {
         recordEnhanced(INVOCATION, cxt);
         this.tracing = new Tracing(req);
         this.tracing.submitSegment();
+        MDC.put("trace_id", getTraceLogCorrelationId());
     }
 
     private boolean checkEnhanced(){
@@ -212,4 +229,17 @@ public class DDLambda {
 
         return rb.build();
     }
+
+    /**
+     * Get the Trace ID for trace/log correlation. Inject this into your logs in order to correlate logs with traces.
+     * @return
+     */
+    public String getTraceLogCorrelationId(){
+        if (this.tracing == null){
+            DDLogger.getLoggerImpl().debug("No tracing context; unable to get Trace ID");
+            return "";
+        }
+        return this.tracing.getLogCorrelationTraceID();
+    }
+
 }

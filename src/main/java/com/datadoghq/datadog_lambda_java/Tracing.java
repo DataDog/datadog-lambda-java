@@ -35,6 +35,14 @@ public class Tracing {
         this.xrt = new XRayTraceContext();
     }
 
+    /**
+     * Test constructor that can take a dummy _X_AMZN_TRACE_ID value
+     * @param xrayTraceInfo
+     */
+    protected Tracing(String xrayTraceInfo){
+        this.xrt = new XRayTraceContext(xrayTraceInfo);
+    }
+
 
     public DDTraceContext getDDContext() {
         if (this.cxt == null) {
@@ -48,6 +56,17 @@ public class Tracing {
             return new XRayTraceContext();
         }
         return xrt;
+    }
+
+    public String getLogCorrelationTraceID(){
+        if (this.cxt != null){
+            return this.cxt.getTraceID();
+        }
+        if (this.xrt != null){
+            return this.xrt.getAPMTraceID();
+        }
+        DDLogger.getLoggerImpl().debug("No DD trace context or XRay trace context set!");
+        return "";
     }
 
     private static DDTraceContext populateDDContext(Map<String,String> headers){
@@ -317,10 +336,31 @@ class XRayTraceContext{
     public XRayTraceContext(){
         //Root=1-5e41a79d-e6a0db584029dba86a594b7e;Parent=8c34f5ad8f92d510;Sampled=1
         String traceId = System.getenv("_X_AMZN_TRACE_ID");
-        if (traceId == null){
-            DDLogger.getLoggerImpl().debug("Unable to find _X_AMZN_TRACE_ID");
+        if (traceId == null || traceId == ""){
+            DDLogger.getLoggerImpl().error("Unable to find _X_AMZN_TRACE_ID");
             return;
         }
+        String[] traceParts = traceId.split(";");
+        if(traceParts.length != 3){
+            DDLogger.getLoggerImpl().error ("Malformed _X_AMZN_TRACE_ID value: "+ traceId);
+            return;
+        }
+
+        try {
+            this.traceId = traceParts[0].split("=")[1];
+            parentId = traceParts[1].split("=")[1];
+        } catch (Exception e){
+            DDLogger.getLoggerImpl().error("Malformed _X_AMZN_TRACE_ID value: "+ traceId);
+            return;
+        }
+        this.traceIdHeader = traceId;
+    }
+
+    /**
+     * Test constructor that can take a dummy _X_AMZN_TRACE_ID value rather than reading from env vars
+     * @param traceId
+     */
+    protected XRayTraceContext(String traceId){
         String[] traceParts = traceId.split(";");
         if(traceParts.length != 3){
             DDLogger.getLoggerImpl().error ("Malformed _X_AMZN_TRACE_ID value: "+ traceId);
@@ -374,5 +414,36 @@ class XRayTraceContext{
             DDLogger.getLoggerImpl().debug("Problem converting XRay Parent ID to APM Parent ID: "+ e.getMessage());
             return null;
         }
+    }
+
+    public String getAPMTraceID(){
+        //trace ID looks like 1-5e41a79d-e6a0db584029dba86a594b7e
+        String bigid = "";
+        try {
+            bigid = this.traceId.split("-")[2];
+        }
+        catch (ArrayIndexOutOfBoundsException | NullPointerException ai){
+            DDLogger.getLoggerImpl().error("Unexpected format for the trace ID. Unable to parse it. " + this.traceId);
+            return "";
+        }
+
+        //just to verify
+        if (bigid.length() != 24){
+            DDLogger.getLoggerImpl().error("Got an unusual traceid from x-ray. Unable to convert that to an APM id. " + this.traceId);
+            return "";
+        }
+
+        String last16 = bigid.substring(bigid.length()-16); // should be the last 16 characters of the big id
+
+        Long parsed = 0L;
+        try {
+            parsed = Long.parseUnsignedLong(last16, 16); //unsigned because parseLong throws a numberformatexception at anything greater than 0x7FFFF...
+        }
+        catch (NumberFormatException ne){
+            DDLogger.getLoggerImpl().error("Got a NumberFormatException trying to parse the traceID. Unable to convert to an APM id. " + this.traceId);
+            return "";
+        }
+        parsed = parsed & 0x7FFFFFFFFFFFFFFFL; //take care of that pesky first bit...
+        return parsed.toString();
     }
 }
