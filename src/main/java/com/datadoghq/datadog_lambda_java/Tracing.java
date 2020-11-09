@@ -337,7 +337,7 @@ class XRayTraceContext{
         //Root=1-5e41a79d-e6a0db584029dba86a594b7e;Parent=8c34f5ad8f92d510;Sampled=1
         String traceId = System.getenv("_X_AMZN_TRACE_ID");
         if (traceId == null || traceId == ""){
-            DDLogger.getLoggerImpl().error("Unable to find _X_AMZN_TRACE_ID");
+            DDLogger.getLoggerImpl().debug("Unable to find _X_AMZN_TRACE_ID");
             return;
         }
         String[] traceParts = traceId.split(";");
@@ -363,7 +363,7 @@ class XRayTraceContext{
     protected XRayTraceContext(String traceId){
         String[] traceParts = traceId.split(";");
         if(traceParts.length != 3){
-            DDLogger.getLoggerImpl().error ("Malformed _X_AMZN_TRACE_ID value: "+ traceId);
+            DDLogger.getLoggerImpl().error("Malformed _X_AMZN_TRACE_ID value: "+ traceId);
             return;
         }
 
@@ -423,13 +423,13 @@ class XRayTraceContext{
             bigid = this.traceId.split("-")[2];
         }
         catch (ArrayIndexOutOfBoundsException | NullPointerException ai){
-            DDLogger.getLoggerImpl().error("Unexpected format for the trace ID. Unable to parse it. " + this.traceId);
+            DDLogger.getLoggerImpl().debug("Unexpected format for the trace ID. Unable to parse it. " + this.traceId);
             return "";
         }
 
         //just to verify
         if (bigid.length() != 24){
-            DDLogger.getLoggerImpl().error("Got an unusual traceid from x-ray. Unable to convert that to an APM id. " + this.traceId);
+            DDLogger.getLoggerImpl().debug("Got an unusual traceid from x-ray. Unable to convert that to an APM id. " + this.traceId);
             return "";
         }
 
@@ -440,7 +440,7 @@ class XRayTraceContext{
             parsed = Long.parseUnsignedLong(last16, 16); //unsigned because parseLong throws a numberformatexception at anything greater than 0x7FFFF...
         }
         catch (NumberFormatException ne){
-            DDLogger.getLoggerImpl().error("Got a NumberFormatException trying to parse the traceID. Unable to convert to an APM id. " + this.traceId);
+            DDLogger.getLoggerImpl().debug("Got a NumberFormatException trying to parse the traceID. Unable to convert to an APM id. " + this.traceId);
             return "";
         }
         parsed = parsed & 0x7FFFFFFFFFFFFFFFL; //take care of that pesky first bit...
