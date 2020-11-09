@@ -38,7 +38,7 @@ Once [installed](#installation), you should be able to submit custom metrics fro
 
 Check out the instructions for [submitting custom metrics from AWS Lambda functions](https://docs.datadoghq.com/integrations/amazon_lambda/?tab=java#custom-metrics).
 
-## Tracing
+## Distributed Tracing
 
 Wrap your outbound HTTP requests with trace headers to see your lambda in context in APM.
 The Lambda Java Client Library provides instrumented HTTP connection objects as well as helper methods for
@@ -167,6 +167,30 @@ public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, AP
     }
 }
 ```
+
+### Trace/Log Correlations
+
+In order to correlate your traces with your logs, you must inject the Trace ID (Datadog or XRay)
+into your log messages. We've added the Trace ID into the slf4j MDC under the key `dd.trace_id`
+and provided convenience methods to get it automatically. The Trace ID is added to the MDC as a side
+effect of instantiating any `new DDLambda(...)`.
+
+If you are using JSON logs, add the trace ID to each log message with the key `dd.trace_id`. 
+
+If you are using plain text logs, then you must create a new [Parser](https://docs.datadoghq.com/logs/processing/parsing/?tab=matcher)
+that can extract the trace ID from the correct position in the logs. Please see below about how
+to access the Trace ID.
+
+#### Log4j / SLF4J
+
+We have added the Trace ID into the slf4j MDC under the key `dd.trace_id`. If you are, for example,
+using a `PatternLayout`, you must add the pattern `%X{dd.trace_id}` into your layout.
+
+#### Other logging solutions
+
+If you are using a different logging solution, the trace ID can be accessed using the method
+`DDLambda.getTraceLogCorrelationId()`. That returns your trace ID as a string that can be added
+to any log message.
 
 ## Opening Issues
 

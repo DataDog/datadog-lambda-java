@@ -17,7 +17,7 @@ public class TraceLogCorrelationTest {
     @Test
     public void TestWithLog4J(){
         Logger logger = Logger.getLogger(TraceLogCorrelationTest.class.getName());
-        PatternLayout layout = new PatternLayout("%d{ISO8601} %X{trace_id} [%t] %-5p %c %x - %m%n");
+        PatternLayout layout = new PatternLayout("%d{ISO8601} %X{dd.trace_id} [%t] %-5p %c %x - %m%n");
         logger.addAppender(new ConsoleAppender((layout)));
 
         logger.info("Test log message");

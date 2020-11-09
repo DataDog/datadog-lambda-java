@@ -21,6 +21,7 @@ public class DDLambda {
     private String ENHANCED_PREFIX = "aws.lambda.enhanced.";
     private String INVOCATION = "invocations";
     private String ERROR = "errors";
+    private String MDC_TRACE_ID_FIELD = "dd.trace_id";
     private Tracing tracing;
     private boolean enhanced = true;
 
@@ -32,7 +33,7 @@ public class DDLambda {
         this.tracing = new Tracing();
         this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
-        MDC.put("trace_id", getTraceLogCorrelationId());
+        MDC.put(MDC_TRACE_ID_FIELD, getTraceLogCorrelationId());
     }
 
     /**
@@ -44,7 +45,7 @@ public class DDLambda {
         this.tracing = new Tracing(xrayTraceInfo);
         this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
-        MDC.put("trace_id", getTraceLogCorrelationId());
+        MDC.put(MDC_TRACE_ID_FIELD, getTraceLogCorrelationId());
     }
 
     /**
@@ -58,7 +59,7 @@ public class DDLambda {
         recordEnhanced(INVOCATION, cxt);
         this.tracing = new Tracing(req);
         this.tracing.submitSegment();
-        MDC.put("trace_id", getTraceLogCorrelationId());
+        MDC.put(MDC_TRACE_ID_FIELD, getTraceLogCorrelationId());
     }
 
     /**
@@ -72,7 +73,7 @@ public class DDLambda {
         recordEnhanced(INVOCATION, cxt);
         this.tracing = new Tracing(req);
         this.tracing.submitSegment();
-        MDC.put("trace_id", getTraceLogCorrelationId());
+        MDC.put(MDC_TRACE_ID_FIELD, getTraceLogCorrelationId());
     }
 
     /**
@@ -86,7 +87,7 @@ public class DDLambda {
         recordEnhanced(INVOCATION, cxt);
         this.tracing = new Tracing(req);
         this.tracing.submitSegment();
-        MDC.put("trace_id", getTraceLogCorrelationId());
+        MDC.put(MDC_TRACE_ID_FIELD, getTraceLogCorrelationId());
     }
 
     private boolean checkEnhanced(){
