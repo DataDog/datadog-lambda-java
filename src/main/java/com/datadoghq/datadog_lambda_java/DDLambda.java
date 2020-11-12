@@ -21,7 +21,7 @@ public class DDLambda {
     private String ENHANCED_PREFIX = "aws.lambda.enhanced.";
     private String INVOCATION = "invocations";
     private String ERROR = "errors";
-    private String MDC_TRACE_ID_FIELD = "dd.trace_id";
+    private String MDC_TRACE_CONTEXT_FIELD = "dd.trace_context";
     private Tracing tracing;
     private boolean enhanced = true;
 
@@ -33,7 +33,7 @@ public class DDLambda {
         this.tracing = new Tracing();
         this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
-        MDC.put(MDC_TRACE_ID_FIELD, getTraceLogCorrelationId());
+        MDC.put(MDC_TRACE_CONTEXT_FIELD, getTraceContextString());
     }
 
     /**
@@ -45,7 +45,7 @@ public class DDLambda {
         this.tracing = new Tracing(xrayTraceInfo);
         this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
-        MDC.put(MDC_TRACE_ID_FIELD, getTraceLogCorrelationId());
+        MDC.put(MDC_TRACE_CONTEXT_FIELD, getTraceContextString());
     }
 
     /**
@@ -59,7 +59,7 @@ public class DDLambda {
         recordEnhanced(INVOCATION, cxt);
         this.tracing = new Tracing(req);
         this.tracing.submitSegment();
-        MDC.put(MDC_TRACE_ID_FIELD, getTraceLogCorrelationId());
+        MDC.put(MDC_TRACE_CONTEXT_FIELD, getTraceContextString());
     }
 
     /**
@@ -73,7 +73,7 @@ public class DDLambda {
         recordEnhanced(INVOCATION, cxt);
         this.tracing = new Tracing(req);
         this.tracing.submitSegment();
-        MDC.put(MDC_TRACE_ID_FIELD, getTraceLogCorrelationId());
+        MDC.put(MDC_TRACE_CONTEXT_FIELD, getTraceContextString());
     }
 
     /**
@@ -87,7 +87,7 @@ public class DDLambda {
         recordEnhanced(INVOCATION, cxt);
         this.tracing = new Tracing(req);
         this.tracing.submitSegment();
-        MDC.put(MDC_TRACE_ID_FIELD, getTraceLogCorrelationId());
+        MDC.put(MDC_TRACE_CONTEXT_FIELD, getTraceContextString());
     }
 
     private boolean checkEnhanced(){
@@ -232,15 +232,35 @@ public class DDLambda {
     }
 
     /**
-     * Get the Trace ID for trace/log correlation. Inject this into your logs in order to correlate logs with traces.
-     * @return
+     * Get the trace context for trace/log correlation. Inject this into your logs in order to correlate logs with traces.
+     * @return a map of the current trace context
      */
-    public String getTraceLogCorrelationId(){
+    public Map<String,String> getTraceContext(){
         if (this.tracing == null){
             DDLogger.getLoggerImpl().debug("No tracing context; unable to get Trace ID");
+            return null;
+        }
+        return this.tracing.getLogCorrelationTraceAndSpanIDsMap();
+    }
+
+    /**
+     * Get the trace context in string form. Inject this into your logs in order to correlate logs with traces.
+     * @return a string representation of the current trace context
+     */
+    public String getTraceContextString(){
+        Map<String,String> traceInfo = getTraceContext();
+        if (traceInfo == null){
+            DDLogger.getLoggerImpl().debug("No Trace/Log correlation IDs returned");
             return "";
         }
-        return this.tracing.getLogCorrelationTraceID();
+
+        String traceID = traceInfo.get(this.tracing.TRACE_ID_KEY);
+        String spanID = traceInfo.get(this.tracing.SPAN_ID_KEY);
+        return formatTraceContext(this.tracing.TRACE_ID_KEY, traceID, this.tracing.SPAN_ID_KEY, spanID);
+    }
+
+    private String formatTraceContext(String traceKey, String trace, String spanKey, String span){
+        return String.format("[%s=%s %s=%s]", traceKey, trace, spanKey, span);
     }
 
 }

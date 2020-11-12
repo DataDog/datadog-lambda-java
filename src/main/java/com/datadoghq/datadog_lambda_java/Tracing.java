@@ -16,6 +16,9 @@ public class Tracing {
     protected DDTraceContext cxt;
     protected XRayTraceContext xrt;
 
+    protected String TRACE_ID_KEY = "dd.trace_id";
+    protected String SPAN_ID_KEY = "dd.span_id";
+
     public Tracing(){
         this.xrt = new XRayTraceContext();
     }
@@ -58,15 +61,29 @@ public class Tracing {
         return xrt;
     }
 
-    public String getLogCorrelationTraceID(){
+    public Map<String,String> getLogCorrelationTraceAndSpanIDsMap(){
         if (this.cxt != null){
-            return this.cxt.getTraceID();
+            String traceID = this.cxt.getTraceID();
+            String spanID = this.cxt.getParentID();
+            Map<String, String> out  = new HashMap<String, String>();
+            out.put(TRACE_ID_KEY, traceID);
+            out.put(SPAN_ID_KEY, spanID);
+            return out;
         }
         if (this.xrt != null){
-            return this.xrt.getAPMTraceID();
+            String traceID = this.xrt.getAPMTraceID();
+            String spanID = this.xrt.getAPMParentID();
+            Map<String, String> out  = new HashMap<String, String>();
+            out.put(TRACE_ID_KEY, traceID);
+            out.put(SPAN_ID_KEY, spanID);
+            return out;
         }
         DDLogger.getLoggerImpl().debug("No DD trace context or XRay trace context set!");
-        return "";
+        return null;
+    }
+
+    private String formatLogCorrelation(String trace, String span){
+        return String.format("[dd.trace_id=%s dd.span_id=%s]", trace, span);
     }
 
     private static DDTraceContext populateDDContext(Map<String,String> headers){

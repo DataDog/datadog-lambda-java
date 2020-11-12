@@ -170,26 +170,50 @@ public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, AP
 
 ### Trace/Log Correlations
 
-In order to correlate your traces with your logs, you must inject the Trace ID (Datadog or XRay)
-into your log messages. We've added the Trace ID into the slf4j MDC under the key `dd.trace_id`
-and provided convenience methods to get it automatically. The Trace ID is added to the MDC as a side
+In order to correlate your traces with your logs, you must inject the trace context
+into your log messages. We've added the these into the slf4j MDC under the key `dd.trace_context`
+and provided convenience methods to get it automatically. The trace context is added to the MDC as a side
 effect of instantiating any `new DDLambda(...)`.
 
-If you are using JSON logs, add the trace ID to each log message with the key `dd.trace_id`. 
+This is an example trace context: `[dd.trace_id=3371139772690049666 dd.span_id=13006875827893840236]`
+
+#### JSON Logs
+
+If you are using JSON logs, add the trace ID and span ID to each log message with the keys 
+`dd.trace_id` and `dd.span_id` respectively. To get a map containing trace and span IDs,
+ call `DDLambda.getTraceContext()`. Union this map with the JSON data being logged.
+
+#### Plain text logs
 
 If you are using plain text logs, then you must create a new [Parser](https://docs.datadoghq.com/logs/processing/parsing/?tab=matcher)
-that can extract the trace ID from the correct position in the logs. Please see below about how
-to access the Trace ID.
+that can extract the trace context from the correct position in the logs. Use the helper `_trace_context` to
+extract the trace context. For example, if your log line looked like:
+
+```
+INFO 2020-11-11T14:00:00Z LAMBDA_REQUEST_ID [dd.trace_id=12345 dd.span_id=67890] This is a log message
+```
+
+Then your parser rule would look like:
+
+```
+my_custom_rule \[%{word:level}\]?\s+%{_timestamp}\s+%{notSpace:lambda.request_id}%{_trace_context}?.*
+```
 
 #### Log4j / SLF4J
 
-We have added the Trace ID into the slf4j MDC under the key `dd.trace_id`. If you are, for example,
-using a `PatternLayout`, you must add the pattern `%X{dd.trace_id}` into your layout.
+We have added the Trace ID into the slf4j MDC under the key `dd.trace_context`. If you are, for example,
+using a `PatternLayout`, you must add the pattern `%X{dd.trace_context}` into your layout. E.g.
+
+```
+PatternLayout layout = new PatternLayout("%-5p [%t]: %m %X{dd.trace_context}%n");
+```
+
+would result in log lines looking like `DEBUG [main]: This is a log message [dd.trace_id=12345 dd.span_id=67890]`
 
 #### Other logging solutions
 
 If you are using a different logging solution, the trace ID can be accessed using the method
-`DDLambda.getTraceLogCorrelationId()`. That returns your trace ID as a string that can be added
+`DDLambda.getTraceContextString()`. That returns your trace ID as a string that can be added
 to any log message.
 
 ## Opening Issues
