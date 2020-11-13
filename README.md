@@ -201,14 +201,19 @@ my_custom_rule \[%{word:level}\]?\s+%{_timestamp}\s+%{notSpace:lambda.request_id
 
 #### Log4j / SLF4J
 
-We have added the Trace ID into the slf4j MDC under the key `dd.trace_context`. If you are, for example,
-using a `PatternLayout`, you must add the pattern `%X{dd.trace_context}` into your layout. E.g.
+We have added the Trace ID into the slf4j MDC under the key `dd.trace_context`. That can be accessed
+using the `%X{dd.trace_context}` operator. Here is an example `log4j.properties`: 
 
 ```
-PatternLayout layout = new PatternLayout("%-5p [%t]: %m %X{dd.trace_context}%n");
+log = .
+log4j.rootLogger = DEBUG, LAMBDA
+
+log4j.appender.LAMBDA=com.amazonaws.services.lambda.runtime.log4j.LambdaAppender
+log4j.appender.LAMBDA.layout=org.apache.log4j.PatternLayout
+log4j.appender.LAMBDA.layout.conversionPattern=%d{yyyy-MM-dd HH:mm:ss} %X{dd.trace_context} %-5p %c:%L - %m%n
 ```
 
-would result in log lines looking like `DEBUG [main]: This is a log message [dd.trace_id=12345 dd.span_id=67890]`
+would result in log lines looking like `2020-11-13 19:21:53 [dd.trace_id=1168910694192328743 dd.span_id=3204959397041471598] INFO  com.serverless.Handler:20 - Test Log Message`
 
 #### Other logging solutions
 
