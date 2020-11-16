@@ -16,6 +16,9 @@ public class Tracing {
     protected DDTraceContext cxt;
     protected XRayTraceContext xrt;
 
+    protected String TRACE_ID_KEY = "dd.trace_id";
+    protected String SPAN_ID_KEY = "dd.span_id";
+
     public Tracing(){
         this.xrt = new XRayTraceContext();
     }
@@ -35,6 +38,14 @@ public class Tracing {
         this.xrt = new XRayTraceContext();
     }
 
+    /**
+     * Test constructor that can take a dummy _X_AMZN_TRACE_ID value
+     * @param xrayTraceInfo
+     */
+    protected Tracing(String xrayTraceInfo){
+        this.xrt = new XRayTraceContext(xrayTraceInfo);
+    }
+
 
     public DDTraceContext getDDContext() {
         if (this.cxt == null) {
@@ -48,6 +59,31 @@ public class Tracing {
             return new XRayTraceContext();
         }
         return xrt;
+    }
+
+    public Map<String,String> getLogCorrelationTraceAndSpanIDsMap(){
+        if (this.cxt != null){
+            String traceID = this.cxt.getTraceID();
+            String spanID = this.cxt.getParentID();
+            Map<String, String> out  = new HashMap<String, String>();
+            out.put(TRACE_ID_KEY, traceID);
+            out.put(SPAN_ID_KEY, spanID);
+            return out;
+        }
+        if (this.xrt != null){
+            String traceID = this.xrt.getAPMTraceID();
+            String spanID = this.xrt.getAPMParentID();
+            Map<String, String> out  = new HashMap<String, String>();
+            out.put(TRACE_ID_KEY, traceID);
+            out.put(SPAN_ID_KEY, spanID);
+            return out;
+        }
+        DDLogger.getLoggerImpl().debug("No DD trace context or XRay trace context set!");
+        return null;
+    }
+
+    private String formatLogCorrelation(String trace, String span){
+        return String.format("[dd.trace_id=%s dd.span_id=%s]", trace, span);
     }
 
     private static DDTraceContext populateDDContext(Map<String,String> headers){
@@ -317,13 +353,34 @@ class XRayTraceContext{
     public XRayTraceContext(){
         //Root=1-5e41a79d-e6a0db584029dba86a594b7e;Parent=8c34f5ad8f92d510;Sampled=1
         String traceId = System.getenv("_X_AMZN_TRACE_ID");
-        if (traceId == null){
+        if (traceId == null || traceId == ""){
             DDLogger.getLoggerImpl().debug("Unable to find _X_AMZN_TRACE_ID");
             return;
         }
         String[] traceParts = traceId.split(";");
         if(traceParts.length != 3){
             DDLogger.getLoggerImpl().error ("Malformed _X_AMZN_TRACE_ID value: "+ traceId);
+            return;
+        }
+
+        try {
+            this.traceId = traceParts[0].split("=")[1];
+            parentId = traceParts[1].split("=")[1];
+        } catch (Exception e){
+            DDLogger.getLoggerImpl().error("Malformed _X_AMZN_TRACE_ID value: "+ traceId);
+            return;
+        }
+        this.traceIdHeader = traceId;
+    }
+
+    /**
+     * Test constructor that can take a dummy _X_AMZN_TRACE_ID value rather than reading from env vars
+     * @param traceId
+     */
+    protected XRayTraceContext(String traceId){
+        String[] traceParts = traceId.split(";");
+        if(traceParts.length != 3){
+            DDLogger.getLoggerImpl().error("Malformed _X_AMZN_TRACE_ID value: "+ traceId);
             return;
         }
 
@@ -374,5 +431,36 @@ class XRayTraceContext{
             DDLogger.getLoggerImpl().debug("Problem converting XRay Parent ID to APM Parent ID: "+ e.getMessage());
             return null;
         }
+    }
+
+    public String getAPMTraceID(){
+        //trace ID looks like 1-5e41a79d-e6a0db584029dba86a594b7e
+        String bigid = "";
+        try {
+            bigid = this.traceId.split("-")[2];
+        }
+        catch (ArrayIndexOutOfBoundsException | NullPointerException ai){
+            DDLogger.getLoggerImpl().debug("Unexpected format for the trace ID. Unable to parse it. " + this.traceId);
+            return "";
+        }
+
+        //just to verify
+        if (bigid.length() != 24){
+            DDLogger.getLoggerImpl().debug("Got an unusual traceid from x-ray. Unable to convert that to an APM id. " + this.traceId);
+            return "";
+        }
+
+        String last16 = bigid.substring(bigid.length()-16); // should be the last 16 characters of the big id
+
+        Long parsed = 0L;
+        try {
+            parsed = Long.parseUnsignedLong(last16, 16); //unsigned because parseLong throws a numberformatexception at anything greater than 0x7FFFF...
+        }
+        catch (NumberFormatException ne){
+            DDLogger.getLoggerImpl().debug("Got a NumberFormatException trying to parse the traceID. Unable to convert to an APM id. " + this.traceId);
+            return "";
+        }
+        parsed = parsed & 0x7FFFFFFFFFFFFFFFL; //take care of that pesky first bit...
+        return parsed.toString();
     }
 }

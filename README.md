@@ -38,7 +38,7 @@ Once [installed](#installation), you should be able to submit custom metrics fro
 
 Check out the instructions for [submitting custom metrics from AWS Lambda functions](https://docs.datadoghq.com/integrations/amazon_lambda/?tab=java#custom-metrics).
 
-## Tracing
+## Distributed Tracing
 
 Wrap your outbound HTTP requests with trace headers to see your lambda in context in APM.
 The Lambda Java Client Library provides instrumented HTTP connection objects as well as helper methods for
@@ -167,6 +167,59 @@ public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, AP
     }
 }
 ```
+
+### Trace/Log Correlations
+
+In order to correlate your traces with your logs, you must inject the trace context
+into your log messages. We've added the these into the slf4j MDC under the key `dd.trace_context`
+and provided convenience methods to get it automatically. The trace context is added to the MDC as a side
+effect of instantiating any `new DDLambda(...)`.
+
+This is an example trace context: `[dd.trace_id=3371139772690049666 dd.span_id=13006875827893840236]`
+
+#### JSON Logs
+
+If you are using JSON logs, add the trace ID and span ID to each log message with the keys 
+`dd.trace_id` and `dd.span_id` respectively. To get a map containing trace and span IDs,
+ call `DDLambda.getTraceContext()`. Union this map with the JSON data being logged.
+
+#### Plain text logs
+
+If you are using plain text logs, then you must create a new [Parser](https://docs.datadoghq.com/logs/processing/parsing/?tab=matcher)
+by cloning the existing Lambda Pipeline. The new parser can extract the trace context from the correct position in the logs. 
+Use the helper `_trace_context` to extract the trace context. For example, if your log line looked like:
+
+```
+INFO 2020-11-11T14:00:00Z LAMBDA_REQUEST_ID [dd.trace_id=12345 dd.span_id=67890] This is a log message
+```
+
+Then your parser rule would look like:
+
+```
+my_custom_rule \[%{word:level}\]?\s+%{_timestamp}\s+%{notSpace:lambda.request_id}%{_trace_context}?.*
+```
+
+#### Log4j / SLF4J
+
+We have added the Trace ID into the slf4j MDC under the key `dd.trace_context`. That can be accessed
+using the `%X{dd.trace_context}` operator. Here is an example `log4j.properties`: 
+
+```
+log = .
+log4j.rootLogger = DEBUG, LAMBDA
+
+log4j.appender.LAMBDA=com.amazonaws.services.lambda.runtime.log4j.LambdaAppender
+log4j.appender.LAMBDA.layout=org.apache.log4j.PatternLayout
+log4j.appender.LAMBDA.layout.conversionPattern=%d{yyyy-MM-dd HH:mm:ss} %X{dd.trace_context} %-5p %c:%L - %m%n
+```
+
+would result in log lines looking like `2020-11-13 19:21:53 [dd.trace_id=1168910694192328743 dd.span_id=3204959397041471598] INFO  com.serverless.Handler:20 - Test Log Message`
+
+#### Other logging solutions
+
+If you are using a different logging solution, the trace ID can be accessed using the method
+`DDLambda.getTraceContextString()`. That returns your trace ID as a string that can be added
+to any log message.
 
 ## Opening Issues
 
