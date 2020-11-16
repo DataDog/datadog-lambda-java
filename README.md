@@ -186,8 +186,8 @@ If you are using JSON logs, add the trace ID and span ID to each log message wit
 #### Plain text logs
 
 If you are using plain text logs, then you must create a new [Parser](https://docs.datadoghq.com/logs/processing/parsing/?tab=matcher)
-that can extract the trace context from the correct position in the logs. Use the helper `_trace_context` to
-extract the trace context. For example, if your log line looked like:
+by cloning the existing Lambda Pipeline. The new parser can extract the trace context from the correct position in the logs. 
+Use the helper `_trace_context` to extract the trace context. For example, if your log line looked like:
 
 ```
 INFO 2020-11-11T14:00:00Z LAMBDA_REQUEST_ID [dd.trace_id=12345 dd.span_id=67890] This is a log message
