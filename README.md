@@ -215,6 +215,9 @@ log4j.appender.LAMBDA.layout.conversionPattern=%d{yyyy-MM-dd HH:mm:ss} %X{dd.tra
 
 would result in log lines looking like `2020-11-13 19:21:53 [dd.trace_id=1168910694192328743 dd.span_id=3204959397041471598] INFO  com.serverless.Handler:20 - Test Log Message`
 
+Just like the **Plain Text Logs** in the previous section, you must create a new [Parser](https://docs.datadoghq.com/logs/processing/parsing/?tab=matcher) in order to parse the trace context correctly.
+
+
 #### Other logging solutions
 
 If you are using a different logging solution, the trace ID can be accessed using the method
