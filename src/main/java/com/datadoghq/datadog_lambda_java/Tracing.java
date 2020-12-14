@@ -191,7 +191,7 @@ class ConverterSubsegment {
     }
 
     public boolean sendToXRay(){
-        if (this.id == null || this.id == "") {
+        if (this.id == null || this.id.equals("")) {
             return false;
         }
 
@@ -353,7 +353,7 @@ class XRayTraceContext{
     public XRayTraceContext(){
         //Root=1-5e41a79d-e6a0db584029dba86a594b7e;Parent=8c34f5ad8f92d510;Sampled=1
         String traceId = System.getenv("_X_AMZN_TRACE_ID");
-        if (traceId == null || traceId == ""){
+        if (traceId == null || traceId.equals("")){
             DDLogger.getLoggerImpl().debug("Unable to find _X_AMZN_TRACE_ID");
             return;
         }

@@ -96,7 +96,7 @@ public class DDLambda {
             return true;
         }
 
-        if (sysEnhanced.toLowerCase() == "false"){
+        if (sysEnhanced.toLowerCase().equals("false")){
             return false;
         }
         return true;
