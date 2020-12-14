@@ -8,9 +8,14 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Rule;
+import org.junit.contrib.java.lang.system.EnvironmentVariables;
 
 
 public class LambdaInstrumenterTest {
+    @Rule
+    public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
+
     @Before
     public void setUp() throws Exception {
         ColdStart.resetColdStart();
@@ -107,6 +112,35 @@ public class LambdaInstrumenterTest {
         Assert.assertEquals("aws.lambda.enhanced.errors", pcm.metric);
 
         Assert.assertTrue(pcm.tags.contains("cold_start:true"));
+    }
+
+    @Test
+    public void EnhancedMetricsDeactivatedWithEnvVar(){
+        environmentVariables.set("DD_ENHANCED_METRICS", "false");
+        Context mc1 = new EnhancedMetricTest.MockContext();
+        DDLambda ddl = new DDLambda(mc1);
+        boolean isEnhanced = ddl.checkEnhanced();
+        Assert.assertFalse(isEnhanced);
+        environmentVariables.clear("DD_ENHANCED_METRICS");
+    }
+
+    @Test
+    public void EnhancedMetricsActivatedByDefault(){
+        System.out.println(System.getenv("DD_ENHANCED_METRICS"));
+        Context mc1 = new EnhancedMetricTest.MockContext();
+        DDLambda ddl = new DDLambda(mc1);
+        boolean isEnhanced = ddl.checkEnhanced();
+        Assert.assertTrue(isEnhanced);
+    }
+
+    @Test
+    public void EnhancedMetricsActivatedWithEnvVar(){
+        environmentVariables.set("DD_ENHANCED_METRICS", "true");
+        Context mc1 = new EnhancedMetricTest.MockContext();
+        DDLambda ddl = new DDLambda(mc1);
+        boolean isEnhanced = ddl.checkEnhanced();
+        Assert.assertTrue(isEnhanced);
+        environmentVariables.clear("DD_ENHANCED_METRICS");
     }
 
     @After

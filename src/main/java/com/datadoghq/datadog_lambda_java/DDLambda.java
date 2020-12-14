@@ -90,7 +90,7 @@ public class DDLambda {
         MDC.put(MDC_TRACE_CONTEXT_FIELD, getTraceContextString());
     }
 
-    private boolean checkEnhanced(){
+    protected boolean checkEnhanced(){
         String sysEnhanced = System.getenv(ENHANCED_ENV);
         if (sysEnhanced == null){
             return true;
