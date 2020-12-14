@@ -35,6 +35,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.apache.logging.log4j:log4j-api:2.13.3'
     testImplementation 'org.apache.logging.log4j:log4j-core:2.13.3'
+    testImplementation 'com.github.stefanbirkner:system-rules:1.19.0'
 }
 
 sourceCompatibility = 1.8
