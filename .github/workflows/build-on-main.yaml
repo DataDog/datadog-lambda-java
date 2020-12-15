@@ -1,8 +1,8 @@
-name: Test on Master branch
+name: Test on Main branch
 on: 
         push:
                 branches:
-                        - master
+                        - main 
 jobs:
   gradle:
     strategy:
