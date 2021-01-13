@@ -22,6 +22,8 @@ public class DDLambda {
     private String INVOCATION = "invocations";
     private String ERROR = "errors";
     private String MDC_TRACE_CONTEXT_FIELD = "dd.trace_context";
+    private String JSON_TRACE_ID = "dd.trace_id";
+    private String JSON_SPAN_ID = "dd.span_id";
     private Tracing tracing;
     private boolean enhanced = true;
 
@@ -33,7 +35,7 @@ public class DDLambda {
         this.tracing = new Tracing();
         this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
-        MDC.put(MDC_TRACE_CONTEXT_FIELD, getTraceContextString());
+        addTraceContextToMDC();
     }
 
     /**
@@ -45,7 +47,7 @@ public class DDLambda {
         this.tracing = new Tracing(xrayTraceInfo);
         this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
-        MDC.put(MDC_TRACE_CONTEXT_FIELD, getTraceContextString());
+        addTraceContextToMDC();
     }
 
     /**
@@ -59,7 +61,7 @@ public class DDLambda {
         recordEnhanced(INVOCATION, cxt);
         this.tracing = new Tracing(req);
         this.tracing.submitSegment();
-        MDC.put(MDC_TRACE_CONTEXT_FIELD, getTraceContextString());
+        addTraceContextToMDC();
     }
 
     /**
@@ -73,7 +75,7 @@ public class DDLambda {
         recordEnhanced(INVOCATION, cxt);
         this.tracing = new Tracing(req);
         this.tracing.submitSegment();
-        MDC.put(MDC_TRACE_CONTEXT_FIELD, getTraceContextString());
+        addTraceContextToMDC();
     }
 
     /**
@@ -87,6 +89,17 @@ public class DDLambda {
         recordEnhanced(INVOCATION, cxt);
         this.tracing = new Tracing(req);
         this.tracing.submitSegment();
+        addTraceContextToMDC();
+    }
+
+    private void addTraceContextToMDC(){
+        Map<String,String> traceContext = getTraceContext();
+        String traceId = traceContext.get(tracing.TRACE_ID_KEY);
+        String spanId = traceContext.get(tracing.SPAN_ID_KEY);
+
+        //to make life easier for people using JSON logging
+        MDC.put(JSON_TRACE_ID, traceId);
+        MDC.put(JSON_SPAN_ID, spanId);
         MDC.put(MDC_TRACE_CONTEXT_FIELD, getTraceContextString());
     }
 
