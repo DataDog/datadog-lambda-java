@@ -245,7 +245,8 @@ public class DDLambda {
     }
 
     /**
-     * Get the trace context for trace/log correlation. Inject this into your logs in order to correlate logs with traces.
+     * Get the trace context for trace/log correlation. This is optional, as dd.trace_id and dd.span_id are automatically injected
+     * into the MDC.
      * @return a map of the current trace context
      */
     public Map<String,String> getTraceContext(){
