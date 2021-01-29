@@ -1,6 +1,6 @@
 # datadog-lambda-java
 
-[![Slack](https://img.shields.io/badge/slack-%23serverless-blueviolet?logo=slack)](https://datadoghq.slack.com/channels/serverless/)
+[![Slack](https://chat.datadoghq.com/badge.svg?bg=632CA6)](https://chat.datadoghq.com/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](https://github.com/DataDog/datadog-lambda-java/blob/main/LICENSE)
 ![](https://github.com/DataDog/datadog-lambda-java/workflows/Test%20on%20Master%20branch/badge.svg)
 ![Bintray](https://img.shields.io/bintray/v/datadog/datadog-maven/datadog-lambda-java)
@@ -237,7 +237,11 @@ You can also open an issue for a feature request.
 ## Contributing
 
 If you find an issue with this package and have a fix, please feel free to open a pull request 
-following the [procedures](https://github.com/DataDog/dd-lambda-layer-java/blob/main/CONTRIBUTING.md).
+following the [procedures](https://github.com/DataDog/datadog-lambda-java/blob/main/CONTRIBUTING.md).
+
+## Community
+
+For product feedback and questions, join the `#serverless` channel in the [Datadog community on Slack](https://chat.datadoghq.com/).
 
 ## License
 
