@@ -143,6 +143,16 @@ public class LambdaInstrumenterTest {
         environmentVariables.clear("DD_ENHANCED_METRICS");
     }
 
+    @Test
+    public void ArnsAreSanitizedCorrectly(){
+        DDLambda ddl = new DDLambda(null);
+        String sanitized = ddl.santitizeFunctionArn("arn:aws:lambda:us-west-1:601427279990:function:lambda-tracing-integration-java-2-dev-hello");
+        Assert.assertEquals("arn:aws:lambda:us-west-1:601427279990:function:lambda-tracing-integration-java-2-dev-hello", sanitized);
+
+        sanitized = ddl.santitizeFunctionArn("arn:aws:lambda:us-west-1:601427279990:function:lambda-tracing-integration-java-2-dev-hello:LATEST");
+        Assert.assertEquals("arn:aws:lambda:us-west-1:601427279990:function:lambda-tracing-integration-java-2-dev-hello", sanitized);
+    }
+
     @After
     public void tearDown() throws Exception {
         ColdStart.resetColdStart();
