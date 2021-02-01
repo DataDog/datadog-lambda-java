@@ -110,18 +110,22 @@ public class DDLambda {
         String requestId = "";
         String functionName = "";
         String functionArn = "";
+        String functionVersion = "";
         if (cxt != null) {
             requestId = cxt.getAwsRequestId();
             functionName = cxt.getFunctionName();
             functionArn = santitizeFunctionArn(cxt.getInvokedFunctionArn());
+            functionVersion = cxt.getFunctionVersion();
         }
         Span span = GlobalTracer.get().activeSpan();
         if (span != null) {
             span.setTag("request_id", requestId);
-            span.setTag("service", functionName);
+            span.setTag("service", "aws.lambda");
             span.setTag("function_arn", functionArn);
             span.setTag("cold_start", ColdStart.getColdStart(cxt));
             span.setTag("datadog_lambda", BuildConfig.datadog_lambda_version);
+            span.setTag("resource_names", functionName);
+            span.setTag("function_version", functionVersion);
         }
     }
 

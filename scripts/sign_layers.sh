@@ -30,7 +30,7 @@ fi
 
 if [ -z "$2" ]
 then
-  echo "Usage: ./sign_layers (staging|prod) layer_file.zip"
+  echo "Usage: ./sign_layers (sandbox|prod) layer_file.zip"
   exit 1
 fi
 
@@ -105,4 +105,4 @@ aws s3api delete-object --bucket $S3_BUCKET_NAME --key $S3_UNSIGNED_ZIP_KEY
 aws s3api delete-object --bucket $S3_BUCKET_NAME --key $S3_SIGNED_ZIP_KEY
 
 echo
-echo "Successfully signed all layers!"
+echo "Successfully signed the layer!"

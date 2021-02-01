@@ -6,7 +6,6 @@
 # Copyright 2019 Datadog, Inc.
 
 # Lists most recent layers ARNs across regions to STDOUT
-# Optionals args: [layer-name] [region]
 
 set -e
 
@@ -46,6 +45,5 @@ done
 
 if [ ${#LAYERS_MISSING_REGIONS[@]} -gt 0 ]; then
     echo "WARNING: Following regions missing layers: ${LAYERS_MISSING_REGIONS[@]}"
-    echo "Please run ./add_new_region.sh <new_region> to add layers to the missing regions" 
     exit 1
 fi
