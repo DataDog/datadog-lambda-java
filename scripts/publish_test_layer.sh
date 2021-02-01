@@ -6,7 +6,7 @@
 # Copyright 2021 Datadog, Inc.
 
 # Publish the datadog python lambda layer across regions, using the AWS CLI
-# Usage: publish_layer.sh [region] [layer]
+# Usage: publish_test_layer.sh path/to/layer.jar [region]
 # Specifying the region and layer arg will publish the specified layer to the specified region
 set -e
 
@@ -84,5 +84,6 @@ publish_layer() {
 echo "Starting publishing layer for region $REGION..."
 
 publish_layer $REGION "$aws_version_key"
+rm $LAYER_ZIP
 
 echo "Done !"
