@@ -30,19 +30,23 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3:3.10'
     implementation 'org.slf4j:slf4j-log4j12:1.7.28'
     implementation 'org.jetbrains:annotations:15.0'
+    implementation 'io.opentracing:opentracing-api:0.33.0'
+    implementation 'io.opentracing:opentracing-util:0.33.0'
+    implementation 'com.datadoghq:dd-trace-api:0.72.0'
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.apache.logging.log4j:log4j-api:2.13.3'
     testImplementation 'org.apache.logging.log4j:log4j-core:2.13.3'
     testImplementation 'com.github.stefanbirkner:system-rules:1.19.0'
+
 }
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 group = 'com.datadoghq'
-version= '0.0.8'
+version= '0.0.9'
 
 allprojects {
     repositories {
