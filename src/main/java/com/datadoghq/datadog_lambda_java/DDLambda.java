@@ -1,5 +1,7 @@
 package com.datadoghq.datadog_lambda_java;
 
+import io.opentracing.Tracer;
+import io.opentracing.Tracer.SpanBuilder;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -41,6 +43,7 @@ public class DDLambda {
         this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
         addTraceContextToMDC();
+        startSpan(cxt);
         addTagsToSpan(cxt);
     }
 
@@ -55,6 +58,7 @@ public class DDLambda {
         this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
         addTraceContextToMDC();
+        startSpan(cxt);
         addTagsToSpan(cxt);
     }
 
@@ -71,6 +75,7 @@ public class DDLambda {
         this.tracing = new Tracing(req);
         this.tracing.submitSegment();
         addTraceContextToMDC();
+        startSpan(cxt);
         addTagsToSpan(cxt);
     }
 
@@ -87,6 +92,7 @@ public class DDLambda {
         this.tracing = new Tracing(req);
         this.tracing.submitSegment();
         addTraceContextToMDC();
+        startSpan(cxt);
         addTagsToSpan(cxt);
     }
 
@@ -103,8 +109,48 @@ public class DDLambda {
         this.tracing = new Tracing(req);
         this.tracing.submitSegment();
         addTraceContextToMDC();
+        startSpan(cxt);
         addTagsToSpan(cxt);
     }
+
+    private void startSpan(Context cxt){
+        String functionName = "";
+        if (cxt != null){
+            System.out.println("AGOCS -- starting span. Context is not null.");
+            functionName = cxt.getFunctionName();
+        }
+
+        Tracer tracer = GlobalTracer.get();
+        SpanBuilder spanBuilder = tracer.buildSpan(functionName);
+
+        if (this.tracing != null){
+            System.out.println("Tracing is not null. Adding a parent span.");
+            System.out.println("Parent trace ID: " + tracing.toTraceId());
+            System.out.println("Parent span ID: " + tracing.toSpanId());
+            spanBuilder = spanBuilder.asChildOf(tracing);
+        }
+        Span thisSpan = spanBuilder.start();
+        System.out.println("Started span "+ thisSpan);
+        tracer.activateSpan(thisSpan);
+        System.out.println("Activated span " + thisSpan);
+    }
+
+    /**
+     * Finish the active span. If you have installed the dd-trace-java Lambda
+     * layer, you MUST call DDLambda.finish() at the end of your Handler
+     * in order to finish spans.
+     */
+    public void finish(){
+        System.out.println("AGOCS -- finishing span");
+        Span span = GlobalTracer.get().activeSpan();
+        System.out.println("Got active span " + span);
+        if (span != null) {
+            span.finish();
+        } else {
+            System.out.println("AGOCS -- Span was null");
+        }
+    }
+
 
     private void addTagsToSpan(Context cxt) {
         String requestId = "";

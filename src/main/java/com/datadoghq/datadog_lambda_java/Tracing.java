@@ -1,17 +1,19 @@
 package com.datadoghq.datadog_lambda_java;
 
+import io.opentracing.SpanContext;
 import java.io.IOException;
 import java.net.*;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2ProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.google.gson.Gson;
 
-public class Tracing {
+public class Tracing implements SpanContext {
 
     protected DDTraceContext cxt;
     protected XRayTraceContext xrt;
@@ -129,6 +131,33 @@ public class Tracing {
         traceHeaders.put(this.cxt.ddParentKey, this.xrt.getAPMParentID());
 
         return traceHeaders;
+    }
+
+    @Override
+    public String toTraceId() {
+        if (this.cxt != null){
+            return this.cxt.getTraceID();
+        }
+        if (this.xrt != null){
+            return this.xrt.getAPMTraceID();
+        }
+        return null;
+    }
+
+    @Override
+    public String toSpanId() {
+        if (this.cxt != null){
+            return this.cxt.getParentID();
+        }
+        if (this.xrt != null){
+            return this.xrt.getAPMParentID();
+        }
+        return null;
+    }
+
+    @Override
+    public Iterable<Entry<String, String>> baggageItems() {
+        return null;
     }
 }
 
@@ -290,6 +319,11 @@ class DDTraceContext {
         }
         headers = toLowerKeys(headers);
 
+        System.out.println("AGOCS -- Headers has been converted to lower case");
+        for ( Map.Entry<String, String> entry: headers.entrySet()) {
+            System.out.println(entry.getKey() + " : " + entry.getValue());
+        }
+
         if (headers.get(ddTraceKey) == null) {
             DDLogger.getLoggerImpl().debug("Headers missing the DD Trace ID");
             throw new Exception("No trace ID");
@@ -307,6 +341,8 @@ class DDTraceContext {
             headers.put(ddSamplingKey, "2");
         }
         this.samplingPriority = headers.get(ddSamplingKey);
+
+        System.out.println("Agocs: Set trace id to: " + this.getTraceID());
     }
 
     private  Map<String,String> toLowerKeys(Map<String,String> headers){
