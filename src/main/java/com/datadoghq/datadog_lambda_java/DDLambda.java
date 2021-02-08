@@ -1,5 +1,6 @@
 package com.datadoghq.datadog_lambda_java;
 
+import io.opentracing.Scope;
 import io.opentracing.Tracer;
 import io.opentracing.Tracer.SpanBuilder;
 import java.io.IOException;
@@ -32,6 +33,7 @@ public class DDLambda {
     private String JSON_SPAN_ID = "dd.span_id";
     private Tracing tracing;
     private boolean enhanced = true;
+    private Scope tracingScope;
 
     /**
      * Create a new DDLambda instrumenter given some Lambda context
@@ -131,7 +133,7 @@ public class DDLambda {
         }
         Span thisSpan = spanBuilder.start();
         System.out.println("Started span "+ thisSpan);
-        tracer.activateSpan(thisSpan);
+        this.tracingScope = tracer.activateSpan(thisSpan);
         System.out.println("Activated span " + thisSpan);
     }
 
@@ -143,12 +145,21 @@ public class DDLambda {
     public void finish(){
         System.out.println("AGOCS -- finishing span");
         Span span = GlobalTracer.get().activeSpan();
-        System.out.println("Got active span " + span);
+
+
+
+        System.out.println("Got active span to finish" + span);
         if (span != null) {
             span.finish();
         } else {
             System.out.println("AGOCS -- Span was null");
         }
+
+
+        if (this.tracingScope == null){
+            System.out.println("AGOCS -- scope is null!!");
+        }
+        this.tracingScope.close();
     }
 
 
