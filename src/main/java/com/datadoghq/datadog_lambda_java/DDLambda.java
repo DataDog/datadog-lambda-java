@@ -122,7 +122,7 @@ public class DDLambda {
      * @param cxt is the Lambda Context passed to the Handler function.
      */
     private void startSpan(Map<String,String> headers, Context cxt){
-        //If the user has set DD_TRACE_ENABLED=false, don't start a span
+        //If the user has not set DD_TRACE_ENABLED=true, don't start a span
         if(!checkTraceEnabled()){
             return;
         }
