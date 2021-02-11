@@ -1,8 +1,11 @@
 package com.datadoghq.datadog_lambda_java;
 
 import io.opentracing.Scope;
+import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
 import io.opentracing.Tracer.SpanBuilder;
+import io.opentracing.propagation.Format.Builtin;
+import io.opentracing.propagation.TextMapAdapter;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -31,6 +34,7 @@ public class DDLambda {
     private String MDC_TRACE_CONTEXT_FIELD = "dd.trace_context";
     private String JSON_TRACE_ID = "dd.trace_id";
     private String JSON_SPAN_ID = "dd.span_id";
+    private String TRACE_ENABLED_ENV = "DD_TRACE_ENABLED";
     private Tracing tracing;
     private boolean enhanced = true;
     private Scope tracingScope;
@@ -45,8 +49,7 @@ public class DDLambda {
         this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
         addTraceContextToMDC();
-        startSpan(cxt);
-        addTagsToSpan(cxt);
+        startSpan(null, cxt);
     }
 
     /**
@@ -60,8 +63,7 @@ public class DDLambda {
         this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
         addTraceContextToMDC();
-        startSpan(cxt);
-        addTagsToSpan(cxt);
+        startSpan(null, cxt);
     }
 
     /**
@@ -77,8 +79,7 @@ public class DDLambda {
         this.tracing = new Tracing(req);
         this.tracing.submitSegment();
         addTraceContextToMDC();
-        startSpan(cxt);
-        addTagsToSpan(cxt);
+        startSpan(req.getHeaders(), cxt);
     }
 
     /**
@@ -94,8 +95,7 @@ public class DDLambda {
         this.tracing = new Tracing(req);
         this.tracing.submitSegment();
         addTraceContextToMDC();
-        startSpan(cxt);
-        addTagsToSpan(cxt);
+        startSpan(req.getHeaders(), cxt);
     }
 
     /**
@@ -111,30 +111,38 @@ public class DDLambda {
         this.tracing = new Tracing(req);
         this.tracing.submitSegment();
         addTraceContextToMDC();
-        startSpan(cxt);
-        addTagsToSpan(cxt);
+        startSpan(req.getHeaders(), cxt);
     }
 
-    private void startSpan(Context cxt){
+    /**
+     * startSpan is called by the DDLambda constructors. If there is a dd-agent-java present, it will start
+     * a span. If not, startSpan is a noop.
+     * @param headers are the headers from the Lambda request. If Headers are null or empty, distributed tracing
+     *                is impossible but a span will still start.
+     * @param cxt is the Lambda Context passed to the Handler function.
+     */
+    private void startSpan(Map<String,String> headers, Context cxt){
+        //If the user has set DD_TRACE_ENABLED=false, don't start a span
+        if(!checkTraceEnabled()){
+            return;
+        }
+
         String functionName = "";
         if (cxt != null){
-            System.out.println("AGOCS -- starting span. Context is not null.");
             functionName = cxt.getFunctionName();
         }
 
+        //Get the Datadog tracer, if it exists
         Tracer tracer = GlobalTracer.get();
-        SpanBuilder spanBuilder = tracer.buildSpan(functionName);
+        //Datadog tracer will be able to extract datadog trace headers from an incoming request
+        SpanContext parentContext = tracer.extract(Builtin.HTTP_HEADERS, new TextMapAdapter(headers));
 
-        if (this.tracing != null){
-            System.out.println("Tracing is not null. Adding a parent span.");
-            System.out.println("Parent trace ID: " + tracing.toTraceId());
-            System.out.println("Parent span ID: " + tracing.toSpanId());
-            spanBuilder = spanBuilder.asChildOf(tracing);
-        }
+        SpanBuilder spanBuilder = tracer.buildSpan(functionName).asChildOf(parentContext);
+        spanBuilder = addDDTags(spanBuilder, cxt);
         Span thisSpan = spanBuilder.start();
-        System.out.println("Started span "+ thisSpan);
+
+        //Hang on to the scope, we'll need it later to close.
         this.tracingScope = tracer.activateSpan(thisSpan);
-        System.out.println("Activated span " + thisSpan);
     }
 
     /**
@@ -143,27 +151,29 @@ public class DDLambda {
      * in order to finish spans.
      */
     public void finish(){
-        System.out.println("AGOCS -- finishing span");
         Span span = GlobalTracer.get().activeSpan();
 
+        if (this.tracingScope == null){
+            DDLogger.getLoggerImpl().debug("Unable to close tracing scope because it is null.");
+            return;
+        }
+        this.tracingScope.close();
 
-
-        System.out.println("Got active span to finish" + span);
         if (span != null) {
             span.finish();
         } else {
-            System.out.println("AGOCS -- Span was null");
+            DDLogger.getLoggerImpl().debug("Unable to finish span because it is null.");
+            return;
         }
-
-
-        if (this.tracingScope == null){
-            System.out.println("AGOCS -- scope is null!!");
-        }
-        this.tracingScope.close();
     }
 
-
-    private void addTagsToSpan(Context cxt) {
+    /**
+     * addDDTags adds Datadog tags to a span's tags.
+     * @param spanBuilder is the SpanBuilder being used to build the span to which these tags will be applied
+     * @param cxt is the Lambda Context that contains the information necessary to build these tags
+     * @return a SpanBuilder with the necessary tags.
+     */
+    private SpanBuilder addDDTags(SpanBuilder spanBuilder, Context cxt) {
         String requestId = "";
         String functionName = "";
         String functionArn = "";
@@ -173,17 +183,19 @@ public class DDLambda {
             functionName = cxt.getFunctionName();
             functionArn = santitizeFunctionArn(cxt.getInvokedFunctionArn());
             functionVersion = cxt.getFunctionVersion();
+        } else {
+            return spanBuilder;
         }
-        Span span = GlobalTracer.get().activeSpan();
-        if (span != null) {
-            span.setTag("request_id", requestId);
-            span.setTag("service", "aws.lambda");
-            span.setTag("function_arn", functionArn);
-            span.setTag("cold_start", ColdStart.getColdStart(cxt));
-            span.setTag("datadog_lambda", BuildConfig.datadog_lambda_version);
-            span.setTag("resource_names", functionName);
-            span.setTag("function_version", functionVersion);
+        if (spanBuilder != null) {
+            spanBuilder.withTag("request_id", requestId);
+            spanBuilder.withTag("service", "aws.lambda");
+            spanBuilder.withTag("function_arn", functionArn);
+            spanBuilder.withTag("cold_start", ColdStart.getColdStart(cxt));
+            spanBuilder.withTag("datadog_lambda", BuildConfig.datadog_lambda_version);
+            spanBuilder.withTag("resource_names", functionName);
+            spanBuilder.withTag("function_version", functionVersion);
         }
+        return spanBuilder;
     }
 
     protected String santitizeFunctionArn(String functionArn){
@@ -224,6 +236,22 @@ public class DDLambda {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Check to see if the user has set DD_TRACE_ENABLED
+     * @return true if DD_TRACE_ENABLED has been set to "true" (or "TRUE" or "tRuE" or ...), false otherwise
+     */
+    protected boolean checkTraceEnabled(){
+        String sysTraceEnabled = System.getenv(TRACE_ENABLED_ENV);
+        if (sysTraceEnabled == null) {
+            return false;
+        }
+
+        if (sysTraceEnabled.toLowerCase().equals("true")){
+            return true;
+        }
+        return false;
     }
 
     /**
