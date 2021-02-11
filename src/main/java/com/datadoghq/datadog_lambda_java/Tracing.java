@@ -11,7 +11,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayV2ProxyRequestEven
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.google.gson.Gson;
 
-public class Tracing {
+public class Tracing{
 
     protected DDTraceContext cxt;
     protected XRayTraceContext xrt;
