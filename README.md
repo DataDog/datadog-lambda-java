@@ -72,21 +72,24 @@ For raw formatted logs, you must update your log format and your log parser. Ins
 
 ### Log Format
 
-If you are using raw formatted logs, update your formatter to include `dd.trace_id` and `dd.span_id`. E.g.
+If you are using raw formatted logs, update your formatter to include `dd.trace_context`. E.g.
 
 ```xml
-<Pattern>"%d{yyyy-MM-dd HH:mm:ss} <%X{AWSRequestId}> %-5p %c:%L - %X{dd.trace_id} %X{dd.span_id} - %m%n"</Pattern>
-<!--Please note:                      Request ID                        Trace ID        Span ID  -->
+<Pattern>"%d{yyyy-MM-dd HH:mm:ss} <%X{AWSRequestId}> %-5p %c:%L %X{dd.trace_context} %m%n"</Pattern>
+<!--Please note:                      Request ID                      Trace Context  -->
 ```
 
 Please note that `RequestId` has also been added. 
-This is not strictly necessary for Trace/Log correlation, but it is useful for correlating logs and invocations.
+RequestId is not strictly necessary for Trace/Log correlation, but it is useful for correlating logs and invocations.
 
 
 ### Grok Parser
 
-The following grok parser parses Java logs generated with `System.out.println`
+The following grok parser parses Java logs formatted using the pattern in the previous section.
 
+```
+java_tracer %{date("yyyy-MM-dd HH:mm:ss"):timestamp}\s\<%{uuid:lambda.request_id}\>\s%{word:level}\s+%{data:call_site}%{_trace_context}%{data:message}
+```
 
 ## Opening Issues
 
