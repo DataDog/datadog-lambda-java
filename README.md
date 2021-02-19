@@ -38,6 +38,69 @@ Once [installed](#installation), you should be able to submit custom metrics fro
 
 Check out the instructions for [submitting custom metrics from AWS Lambda functions](https://docs.datadoghq.com/integrations/amazon_lambda/?tab=java#custom-metrics).
 
+## Installing the Java Tracer
+
+The [Java Tracer](https://docs.datadoghq.com/tracing/setup_overview/setup/java/?tab=containers)
+is an optional component that allows you to trace the execution of your Java Lambda function. 
+The traces will be viewable from your Serverless function details page within Datadog.
+
+### Cold start considerations
+
+The Java Tracer adds a nontrivial cold start penalty. 
+Expect roughly 6 seconds per cold start if your lambda function is configured with 3008MB of memory.
+Lambda runtime CPU scales with the amount of memory allocated, so allocating more memory may  help alleviate cold start issues.
+Also consider using provisioned concurrency to keep your lambda function warm.
+
+### Compatable Java runtimes
+
+- java8.al2 (aka Java 8 (Corretto))
+- java11 (aka Java 11 (Corretto))
+
+If your lambda function is using Java 8, please change it to Java 8 Corretto.
+It's called java8.al2 if you're editing serverless.yaml.
+
+### Required Lambda Layer containing the Java Tracer
+
+```
+arn:aws:lambda:[REGION]:464622532012:layer:dd-trace-java:1
+```
+
+### Required environment variables for the Java Tracer
+
+```bash
+JAVA_TOOL_OPTIONS: "-javaagent:\"/opt/java/lib/dd-java-agent.jar\""
+DD_LOGS_INJECTION: "true"
+DD_JMXFETCH_ENABLED: "false"
+DD_TRACE_ENABLED: "true"
+```
+
+### Required code modification for the Java Tracer
+
+In order to use the Java Tracer, you must instantiate a new `DDLambda` at the beginning of your Lambda function and call `DDLambda#finish()` at the end of it.
+
+```java
+public class Handler{
+
+  public ApiGatewayResponse handleRequest(APIGatewayProxyRequestEvent input, Context context){
+    DDLambda ddl = new DDLambda(input, context); // required to set various tags inside the tracer
+
+    ddl.metric("foo.bar", 42, null);
+    do_some_stuff();
+    make_some_http_requests();
+
+    ddl.finish(); // Required to complete the trace
+    return new ApiGatewayResponse();
+  }
+}
+```
+
+`DDLambda ddl = new DDLambda(input, context);` starts a new trace (if the Java Tracer agent is attached to the JRE)
+and sets tags based on the Lambda context. If there is a trace context attached to the request, that will be used
+to set the trace ID and the parent of the span.
+
+`ddl.finish();` finishes the active span and closes the active trace scope. 
+The tracer will flush the trace to Cloudwatch logs once this is called.
+
 # Distributed Tracing
 
 ## Upstream Requests
