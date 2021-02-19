@@ -137,7 +137,7 @@ public class DDLambda {
         //Datadog tracer will be able to extract datadog trace headers from an incoming request
         SpanContext parentContext = tracer.extract(Builtin.HTTP_HEADERS, new TextMapAdapter(headers));
 
-        SpanBuilder spanBuilder = tracer.buildSpan(functionName).asChildOf(parentContext);
+        SpanBuilder spanBuilder = tracer.buildSpan("aws.lambda").asChildOf(parentContext);
         spanBuilder = addDDTags(spanBuilder, cxt);
         Span thisSpan = spanBuilder.start();
 
