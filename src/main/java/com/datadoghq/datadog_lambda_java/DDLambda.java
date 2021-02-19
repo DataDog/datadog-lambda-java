@@ -222,6 +222,7 @@ public class DDLambda {
         }
 
         //to make life easier for people using JSON logging
+        //this is a noop if the tracer is already installed.
         MDC.put(JSON_TRACE_ID, traceId);
         MDC.put(JSON_SPAN_ID, spanId);
         MDC.put(MDC_TRACE_CONTEXT_FIELD, getTraceContextString());

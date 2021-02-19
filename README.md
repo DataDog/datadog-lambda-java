@@ -38,135 +38,26 @@ Once [installed](#installation), you should be able to submit custom metrics fro
 
 Check out the instructions for [submitting custom metrics from AWS Lambda functions](https://docs.datadoghq.com/integrations/amazon_lambda/?tab=java#custom-metrics).
 
-## Distributed Tracing
+# Distributed Tracing
 
-Wrap your outbound HTTP requests with trace headers to see your lambda in context in APM.
-The Lambda Java Client Library provides instrumented HTTP connection objects as well as helper methods for
-instrumenting HTTP connections made with any of the following libraries:
+## Upstream Requests
 
-- java.net.HttpUrlConnection
-- Apache HTTP Client
-- OKHttp3
+You may want to include this Lambda invocation as a child span of some larger trace.
+If so, you should anticipate that the event triggering the Lambda will have some trace context attached to it.
+If this is the case, then you MUST instantiate `DDLambda` with both the request and the lambda context in order for it to extract the trace context.
+E.g. `DDLambda ddl = new DDLambda(request, context);`.
+Currently supported events are:
 
-Don't see your favorite client? Open an issue and request it. Datadog is adding to 
-this library all the time.
+- `APIGatewayProxyRequestEvent`
+- `APIGatewayV2ProxyRequestEvent`
 
-### HttpUrlConnection examples
+If you are using a different event with trace context, you may choose to create a class that implements `Headerable` and supply that as the event instead.
 
-```java
-public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
-    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
-        DDLambda dd = new DDLambda(request, lambda);
- 
-        URL url = new URL("https://example.com");
-        HttpURLConnection instrumentedUrlConnection = dd.makeUrlConnection(url); //Trace headers included
+## Downstream Requests
 
-        instrumentedUrlConnection.connect();
-    
-        return 7;
-    }
-}
-```
-
-Alternatively, if you want to do something more complex:
-
-```java
-public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
-    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
-        DDLambda dd = new DDLambda(request, lambda);
- 
-        URL url = new URL("https://example.com");
-        HttpURLConnection hc = (HttpURLConnection)url.openConnection();
-
-        //Add the distributed tracing headers
-        hc = (HttpURLConnection) dd.addTraceHeaders(hc);
-
-        hc.connect();
-    
-        return 7;
-    }
-}
-```
-
-### Apache HTTP Client examples
-
-```java
-public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
-    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
-        DDLambda dd = new DDLambda(request, lambda);
-    
-        HttpClient client = HttpClientBuilder.create().build();
-    
-        HttpGet hg = dd.makeHttpGet("https://example.com"); //Trace headers included
-
-        HttpResponse hr = client.execute(hg);
-        return 7;
-    }
-}
-```
-
-Alternatively, if you want to do something more complex:
-
-```java
-public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
-    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
-        DDLambda dd = new DDLambda(request, lambda);
-    
-        HttpClient client = HttpClientBuilder.create().build();
-        HttpGet hg = new HttpGet("https://example.com");
-    
-        //Add the distributed tracing headers
-        hg = (HttpGet) dd.addTraceHeaders(hg);
-
-        HttpResponse hr = client.execute(hg);
-        return 7;
-    }
-}
-```
-
-
-### OKHttp3 Client examples
-
-```java
-public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
-    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
-        DDLambda dd = new DDLambda(request, lambda);
-    
-        HttpClient client = HttpClientBuilder.create().build();
-        OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
-        Request okHttpRequest = dd.makeRequestBuilder() // Trace headers included
-            .url("https://example.com")
-            .build(); 
-
-        Response resp = okHttpClient.newCall(okHttpRequest).execute();
-
-        return 7;
-    }
-}
-```
-
-Alternatively:
-
-```java
-public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
-    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
-        DDLambda dd = new DDLambda(request, lambda);
-    
-        HttpClient client = HttpClientBuilder.create().build();
-        OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
-        Request okHttpRequest = new Request.Builder()
-            .url("https://example.com")
-            .build();
-
-        //Add the distributed tracing headers
-        okHttpRequest = dd.addTraceHeaders(okHttpRequest);
-
-        Response resp = okHttpClient.newCall(okHttpRequest).execute();
-
-        return 7;
-    }
-}
-```
+The dd-trace-java tracer will automatically add trace context to outgoing requests for a number of popular services. 
+The list of instrument services can be found here: https://docs.datadoghq.com/tracing/setup_overview/compatibility_requirements/java/ .
+If you wish to enable a beta integration, please note that you must do so using an environment variable.
 
 # Trace/Log Correlation
 
