@@ -65,7 +65,7 @@ public class Tracing{
     public Map<String,String> getLogCorrelationTraceAndSpanIDsMap(){
         String traceId = String.valueOf(CorrelationIdentifier.getTraceId());
         String spanId = String.valueOf(CorrelationIdentifier.getSpanId());
-        if (traceId != null && !traceId.equals("")){
+        if (traceId != null && ! (traceId.equals("") || traceId.equals("0") )){
             Map<String, String> out  = new HashMap<String, String>();
             out.put(TRACE_ID_KEY, traceId);
             out.put(SPAN_ID_KEY, spanId);
