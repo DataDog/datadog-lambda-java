@@ -56,7 +56,7 @@ this library all the time.
 ```java
 public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
     public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
-        DDLambda dd = new DDLambda(request, lambda);
+        DDLambda dd = new DDLambda(request, context);
  
         URL url = new URL("https://example.com");
         HttpURLConnection instrumentedUrlConnection = dd.makeUrlConnection(url); //Trace headers included
@@ -73,7 +73,7 @@ Alternatively, if you want to do something more complex:
 ```java
 public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
     public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
-        DDLambda dd = new DDLambda(request, lambda);
+        DDLambda dd = new DDLambda(request, context);
  
         URL url = new URL("https://example.com");
         HttpURLConnection hc = (HttpURLConnection)url.openConnection();
@@ -93,7 +93,7 @@ public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, AP
 ```java
 public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
     public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
-        DDLambda dd = new DDLambda(request, lambda);
+        DDLambda dd = new DDLambda(request, context);
     
         HttpClient client = HttpClientBuilder.create().build();
     
@@ -110,7 +110,7 @@ Alternatively, if you want to do something more complex:
 ```java
 public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
     public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
-        DDLambda dd = new DDLambda(request, lambda);
+        DDLambda dd = new DDLambda(request, context);
     
         HttpClient client = HttpClientBuilder.create().build();
         HttpGet hg = new HttpGet("https://example.com");
@@ -130,7 +130,7 @@ public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, AP
 ```java
 public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
     public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
-        DDLambda dd = new DDLambda(request, lambda);
+        DDLambda dd = new DDLambda(request, context);
     
         HttpClient client = HttpClientBuilder.create().build();
         OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
@@ -150,7 +150,7 @@ Alternatively:
 ```java
 public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
     public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
-        DDLambda dd = new DDLambda(request, lambda);
+        DDLambda dd = new DDLambda(request, context);
     
         HttpClient client = HttpClientBuilder.create().build();
         OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
