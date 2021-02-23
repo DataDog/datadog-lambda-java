@@ -62,7 +62,7 @@ It's called java8.al2 if you're editing serverless.yaml.
 ### Required Lambda Layer containing the Java Tracer
 
 ```
-arn:aws:lambda:[REGION]:464622532012:layer:dd-trace-java:1
+arn:aws:lambda:[REGION]:464622532012:layer:dd-trace-java:2
 ```
 
 ### Required environment variables for the Java Tracer
