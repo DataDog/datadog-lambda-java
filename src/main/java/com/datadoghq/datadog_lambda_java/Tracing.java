@@ -10,6 +10,7 @@ import java.util.Random;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2ProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.google.gson.Gson;
+import datadog.trace.api.CorrelationIdentifier;
 
 public class Tracing{
 
@@ -62,20 +63,28 @@ public class Tracing{
     }
 
     public Map<String,String> getLogCorrelationTraceAndSpanIDsMap(){
-        if (this.cxt != null){
-            String traceID = this.cxt.getTraceID();
-            String spanID = this.cxt.getParentID();
+        String traceId = String.valueOf(CorrelationIdentifier.getTraceId());
+        String spanId = String.valueOf(CorrelationIdentifier.getSpanId());
+        if (traceId != null && ! (traceId.equals("") || traceId.equals("0") )){
             Map<String, String> out  = new HashMap<String, String>();
-            out.put(TRACE_ID_KEY, traceID);
-            out.put(SPAN_ID_KEY, spanID);
+            out.put(TRACE_ID_KEY, traceId);
+            out.put(SPAN_ID_KEY, spanId);
+            return out;
+        }
+        if (this.cxt != null){
+            traceId = this.cxt.getTraceID();
+            spanId = this.cxt.getParentID();
+            Map<String, String> out  = new HashMap<String, String>();
+            out.put(TRACE_ID_KEY, traceId);
+            out.put(SPAN_ID_KEY, spanId);
             return out;
         }
         if (this.xrt != null){
-            String traceID = this.xrt.getAPMTraceID();
-            String spanID = this.xrt.getAPMParentID();
+            traceId = this.xrt.getAPMTraceID();
+            spanId = this.xrt.getAPMParentID();
             Map<String, String> out  = new HashMap<String, String>();
-            out.put(TRACE_ID_KEY, traceID);
-            out.put(SPAN_ID_KEY, spanID);
+            out.put(TRACE_ID_KEY, traceId);
+            out.put(SPAN_ID_KEY, spanId);
             return out;
         }
         DDLogger.getLoggerImpl().debug("No DD trace context or XRay trace context set!");

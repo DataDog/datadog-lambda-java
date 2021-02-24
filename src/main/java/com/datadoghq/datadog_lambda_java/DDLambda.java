@@ -12,6 +12,7 @@ import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
+import datadog.trace.api.CorrelationIdentifier;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
@@ -221,6 +222,7 @@ public class DDLambda {
         }
 
         //to make life easier for people using JSON logging
+        //this is a noop if the tracer is already installed.
         MDC.put(JSON_TRACE_ID, traceId);
         MDC.put(JSON_SPAN_ID, spanId);
         MDC.put(MDC_TRACE_CONTEXT_FIELD, getTraceContextString());
@@ -298,6 +300,9 @@ public class DDLambda {
     }
 
     /**
+     * Installing dd-java-agent in your lambda environment automatically wraps outbound HTTP calls.
+     * This is no longer necessary.
+     *
      * openConnection calls openConnection on the provided URL, adds the Datadog trace headers, and then returns the
      * resulting URLConnection. This duplicates the usual workflow with a java.net.URLConnection
      *
@@ -305,6 +310,7 @@ public class DDLambda {
      * @return a newly opened URLConnection with Datadog trace headers.
      * @throws IOException
      */
+    @Deprecated
     public URLConnection makeUrlConnection(URL url) throws IOException {
         URLConnection uc = url.openConnection();
         return addTraceHeaders(uc);
@@ -312,11 +318,15 @@ public class DDLambda {
 
 
     /**
+     * Installing dd-java-agent in your lambda environment automatically wraps outbound HTTP calls.
+     * This is no longer necessary.
+     *
      * Adds Datadog trace headers to a java.net.URLConnection, so you can trace downstream HTTP requests.
      *
      * @param urlConnection the URLConnection that will have the trace headers added to it.
      * @return Returns a mutated URLConnection with the new trace headers.
      */
+    @Deprecated
     public URLConnection addTraceHeaders(URLConnection urlConnection) {
         if (this.tracing == null) {
             DDLogger.getLoggerImpl()
@@ -331,12 +341,16 @@ public class DDLambda {
     }
 
     /**
+     * Installing dd-java-agent in your lambda environment automatically wraps outbound HTTP calls.
+     * This is no longer necessary.
+     *
      * Creates an Apache HttpGet instrumented with Datadog trace headers. Please note, this does not _execute_ the HttpGet,
      * it merely creates a default HttpGet with headers added.
      *
      * @param url The URL that will eventually be gotten.
      * @return Returns an HttpGet for the provided URL, instrumented with Datadog trace headers.
      */
+    @Deprecated
     public HttpGet makeHttpGet(String url) {
         HttpGet hg = new HttpGet(url);
         hg = (HttpGet) addTraceHeaders(hg);
@@ -344,11 +358,15 @@ public class DDLambda {
     }
 
     /**
+     * Installing dd-java-agent in your lambda environment automatically wraps outbound HTTP calls.
+     * This is no longer necessary.
+     *
      * Adds Datadog trace header to an org.apache.http.client.methods.HttpUriRequest, so you can trace downstream HTTP requests.
      *
      * @param httpRequest the HttpUriRequest that will have the trace headers added to it.
      * @return Returns a mutated HttpUriRequest with the new trace headers.
      */
+    @Deprecated
     public HttpUriRequest addTraceHeaders(HttpUriRequest httpRequest) {
         if (this.tracing == null) {
             DDLogger.getLoggerImpl()
@@ -363,10 +381,14 @@ public class DDLambda {
     }
 
     /**
+     * Installing dd-java-agent in your lambda environment automatically wraps outbound HTTP calls.
+     * This is no longer necessary.
+     *
      * Create an OKHttp3 request builder with Datadog headers already added.
      *
      * @return Returns an OKHttp3 Request Builder with Datadog trace headers already added.
      */
+    @Deprecated
     public Request.Builder makeRequestBuilder() {
         Request.Builder hrb = new Request.Builder();
 
@@ -376,11 +398,15 @@ public class DDLambda {
     }
 
     /**
+     * Installing dd-java-agent in your lambda environment automatically wraps outbound HTTP calls.
+     * This is no longer necessary.
+     *
      * Adds Datadog trace header to an OKHttp3 request, so you can trace downstream HTTP requests.
      *
      * @param request The OKHttp3 Request that will have the trace headers added to it.
      * @return Returns a mutated OKHttp3 Request with the new trace headers.
      */
+    @Deprecated
     public Request addTraceHeaders(Request request) {
         if (this.tracing == null) {
             DDLogger.getLoggerImpl()

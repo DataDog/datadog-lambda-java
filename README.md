@@ -14,7 +14,8 @@ to the Datadog API.
 
 ## Installation
 
-This library will be distributed through JFrog [Bintray](https://bintray.com/beta/#/datadog/datadog-maven/datadog-lambda-java). Follow the [installation instructions](https://docs.datadoghq.com/serverless/installation/java/), and view your function's enhanced metrics, traces and logs in Datadog. 
+This library will be distributed through JFrog [Bintray](https://bintray.com/beta/#/datadog/datadog-maven/datadog-lambda-java). 
+Follow the [installation instructions](https://docs.datadoghq.com/serverless/installation/java/), and view your function's enhanced metrics, traces and logs in Datadog. 
 
 ## Environment Variables
 
@@ -38,191 +39,131 @@ Once [installed](#installation), you should be able to submit custom metrics fro
 
 Check out the instructions for [submitting custom metrics from AWS Lambda functions](https://docs.datadoghq.com/integrations/amazon_lambda/?tab=java#custom-metrics).
 
-## Distributed Tracing
+## Installing the Java Tracer
 
-Wrap your outbound HTTP requests with trace headers to see your lambda in context in APM.
-The Lambda Java Client Library provides instrumented HTTP connection objects as well as helper methods for
-instrumenting HTTP connections made with any of the following libraries:
+The [Java Tracer](https://docs.datadoghq.com/tracing/setup_overview/setup/java/?tab=containers)
+is an optional component that allows you to trace the execution of your Java Lambda function. 
+The traces will be viewable from your Serverless function details page within Datadog.
 
-- java.net.HttpUrlConnection
-- Apache HTTP Client
-- OKHttp3
-
-Don't see your favorite client? Open an issue and request it. Datadog is adding to 
-this library all the time.
-
-### HttpUrlConnection examples
-
-```java
-public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
-    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
-        DDLambda dd = new DDLambda(request, lambda);
+Briefly, in order to use the Java tracer, the following prerquisites must be met (detailed below):
+1. The `datadog-lambda-java` library must be included in your project, following these  [installation instructions](https://docs.datadoghq.com/serverless/installation/java/)
+1. You must use a compatible Java runtime
+1. You must attach the Java Tracer lambda layer
+1. Several environment variables must be set
+1. Your handler must instantiate a `new DDLambda` in order to start traces, and call `DDLambda#finish` in order to end traces.
  
-        URL url = new URL("https://example.com");
-        HttpURLConnection instrumentedUrlConnection = dd.makeUrlConnection(url); //Trace headers included
 
-        instrumentedUrlConnection.connect();
-    
-        return 7;
-    }
-}
+### Cold start considerations
+
+The Java Tracer adds a nontrivial cold start penalty. 
+Expect roughly 6 seconds per cold start if your Lambda function is configured with 3008MB of memory.
+Lambda runtime CPU scales with the amount of memory allocated, so allocating more memory may  help alleviate cold start issues.
+Also consider using provisioned concurrency to keep your lambda function warm.
+
+### Compatible Java runtimes
+
+- java8.al2 (aka Java 8 (Corretto))
+- java11 (aka Java 11 (Corretto))
+
+If your lambda function is using Java 8, please change it to Java 8 Corretto.
+It's called java8.al2 if you're editing serverless.yaml.
+
+### Required Lambda Layer containing the Java Tracer
+
+```
+arn:aws:lambda:[REGION]:464622532012:layer:dd-trace-java:2
 ```
 
-Alternatively, if you want to do something more complex:
+The lambda layer version (in this case, `2`) will always correspond with the minor version of the `datadog-lambda-java` library.
+
+### Required environment variables for the Java Tracer
+
+```bash
+JAVA_TOOL_OPTIONS: "-javaagent:\"/opt/java/lib/dd-java-agent.jar\""
+DD_LOGS_INJECTION: "true"
+DD_JMXFETCH_ENABLED: "false"
+DD_TRACE_ENABLED: "true"
+```
+
+### Required code modification for the Java Tracer
+
+In order to use the Java Tracer, you must instantiate a new `DDLambda` at the beginning of your Lambda function and call `DDLambda#finish()` at the end of it.
 
 ```java
-public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
-    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
-        DDLambda dd = new DDLambda(request, lambda);
- 
-        URL url = new URL("https://example.com");
-        HttpURLConnection hc = (HttpURLConnection)url.openConnection();
+public class Handler{
 
-        //Add the distributed tracing headers
-        hc = (HttpURLConnection) dd.addTraceHeaders(hc);
+  public ApiGatewayResponse handleRequest(APIGatewayProxyRequestEvent input, Context context){
+    DDLambda ddl = new DDLambda(input, context); // required to set various tags inside the tracer
 
-        hc.connect();
-    
-        return 7;
-    }
+    ddl.metric("foo.bar", 42, null);
+    do_some_stuff();
+    make_some_http_requests();
+
+    ddl.finish(); // Required to complete the trace
+    return new ApiGatewayResponse();
+  }
 }
 ```
 
-### Apache HTTP Client examples
+`DDLambda ddl = new DDLambda(input, context);` starts a new trace (if the Java Tracer agent is attached to the JRE)
+and sets tags based on the Lambda context. If there is a trace context attached to the request, that will be used
+to set the trace ID and the parent of the span.
 
-```java
-public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
-    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
-        DDLambda dd = new DDLambda(request, lambda);
-    
-        HttpClient client = HttpClientBuilder.create().build();
-    
-        HttpGet hg = dd.makeHttpGet("https://example.com"); //Trace headers included
+`ddl.finish();` finishes the active span and closes the active trace scope. 
+The tracer will flush the trace to Cloudwatch logs once this is called.
 
-        HttpResponse hr = client.execute(hg);
-        return 7;
-    }
-}
+# Distributed Tracing
+
+## Upstream Requests
+
+You may want to include this Lambda invocation as a child span of some larger trace.
+If so, you should anticipate that the event triggering the Lambda will have some trace context attached to it.
+If this is the case, then you MUST instantiate `DDLambda` with both the request and the lambda context in order for it to extract the trace context.
+E.g. `DDLambda ddl = new DDLambda(request, context);`.
+Currently supported events are:
+
+- `APIGatewayProxyRequestEvent`
+- `APIGatewayV2ProxyRequestEvent`
+
+If you are using a different event with trace context, you may choose to create a class that implements `Headerable` and supply that as the event instead.
+
+## Downstream Requests
+
+The dd-trace-java tracer will automatically add trace context to outgoing requests for a number of popular services. 
+The list of instrumented services can be found here: https://docs.datadoghq.com/tracing/setup_overview/compatibility_requirements/java/ .
+If you wish to enable a beta integration, please note that you must do so using an environment variable.
+
+# Trace/Log Correlation
+
+Please see [Connecting Java Logs and Traces](https://docs.datadoghq.com/tracing/connect_logs_and_traces/java/?tab=log4j2)
+
+In brief, if you set the environment variable `DD_LOGS_INJECTION=true`, your trace ID and span ID are automatically injected into the MDC.
+If you are using JSON-formatted logs and logging using Logback, there is nothing left to do.
+
+## Raw-formatted logs (Log4J, etc.)
+
+For raw formatted logs, you must update your log format and your log parser. Instructions for both are below.
+
+### Log Format
+
+If you are using raw formatted logs, update your formatter to include `dd.trace_context`. E.g.
+
+```xml
+<Pattern>"%d{yyyy-MM-dd HH:mm:ss} <%X{AWSRequestId}> %-5p %c:%L %X{dd.trace_context} %m%n"</Pattern>
+<!--Please note:                      Request ID                      Trace Context  -->
 ```
 
-Alternatively, if you want to do something more complex:
-
-```java
-public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
-    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
-        DDLambda dd = new DDLambda(request, lambda);
-    
-        HttpClient client = HttpClientBuilder.create().build();
-        HttpGet hg = new HttpGet("https://example.com");
-    
-        //Add the distributed tracing headers
-        hg = (HttpGet) dd.addTraceHeaders(hg);
-
-        HttpResponse hr = client.execute(hg);
-        return 7;
-    }
-}
-```
+Please note that `RequestId` has also been added. 
+RequestId is not strictly necessary for Trace/Log correlation, but it is useful for correlating logs and invocations.
 
 
-### OKHttp3 Client examples
+### Grok Parser
 
-```java
-public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
-    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
-        DDLambda dd = new DDLambda(request, lambda);
-    
-        HttpClient client = HttpClientBuilder.create().build();
-        OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
-        Request okHttpRequest = dd.makeRequestBuilder() // Trace headers included
-            .url("https://example.com")
-            .build(); 
-
-        Response resp = okHttpClient.newCall(okHttpRequest).execute();
-
-        return 7;
-    }
-}
-```
-
-Alternatively:
-
-```java
-public class Handler implements RequestHandler<APIGatewayV2ProxyRequestEvent, APIGatewayV2ProxyResponseEvent> {
-    public Integer handleRequest(APIGatewayV2ProxyRequestEvent request, Context context){
-        DDLambda dd = new DDLambda(request, lambda);
-    
-        HttpClient client = HttpClientBuilder.create().build();
-        OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
-        Request okHttpRequest = new Request.Builder()
-            .url("https://example.com")
-            .build();
-
-        //Add the distributed tracing headers
-        okHttpRequest = dd.addTraceHeaders(okHttpRequest);
-
-        Response resp = okHttpClient.newCall(okHttpRequest).execute();
-
-        return 7;
-    }
-}
-```
-
-### Trace/Log Correlations
-
-In order to correlate your traces with your logs, you must inject the trace context
-into your log messages. We've added the these into the slf4j MDC under the key `dd.trace_context`
-and provided convenience methods to get it automatically. The trace context is added to the MDC as a side
-effect of instantiating any `new DDLambda(...)`.
-
-This is an example trace context: `[dd.trace_id=3371139772690049666 dd.span_id=13006875827893840236]`
-
-#### JSON Logs
-
-If you are using JSON logs, add the trace ID and span ID to each log message with the keys 
-`dd.trace_id` and `dd.span_id` respectively. To get a map containing trace and span IDs,
- call `DDLambda.getTraceContext()`. Union this map with the JSON data being logged.
-
-#### Plain text logs
-
-If you are using plain text logs, then you must create a new [Parser](https://docs.datadoghq.com/logs/processing/parsing/?tab=matcher)
-by cloning the existing Lambda Pipeline. The new parser can extract the trace context from the correct position in the logs. 
-Use the helper `_trace_context` to extract the trace context. For example, if your log line looked like:
+The following grok parser parses Java logs formatted using the pattern in the previous section.
 
 ```
-INFO 2020-11-11T14:00:00Z LAMBDA_REQUEST_ID [dd.trace_id=12345 dd.span_id=67890] This is a log message
+java_tracer %{date("yyyy-MM-dd HH:mm:ss"):timestamp}\s\<%{uuid:lambda.request_id}\>\s%{word:level}\s+%{data:call_site}%{_trace_context}%{data:message}
 ```
-
-Then your parser rule would look like:
-
-```
-my_custom_rule \[%{word:level}\]?\s+%{_timestamp}\s+%{notSpace:lambda.request_id}%{_trace_context}?.*
-```
-
-#### Log4j / SLF4J
-
-We have added the Trace ID into the slf4j MDC under the key `dd.trace_context`. That can be accessed
-using the `%X{dd.trace_context}` operator. Here is an example `log4j.properties`: 
-
-```
-log = .
-log4j.rootLogger = DEBUG, LAMBDA
-
-log4j.appender.LAMBDA=com.amazonaws.services.lambda.runtime.log4j.LambdaAppender
-log4j.appender.LAMBDA.layout=org.apache.log4j.PatternLayout
-log4j.appender.LAMBDA.layout.conversionPattern=%d{yyyy-MM-dd HH:mm:ss} %X{dd.trace_context} %-5p %c:%L - %m%n
-```
-
-would result in log lines looking like `2020-11-13 19:21:53 [dd.trace_id=1168910694192328743 dd.span_id=3204959397041471598] INFO  com.serverless.Handler:20 - Test Log Message`
-
-Just like the **Plain Text Logs** in the previous section, you must create a new [Parser](https://docs.datadoghq.com/logs/processing/parsing/?tab=matcher) in order to parse the trace context correctly.
-
-
-#### Other logging solutions
-
-If you are using a different logging solution, the trace ID can be accessed using the method
-`DDLambda.getTraceContextString()`. That returns your trace ID as a string that can be added
-to any log message.
 
 ## Opening Issues
 
