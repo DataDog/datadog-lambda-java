@@ -14,7 +14,8 @@ to the Datadog API.
 
 ## Installation
 
-This library will be distributed through JFrog [Bintray](https://bintray.com/beta/#/datadog/datadog-maven/datadog-lambda-java). Follow the [installation instructions](https://docs.datadoghq.com/serverless/installation/java/), and view your function's enhanced metrics, traces and logs in Datadog. 
+This library will be distributed through JFrog [Bintray](https://bintray.com/beta/#/datadog/datadog-maven/datadog-lambda-java). 
+Follow the [installation instructions](https://docs.datadoghq.com/serverless/installation/java/), and view your function's enhanced metrics, traces and logs in Datadog. 
 
 ## Environment Variables
 
@@ -44,14 +45,22 @@ The [Java Tracer](https://docs.datadoghq.com/tracing/setup_overview/setup/java/?
 is an optional component that allows you to trace the execution of your Java Lambda function. 
 The traces will be viewable from your Serverless function details page within Datadog.
 
+Briefly, in order to use the Java tracer, the following prerquisites must be met (detailed below):
+1. The `datadog-lambda-java` library must be included in your project, following these  [installation instructions](https://docs.datadoghq.com/serverless/installation/java/)
+1. You must use a compatible Java runtime
+1. You must attach the Java Tracer lambda layer
+1. Several environment variables must be set
+1. Your handler must instantiate a `new DDLambda` in order to start traces, and call `DDLambda#finish` in order to end traces.
+ 
+
 ### Cold start considerations
 
 The Java Tracer adds a nontrivial cold start penalty. 
-Expect roughly 6 seconds per cold start if your lambda function is configured with 3008MB of memory.
+Expect roughly 6 seconds per cold start if your Lambda function is configured with 3008MB of memory.
 Lambda runtime CPU scales with the amount of memory allocated, so allocating more memory may  help alleviate cold start issues.
 Also consider using provisioned concurrency to keep your lambda function warm.
 
-### Compatable Java runtimes
+### Compatible Java runtimes
 
 - java8.al2 (aka Java 8 (Corretto))
 - java11 (aka Java 11 (Corretto))
@@ -64,6 +73,8 @@ It's called java8.al2 if you're editing serverless.yaml.
 ```
 arn:aws:lambda:[REGION]:464622532012:layer:dd-trace-java:2
 ```
+
+The lambda layer version (in this case, `2`) will always correspond with the minor version of the `datadog-lambda-java` library.
 
 ### Required environment variables for the Java Tracer
 
@@ -119,7 +130,7 @@ If you are using a different event with trace context, you may choose to create 
 ## Downstream Requests
 
 The dd-trace-java tracer will automatically add trace context to outgoing requests for a number of popular services. 
-The list of instrument services can be found here: https://docs.datadoghq.com/tracing/setup_overview/compatibility_requirements/java/ .
+The list of instrumented services can be found here: https://docs.datadoghq.com/tracing/setup_overview/compatibility_requirements/java/ .
 If you wish to enable a beta integration, please note that you must do so using an environment variable.
 
 # Trace/Log Correlation
