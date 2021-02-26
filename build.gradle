@@ -46,7 +46,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 group = 'com.datadoghq'
-version= '0.2.0'
+version= '0.2.1'
 
 allprojects {
     repositories {

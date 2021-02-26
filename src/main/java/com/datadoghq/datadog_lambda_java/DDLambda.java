@@ -190,11 +190,12 @@ public class DDLambda {
         if (spanBuilder != null) {
             spanBuilder.withTag("request_id", requestId);
             spanBuilder.withTag("service", "aws.lambda");
-            spanBuilder.withTag("function_arn", functionArn);
+            spanBuilder.withTag("function_arn", functionArn.toLowerCase());
             spanBuilder.withTag("cold_start", ColdStart.getColdStart(cxt));
             spanBuilder.withTag("datadog_lambda", BuildConfig.datadog_lambda_version);
             spanBuilder.withTag("resource_names", functionName);
             spanBuilder.withTag("function_version", functionVersion);
+            spanBuilder.withTag("resource.name", functionName);
         }
         return spanBuilder;
     }
