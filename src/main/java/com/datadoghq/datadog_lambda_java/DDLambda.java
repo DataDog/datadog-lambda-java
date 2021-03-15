@@ -11,6 +11,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import datadog.trace.api.CorrelationIdentifier;
 
@@ -50,7 +51,7 @@ public class DDLambda {
         this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
         addTraceContextToMDC();
-        startSpan(null, cxt);
+        startSpan(new HashMap<>(), cxt);
     }
 
     /**
@@ -64,7 +65,7 @@ public class DDLambda {
         this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
         addTraceContextToMDC();
-        startSpan(null, cxt);
+        startSpan(new HashMap<>(), cxt);
     }
 
     /**
