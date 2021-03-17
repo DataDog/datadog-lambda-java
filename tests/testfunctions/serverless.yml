@@ -1,0 +1,30 @@
+service: AGOCS-test-serverless
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: java8.al2
+
+
+package:
+  artifact: build/distributions/hello.zip
+
+functions:
+  hello:
+    handler: com.serverless.Handler
+    events:
+      - http:
+          path: users/create
+          method: get
+  helloApiGateway:
+    handler: com.serverless.ApiGatewayHandler
+    events:
+      - http:
+          path: users/create
+          method: get
+  helloApiGatewayV2:
+    handler: com.serverless.ApiGatewayV2Handler
+    events:
+      - http:
+          path: users/create
+          method: get
