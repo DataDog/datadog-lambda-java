@@ -1,0 +1,14 @@
+Serverless: Deprecation warning: Resolution of lambda version hashes was improved with better algorithm, which will be used in next major release.
+            Switch to it now by setting "provider.lambdaHashingVersion" to "20201221"
+            More Info: https://www.serverless.com/framework/docs/deprecations/#LAMBDA_HASHING_VERSION_V2
+Serverless: Deprecation warning: Starting with next major version, API Gateway naming will be changed from "{stage}-{service}" to "{service}-{stage}".
+            Set "provider.apiGateway.shouldStartNameWithService" to "true" to adapt to the new behavior now.
+            More Info: https://www.serverless.com/framework/docs/deprecations/#AWS_API_GATEWAY_NAME_STARTING_WITH_SERVICE
+{
+    "statusCode": 200,
+    "body": "{\"message\":\"Go Serverless v1.x! Your function executed successfully!\",\"input\":null}",
+    "headers": {
+        "X-Powered-By": "AWS Lambda & serverless"
+    },
+    "isBase64Encoded": false
+}

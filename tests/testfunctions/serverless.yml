@@ -1,29 +1,54 @@
-service: AGOCS-test-serverless
-frameworkVersion: '2'
+service: Java-integration-test
+# frameworkVersion: '2'
 
 provider:
   name: aws
-  runtime: java8.al2
-
+  # tracing:
+  #   lambda: true
+  #   apiGateway: true
 
 package:
   artifact: build/distributions/hello.zip
 
 functions:
-  hello:
+  hello_Java8:
     handler: com.serverless.Handler
+    runtime: java8.al2
     events:
       - http:
           path: users/create
           method: get
-  helloApiGateway:
+  hello_Java11:
+    handler: com.serverless.Handler
+    runtime: java11
+    events:
+      - http:
+          path: users/create
+          method: get
+  helloApiGateway_Java8:
     handler: com.serverless.ApiGatewayHandler
+    runtime: java8.al2
     events:
       - http:
           path: users/create
           method: get
-  helloApiGatewayV2:
+  helloApiGateway_Java11:
+    handler: com.serverless.ApiGatewayHandler
+    runtime: java11
+    events:
+      - http:
+          path: users/create
+          method: get
+  helloApiGatewayV2_Java8:
     handler: com.serverless.ApiGatewayV2Handler
+    runtime: java8.al2
+    events:
+      - http:
+          path: users/create
+          method: get
+  helloApiGatewayV2_Java11:
+    handler: com.serverless.ApiGatewayV2Handler
+    runtime: java11
     events:
       - http:
           path: users/create

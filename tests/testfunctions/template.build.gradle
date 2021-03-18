@@ -19,7 +19,7 @@ dependencies {
         'com.fasterxml.jackson.core:jackson-annotations:2.11.0'
     )
 
-    implementation 'com.datadoghq:datadog-lambda-java:0.2.2'
+    implementation 'com.datadoghq:datadog-lambda-java:REPLACE_ME'
     implementation 'com.amazonaws:aws-lambda-java-events:3.7.0'
 }
 

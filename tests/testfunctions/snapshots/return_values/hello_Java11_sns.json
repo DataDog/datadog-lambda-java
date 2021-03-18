@@ -1,0 +1,14 @@
+Serverless: Deprecation warning: Resolution of lambda version hashes was improved with better algorithm, which will be used in next major release.
+            Switch to it now by setting "provider.lambdaHashingVersion" to "20201221"
+            More Info: https://www.serverless.com/framework/docs/deprecations/#LAMBDA_HASHING_VERSION_V2
+Serverless: Deprecation warning: Starting with next major version, API Gateway naming will be changed from "{stage}-{service}" to "{service}-{stage}".
+            Set "provider.apiGateway.shouldStartNameWithService" to "true" to adapt to the new behavior now.
+            More Info: https://www.serverless.com/framework/docs/deprecations/#AWS_API_GATEWAY_NAME_STARTING_WITH_SERVICE
+{
+    "statusCode": 200,
+    "body": "{\"message\":\"Go Serverless v1.x! Your function executed successfully!\",\"input\":{\"Records\":[{\"EventVersion\":\"1.0\",\"EventSubscriptionArn\":\"arn:aws:sns:us-east-2:123456789012:sns-lambda:21be56ed-a058-49f5-8c98-aedd2564c486\",\"EventSource\":\"aws:sns\",\"Sns\":{\"SignatureVersion\":\"1\",\"Timestamp\":\"2019-01-02T12:45:07.000Z\",\"Signature\":\"tcc6faL2yUC6dgZdmrwh1Y4cGa/ebXEkAi6RibDsvpi+tE/1+82j...65r==\",\"SigningCertUrl\":\"https://sns.us-east-2.amazonaws.com/SimpleNotificationService-ac565b8b1a6c5d002d285f9598aa1d9b.pem\",\"MessageId\":\"95df01b4-ee98-5cb9-9903-4c221d41eb5e\",\"Message\":\"Hello from SNS!\",\"MessageAttributes\":{\"Test\":{\"Type\":\"String\",\"Value\":\"TestString\"},\"TestBinary\":{\"Type\":\"Binary\",\"Value\":\"TestBinary\"}},\"Type\":\"Notification\",\"UnsubscribeUrl\":\"https://sns.us-east-2.amazonaws.com/?Action=Unsubscribe&amp;SubscriptionArn=arn:aws:sns:us-east-2:123456789012:test-lambda:21be56ed-a058-49f5-8c98-aedd2564c486\",\"TopicArn\":\"arn:aws:sns:us-east-2:123456789012:sns-lambda\",\"Subject\":\"TestInvoke\"}}]}}",
+    "headers": {
+        "X-Powered-By": "AWS Lambda & serverless"
+    },
+    "isBase64Encoded": false
+}
