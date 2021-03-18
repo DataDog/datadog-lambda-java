@@ -13,11 +13,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import datadog.trace.api.CorrelationIdentifier;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2ProxyRequestEvent;
+import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import io.opentracing.Span;
 import io.opentracing.util.GlobalTracer;
 import okhttp3.Request;
@@ -98,6 +98,23 @@ public class DDLambda {
         this.tracing.submitSegment();
         addTraceContextToMDC();
         startSpan(req.getHeaders(), cxt);
+    }
+
+    /**
+     * Create a trace-enabled DDLambda instrumenter given an SQSEvent and a Lambda context
+     *
+     * @param event Your Datadog trace headers are pulled from the SQS Event and sent to XRay for consumption by the
+     *            Datadog Xray Crawler
+     * @param cxt Enhanced Metrics pulls information from the Lambda context.
+     */
+    public DDLambda(SQSEvent event, Context cxt) {
+        this.enhanced = checkEnhanced();
+        recordEnhanced(INVOCATION, cxt);
+        SQSHeaderable headerable = new SQSHeaderable(event);
+        this.tracing = new Tracing(headerable);
+        this.tracing.submitSegment();
+        addTraceContextToMDC();
+        startSpan(headerable.getHeaders(), cxt);
     }
 
     /**
