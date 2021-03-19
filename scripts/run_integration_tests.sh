@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Usage - run commands from repo root:
-#   aws-vault exec sandbox-account-admin -- ./scripts/run_integration_tests
+#   aws-vault exec sandbox-account-admin -- ./scripts/run_integration_tests.sh
 # To regenerate snapshots:
 #   UPDATE_SNAPSHOTS=true aws-vault exec sandbox-account-admin -- ./scripts/run_integration_tests
 
@@ -54,7 +54,10 @@ input_event_files=$(ls ./input_events)
 input_event_files=($(for file_name in ${input_event_files[@]}; do echo $file_name; done | sort))
 
 echo "Deploying functions"
-serverless deploy
+# Get java layer version from local publishedversion and pass to deploy
+tracing_layer_version=$(echo "$local_published_version" | cut -d"." -f2)
+
+serverless deploy --java-layer-version "$tracing_layer_version"
 
 echo "Invoking functions"
 set +e # Don't exit this script if an invocation fails or there's a diff
@@ -68,7 +71,7 @@ for handler_name in "${LAMBDA_HANDLERS[@]}"; do
             # Return value snapshot file format is snapshots/return_values/{handler}_{runtime}_{input-event}
             snapshot_path="./snapshots/return_values/${function_name}_${input_event_name}.json"
 
-            return_value=$(serverless invoke -f $function_name --path "./input_events/$input_event_file")
+            return_value=$(serverless invoke -f $function_name --path "./input_events/$input_event_file" --java-layer-version "$tracing_layer_version")
 
             if [ ! -f $snapshot_path ]; then
                 # If the snapshot file doesn't exist yet, we create it
@@ -106,8 +109,7 @@ for handler_name in "${LAMBDA_HANDLERS[@]}"; do
         function_snapshot_path="./snapshots/logs/$function_name.log"
 
         # Fetch logs with serverless cli
-        echo serverless logs -f $function_name --startTime $script_start_time
-        raw_logs=$(serverless logs -f $function_name --startTime $script_start_time)
+        raw_logs=$(serverless logs -f $function_name --startTime $script_start_time --java-layer-version "$tracing_layer_version")
 
         # Replace invocation-specific data like timestamps and IDs with XXXX to normalize logs across executions
         logs=$(
@@ -160,13 +162,12 @@ for handler_name in "${LAMBDA_HANDLERS[@]}"; do
     done
 done
 
-remove_stack () {
-  if [ "$KEEP_STACK" = true ]; then
-    return
-  fi
-  serverless remove
+remove_stack() {
+    if [ "$KEEP_STACK" = true ]; then
+        return
+    fi
+    serverless remove --java-layer-version "$tracing_layer_version"
 }
-
 
 if [ "$mismatch_found" = true ]; then
     echo "FAILURE: A mismatch between new data and a snapshot was found and printed above."

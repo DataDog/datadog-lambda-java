@@ -1,15 +1,45 @@
+Picked up JAVA_TOOL_OPTIONS: -javaagent:"/opt/java/lib/dd-java-agent.jar"
+[dd.trace 2021-03-19 19:22:27:439 +0000] [main] INFO datadog.trace.agent.common.writer.WriterFactory - Detected serverless environment.  Using PrintingWriter
+[dd.trace 2021-03-19 19:22:27:518 +0000] [main] INFO datadog.trace.agent.core.StatusLogger - DATADOG TRACER CONFIGURATION {"version":"0.74.0~9fcc12d26","os_name":"Linux","os_version":"4.14.214-164.339.amzn2.x86_64","architecture":"amd64","lang":"jvm","lang_version":"1.8.0_275","jvm_vendor":"Amazon.com Inc.","jvm_version":"25.275-b01","java_class_version":"52.0","http_nonProxyHosts":"null","http_proxyHost":"null","enabled":true,"service":"lambdainternal.AWSLambda","agent_url":"http://localhost:8126","agent_error":true,"debug":false,"analytics_enabled":false,"sampling_rules":[{},{}],"priority_sampling_enabled":true,"logs_correlation_enabled":true,"profiling_enabled":false,"dd_version":"0.74.0~9fcc12d26","health_checks_enabled":true,"configuration_file":"no config file present","runtime_id":"49cad67d-831d-49f4-894f-9090f0c45a8b","logging_settings":{"levelInBrackets":false,"dateTimeFormat":"'[dd.trace 'yyyy-MM-dd HH:mm:ss:SSS Z']'","logFile":"System.err","configurationFile":"simplelogger.properties","showShortLogName":false,"showDateTime":true,"showLogName":true,"showThreadName":true,"defaultLogLevel":"INFO","warnLevelString":"WARN","embedException":false}}
 START RequestId: XXXX Version: $LATEST
-{"m":"aws.lambda.enhanced.invocations","v":1.0,"t":["memorysize:1024","account_id:XXXX","resource:Java-integration-test-dev-helloApiGatewayV2_Java8","functionname:Java-integration-test-dev-helloApiGatewayV2_Java8","runtime:java1.8.0_275","region:us-east-1","datadog_lambda:0.2.2","cold_start:true"],"e":1616165265}
-2021-03-19 14:47:45 <fcc58846-7f23-4786-9620-82d146435ce0> INFO  com.serverless.Handler:19 - received: 
-END RequestId: XXXX
+{"m":"aws.lambda.enhanced.invocations","v":1.0,"t":["memorysize:1024","account_id:XXXX","resource:Java-integration-test-dev-helloApiGatewayV2_Java8","functionname:Java-integration-test-dev-helloApiGatewayV2_Java8","runtime:java1.8.0_275","region:sa-east-1","datadog_lambda:0.2.2","cold_start:true"],"e":1616181750}
+2021-03-19 19:22:31 <ea8b605a-225e-46b8-a528-c1ae0986de11> INFO  com.serverless.Handler:19 - received: 
+{"traces":[[{"service":"aws.lambda","name":"aws.lambda","resource":"Java-integration-test-dev-helloApiGatewayV2_Java8","trace_id":"79b4d14ca59ac8b4","span_id":"ee529d7afbed34d","parent_id":"0","start":1616181751053185183,"duration":98232839,"error":0,"metrics":{"_dd.agent_psr":1.0},"meta":{"function_arn":"arn:aws:lambda:sa-east-1:601427279990:function:java-integration-test-dev-helloapigatewayv2_java8","runtime-id":"49cad67d-831d-49f4-894f-9090f0c45a8b","language":"jvm","thread.name":"main","request_id":"ea8b605a-225e-46b8-a528-c1ae0986de11","datadog_lambda":"0.2.2","thread.id":"1","cold_start":"true","resource_names":"Java-integration-test-dev-helloApiGatewayV2_Java8","function_version":"$LATEST"}}]]}END RequestId: XXXX
 REPORT RequestId: XXXX	Duration: XXXX ms	Billed Duration: XXXX ms	Memory Size: 1024 MB	Max Memory Used: XXXX MB	Init Duration: XXXX ms	
 START RequestId: XXXX Version: $LATEST
-{"m":"aws.lambda.enhanced.invocations","v":1.0,"t":["memorysize:1024","account_id:XXXX","resource:Java-integration-test-dev-helloApiGatewayV2_Java8","functionname:Java-integration-test-dev-helloApiGatewayV2_Java8","runtime:java1.8.0_275","region:us-east-1","datadog_lambda:0.2.2","cold_start:false"],"e":1616165268}
-2021-03-19 14:47:48 <5a123ac5-c244-47c2-98bf-23a8d0be275e> INFO  com.serverless.Handler:19 - received: 
+{"m":"aws.lambda.enhanced.invocations","v":1.0,"t":["memorysize:1024","account_id:XXXX","resource:Java-integration-test-dev-helloApiGatewayV2_Java8","functionname:Java-integration-test-dev-helloApiGatewayV2_Java8","runtime:java1.8.0_275","region:sa-east-1","datadog_lambda:0.2.2","cold_start:false"],"e":1616181754}
+java.lang.NullPointerException: java.lang.NullPointerException
+java.lang.NullPointerException
+	at io.opentracing.propagation.TextMapExtractAdapter.iterator(TextMapExtractAdapter.java:38)
+	at datadog.trace.bootstrap.instrumentation.api.ContextVisitors$EntrySetContextVisitor.forEachKey(ContextVisitors.java:55)
+	at datadog.trace.bootstrap.instrumentation.api.ContextVisitors$EntrySetContextVisitor.forEachKey(ContextVisitors.java:49)
+	at datadog.trace.agent.core.propagation.TagContextExtractor.extract(TagContextExtractor.java:27)
+	at datadog.trace.agent.core.propagation.HttpCodec$CompoundExtractor.extract(HttpCodec.java:97)
+	at datadog.trace.agent.core.CoreTracer.extract(CoreTracer.java:405)
+	at datadog.trace.instrumentation.opentracing32.OTTracer.extract(OTTracer.java:68)
+	at io.opentracing.util.GlobalTracer.extract(GlobalTracer.java:204)
+	at com.datadoghq.datadog_lambda_java.DDLambda.startSpan(DDLambda.java:140)
+	at com.datadoghq.datadog_lambda_java.DDLambda.<init>(DDLambda.java:100)
+	at com.serverless.ApiGatewayV2Handler.handleRequest(ApiGatewayV2Handler.java:18)
+	at com.serverless.ApiGatewayV2Handler.handleRequest(ApiGatewayV2Handler.java:12)
 END RequestId: XXXX
 REPORT RequestId: XXXX	Duration: XXXX ms	Billed Duration: XXXX ms	Memory Size: 1024 MB	Max Memory Used: XXXX MB	
-START RequestId: XXXX Version: $LATEST
-{"m":"aws.lambda.enhanced.invocations","v":1.0,"t":["memorysize:1024","account_id:XXXX","resource:Java-integration-test-dev-helloApiGatewayV2_Java8","functionname:Java-integration-test-dev-helloApiGatewayV2_Java8","runtime:java1.8.0_275","region:us-east-1","datadog_lambda:0.2.2","cold_start:false"],"e":1616165270}
-2021-03-19 14:47:50 <36531b0b-c8af-483f-a957-37982ed6aba6> INFO  com.serverless.Handler:19 - received: 
+{"traces":[[{"service":"lambdainternal.AWSLambda","name":"http.request","resource":"POST /?/runtime/invocation/?/error","trace_id":"49da90d99df52369","span_id":"6484e660e428b909","parent_id":"0","start":1616181755392043934,"duration":40336702,"type":"http","error":0,"metrics":{"_dd.agent_psr":1.0},"meta":{"http.status_code":"202","component":"http-url-connection","span.kind":"client","http.url":"http://127.0.0.1:9001/2018-06-01/runtime/invocation/d572d560-1e35-4d8e-bc9b-e370ae8a630c/error","runtime-id":"49cad67d-831d-49f4-894f-9090f0c45a8b","language":"jvm","peer.hostname":"127.0.0.1","peer.port":"9001","thread.name":"main","http.method":"POST","thread.id":"1"}}]]}START RequestId: XXXX Version: $LATEST
+{"m":"aws.lambda.enhanced.invocations","v":1.0,"t":["memorysize:1024","account_id:XXXX","resource:Java-integration-test-dev-helloApiGatewayV2_Java8","functionname:Java-integration-test-dev-helloApiGatewayV2_Java8","runtime:java1.8.0_275","region:sa-east-1","datadog_lambda:0.2.2","cold_start:false"],"e":1616181757}
+java.lang.NullPointerException: java.lang.NullPointerException
+java.lang.NullPointerException
+	at io.opentracing.propagation.TextMapExtractAdapter.iterator(TextMapExtractAdapter.java:38)
+	at datadog.trace.bootstrap.instrumentation.api.ContextVisitors$EntrySetContextVisitor.forEachKey(ContextVisitors.java:55)
+	at datadog.trace.bootstrap.instrumentation.api.ContextVisitors$EntrySetContextVisitor.forEachKey(ContextVisitors.java:49)
+	at datadog.trace.agent.core.propagation.TagContextExtractor.extract(TagContextExtractor.java:27)
+	at datadog.trace.agent.core.propagation.HttpCodec$CompoundExtractor.extract(HttpCodec.java:97)
+	at datadog.trace.agent.core.CoreTracer.extract(CoreTracer.java:405)
+	at datadog.trace.instrumentation.opentracing32.OTTracer.extract(OTTracer.java:68)
+	at io.opentracing.util.GlobalTracer.extract(GlobalTracer.java:204)
+	at com.datadoghq.datadog_lambda_java.DDLambda.startSpan(DDLambda.java:140)
+	at com.datadoghq.datadog_lambda_java.DDLambda.<init>(DDLambda.java:100)
+	at com.serverless.ApiGatewayV2Handler.handleRequest(ApiGatewayV2Handler.java:18)
+	at com.serverless.ApiGatewayV2Handler.handleRequest(ApiGatewayV2Handler.java:12)
 END RequestId: XXXX
 REPORT RequestId: XXXX	Duration: XXXX ms	Billed Duration: XXXX ms	Memory Size: 1024 MB	Max Memory Used: XXXX MB	
+{"traces":[[{"service":"lambdainternal.AWSLambda","name":"http.request","resource":"POST /?/runtime/invocation/?/error","trace_id":"881609456d82190","span_id":"236668837f63b598","parent_id":"0","start":1616181757409031361,"duration":3096114,"type":"http","error":0,"metrics":{"_dd.agent_psr":1.0},"meta":{"http.status_code":"202","component":"http-url-connection","span.kind":"client","http.url":"http://127.0.0.1:9001/2018-06-01/runtime/invocation/d6c1d0a8-8977-4563-893e-8bfa979a826a/error","runtime-id":"49cad67d-831d-49f4-894f-9090f0c45a8b","language":"jvm","peer.hostname":"127.0.0.1","peer.port":"9001","thread.name":"main","http.method":"POST","thread.id":"1"}}]]}

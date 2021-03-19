@@ -2,7 +2,7 @@
 *.class
 
 # Log file
-*.log
+# *.log
 
 # BlueJ files
 *.ctxt
@@ -42,3 +42,4 @@ tests/testfunctions/gradle/
 tests/testfunctions/bin/
 tests/testfunctions/.serverless/
 tests/testfunctions/.settings/
+tests/testfunctions/gradle/wrapper/gradle-wrapper.properties
