@@ -1,51 +1,15 @@
-Serverless: Deprecation warning: Resolution of lambda version hashes was improved with better algorithm, which will be used in next major release.
-            Switch to it now by setting "provider.lambdaHashingVersion" to "20201221"
-            More Info: https://www.serverless.com/framework/docs/deprecations/#LAMBDA_HASHING_VERSION_V2
-Serverless: Deprecation warning: Starting with next major version, API Gateway naming will be changed from "{stage}-{service}" to "{service}-{stage}".
-            Set "provider.apiGateway.shouldStartNameWithService" to "true" to adapt to the new behavior now.
-            More Info: https://www.serverless.com/framework/docs/deprecations/#AWS_API_GATEWAY_NAME_STARTING_WITH_SERVICE
 START RequestId: XXXX Version: $LATEST
-{"m":"aws.lambda.enhanced.invocations","v":1.0,"t":["memorysize:1024","account_id:XXXX","resource:Java-integration-test-dev-helloApiGatewayV2_Java8","functionname:Java-integration-test-dev-helloApiGatewayV2_Java8","runtime:java1.8.0_275","region:us-east-1","datadog_lambda:0.2.2","cold_start:true"],"e":1616094217}
-2021-03-18 19:03:37 <efaee199-3c84-4748-91d0-478c6736642d> INFO  com.serverless.Handler:19 - received: 
+{"m":"aws.lambda.enhanced.invocations","v":1.0,"t":["memorysize:1024","account_id:XXXX","resource:Java-integration-test-dev-helloApiGatewayV2_Java8","functionname:Java-integration-test-dev-helloApiGatewayV2_Java8","runtime:java1.8.0_275","region:us-east-1","datadog_lambda:0.2.2","cold_start:true"],"e":1616165265}
+2021-03-19 14:47:45 <fcc58846-7f23-4786-9620-82d146435ce0> INFO  com.serverless.Handler:19 - received: 
 END RequestId: XXXX
 REPORT RequestId: XXXX	Duration: XXXX ms	Billed Duration: XXXX ms	Memory Size: 1024 MB	Max Memory Used: XXXX MB	Init Duration: XXXX ms	
 START RequestId: XXXX Version: $LATEST
-{"m":"aws.lambda.enhanced.invocations","v":1.0,"t":["memorysize:1024","account_id:XXXX","resource:Java-integration-test-dev-helloApiGatewayV2_Java8","functionname:Java-integration-test-dev-helloApiGatewayV2_Java8","runtime:java1.8.0_275","region:us-east-1","datadog_lambda:0.2.2","cold_start:false"],"e":1616094219}
-2021-03-18 19:03:39 <8256b590-531f-43e1-a348-60a00cb77f07> INFO  com.serverless.Handler:19 - received: 
+{"m":"aws.lambda.enhanced.invocations","v":1.0,"t":["memorysize:1024","account_id:XXXX","resource:Java-integration-test-dev-helloApiGatewayV2_Java8","functionname:Java-integration-test-dev-helloApiGatewayV2_Java8","runtime:java1.8.0_275","region:us-east-1","datadog_lambda:0.2.2","cold_start:false"],"e":1616165268}
+2021-03-19 14:47:48 <5a123ac5-c244-47c2-98bf-23a8d0be275e> INFO  com.serverless.Handler:19 - received: 
 END RequestId: XXXX
 REPORT RequestId: XXXX	Duration: XXXX ms	Billed Duration: XXXX ms	Memory Size: 1024 MB	Max Memory Used: XXXX MB	
 START RequestId: XXXX Version: $LATEST
-{"m":"aws.lambda.enhanced.invocations","v":1.0,"t":["memorysize:1024","account_id:XXXX","resource:Java-integration-test-dev-helloApiGatewayV2_Java8","functionname:Java-integration-test-dev-helloApiGatewayV2_Java8","runtime:java1.8.0_275","region:us-east-1","datadog_lambda:0.2.2","cold_start:false"],"e":1616094221}
-2021-03-18 19:03:41 <0db0de0e-ab78-450a-91b7-08b37c6a6ff8> INFO  com.serverless.Handler:19 - received: 
-END RequestId: XXXX
-REPORT RequestId: XXXX	Duration: XXXX ms	Billed Duration: XXXX ms	Memory Size: 1024 MB	Max Memory Used: XXXX MB	
-START RequestId: XXXX Version: $LATEST
-{"m":"aws.lambda.enhanced.invocations","v":1.0,"t":["memorysize:1024","account_id:XXXX","resource:Java-integration-test-dev-helloApiGatewayV2_Java8","functionname:Java-integration-test-dev-helloApiGatewayV2_Java8","runtime:java1.8.0_275","region:us-east-1","datadog_lambda:0.2.2","cold_start:false"],"e":1616094525}
-2021-03-18 19:08:45 <70124106-6d1f-49de-86e7-8ab20125ec72> INFO  com.serverless.Handler:19 - received: 
-END RequestId: XXXX
-REPORT RequestId: XXXX	Duration: XXXX ms	Billed Duration: XXXX ms	Memory Size: 1024 MB	Max Memory Used: XXXX MB	
-START RequestId: XXXX Version: $LATEST
-{"m":"aws.lambda.enhanced.invocations","v":1.0,"t":["memorysize:1024","account_id:XXXX","resource:Java-integration-test-dev-helloApiGatewayV2_Java8","functionname:Java-integration-test-dev-helloApiGatewayV2_Java8","runtime:java1.8.0_275","region:us-east-1","datadog_lambda:0.2.2","cold_start:false"],"e":1616094526}
-2021-03-18 19:08:46 <89e436aa-f9b3-4c7a-9981-9a9130f18047> INFO  com.serverless.Handler:19 - received: 
-END RequestId: XXXX
-REPORT RequestId: XXXX	Duration: XXXX ms	Billed Duration: XXXX ms	Memory Size: 1024 MB	Max Memory Used: XXXX MB	
-START RequestId: XXXX Version: $LATEST
-{"m":"aws.lambda.enhanced.invocations","v":1.0,"t":["memorysize:1024","account_id:XXXX","resource:Java-integration-test-dev-helloApiGatewayV2_Java8","functionname:Java-integration-test-dev-helloApiGatewayV2_Java8","runtime:java1.8.0_275","region:us-east-1","datadog_lambda:0.2.2","cold_start:false"],"e":1616094528}
-2021-03-18 19:08:48 <ddde3be5-1cce-4897-be0e-88ff37552477> INFO  com.serverless.Handler:19 - received: 
-END RequestId: XXXX
-REPORT RequestId: XXXX	Duration: XXXX ms	Billed Duration: XXXX ms	Memory Size: 1024 MB	Max Memory Used: XXXX MB	
-START RequestId: XXXX Version: $LATEST
-{"m":"aws.lambda.enhanced.invocations","v":1.0,"t":["memorysize:1024","account_id:XXXX","resource:Java-integration-test-dev-helloApiGatewayV2_Java8","functionname:Java-integration-test-dev-helloApiGatewayV2_Java8","runtime:java1.8.0_275","region:us-east-1","datadog_lambda:0.2.2","cold_start:true"],"e":1616094925}
-2021-03-18 19:15:26 <91cd3e90-89d0-472b-aeff-64dbf430bd5c> INFO  com.serverless.Handler:19 - received: 
-END RequestId: XXXX
-REPORT RequestId: XXXX	Duration: XXXX ms	Billed Duration: XXXX ms	Memory Size: 1024 MB	Max Memory Used: XXXX MB	Init Duration: XXXX ms	
-START RequestId: XXXX Version: $LATEST
-{"m":"aws.lambda.enhanced.invocations","v":1.0,"t":["memorysize:1024","account_id:XXXX","resource:Java-integration-test-dev-helloApiGatewayV2_Java8","functionname:Java-integration-test-dev-helloApiGatewayV2_Java8","runtime:java1.8.0_275","region:us-east-1","datadog_lambda:0.2.2","cold_start:false"],"e":1616094928}
-2021-03-18 19:15:28 <7496177d-b15f-47bf-95c2-6ef9d6afcd0e> INFO  com.serverless.Handler:19 - received: 
-END RequestId: XXXX
-REPORT RequestId: XXXX	Duration: XXXX ms	Billed Duration: XXXX ms	Memory Size: 1024 MB	Max Memory Used: XXXX MB	
-START RequestId: XXXX Version: $LATEST
-{"m":"aws.lambda.enhanced.invocations","v":1.0,"t":["memorysize:1024","account_id:XXXX","resource:Java-integration-test-dev-helloApiGatewayV2_Java8","functionname:Java-integration-test-dev-helloApiGatewayV2_Java8","runtime:java1.8.0_275","region:us-east-1","datadog_lambda:0.2.2","cold_start:false"],"e":1616094929}
-2021-03-18 19:15:29 <eb38054c-d949-49cd-bfb8-23ec5a452dcd> INFO  com.serverless.Handler:19 - received: 
+{"m":"aws.lambda.enhanced.invocations","v":1.0,"t":["memorysize:1024","account_id:XXXX","resource:Java-integration-test-dev-helloApiGatewayV2_Java8","functionname:Java-integration-test-dev-helloApiGatewayV2_Java8","runtime:java1.8.0_275","region:us-east-1","datadog_lambda:0.2.2","cold_start:false"],"e":1616165270}
+2021-03-19 14:47:50 <36531b0b-c8af-483f-a957-37982ed6aba6> INFO  com.serverless.Handler:19 - received: 
 END RequestId: XXXX
 REPORT RequestId: XXXX	Duration: XXXX ms	Billed Duration: XXXX ms	Memory Size: 1024 MB	Max Memory Used: XXXX MB	

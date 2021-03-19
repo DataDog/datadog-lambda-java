@@ -7,12 +7,14 @@
 
 set -e
 
+export SLS_DEPRECATION_DISABLE=*
+
 # These values need to be in sync with serverless.yml, where there needs to be a function
 # defined for every handler_runtime combination
 LAMBDA_HANDLERS=("hello" "helloApiGateway" "helloApiGatewayV2")
 RUNTIMES=("Java8" "Java11")
 
-LOGS_WAIT_SECONDS=20
+LOGS_WAIT_SECONDS=60
 
 script_path=${BASH_SOURCE[0]}
 scripts_dir=$(dirname $script_path)
@@ -158,18 +160,26 @@ for handler_name in "${LAMBDA_HANDLERS[@]}"; do
     done
 done
 
+remove_stack () {
+  if [ "$KEEP_STACK" = true ]; then
+    return
+  fi
+  serverless remove
+}
+
+
 if [ "$mismatch_found" = true ]; then
     echo "FAILURE: A mismatch between new data and a snapshot was found and printed above."
     echo "If the change is expected, generate new snapshots by running 'UPDATE_SNAPSHOTS=true DD_API_KEY=XXXX ./scripts/run_integration_tests.sh'"
-    serverless remove
+    remove_stack
     exit 1
 fi
 
 if [ -n "$UPDATE_SNAPSHOTS" ]; then
     echo "SUCCESS: Wrote new snapshots for all functions"
-    serverless remove
+    remove_stack
     exit 0
 fi
 
-serverless remove
+remove_stack
 echo "SUCCESS: No difference found between snapshots and new return values or logs"
