@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public class SQSHeaderable implements Headerable {
 
-    static final String DATADOG_ATTRIBUTE_NAME = "_datadog";
+    public static final String DATADOG_ATTRIBUTE_NAME = "_datadog";
     private static final Type HEADERS_GSON_TYPE =  new TypeToken<Map<String, String>>(){}.getType();
 
     private Map<String, String> headers;
