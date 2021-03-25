@@ -5,25 +5,47 @@
 # This product includes software developed at Datadog (https://www.datadoghq.com/).
 # Copyright 2021 Datadog, Inc.
 
-# Publish the datadog python lambda layer across regions, using the AWS CLI
-# Usage: publish_layer.sh [region] [layer]
-# Specifying the region and layer arg will publish the specified layer to the specified region
+# Publish the dd-trace-java lambda layer across regions, using the AWS CLI
+# Usage: VERSION=3 REGIONS=us-east-1 publish_layers.sh
+# VERSION is required.
 set -e
 
-# Makes sure any subprocesses will be terminated with this process
-trap "pkill -P $$; exit 1;" INT
+LAYER_NAME="dd-trace-java"
+AVAILABLE_REGIONS=$(aws ec2 describe-regions --output json | jq -r '.[] | .[] | .RegionName')
+
+# Determine the target regions
+if [ -z "$REGIONS" ]; then
+    echo "Region not specified, running for all available regions."
+    REGIONS=$AVAILABLE_REGIONS
+else
+    echo "Region specified: $REGIONS"
+    if [[ ! "$AVAILABLE_REGIONS" == *"$REGIONS"* ]]; then
+        echo "Could not find $REGIONS in available regions: $AVAILABLE_REGIONS"
+        echo ""
+        echo "EXITING SCRIPT."
+        exit 1
+    fi
+fi
+
+# Determine the target layer version
+if [ -z "$VERSION" ]; then
+    echo "Layer version not specified"
+    echo ""
+    echo "EXITING SCRIPT."
+    exit 1
+else
+    echo "Layer version specified: $VERSION"
+fi
 
 LATEST_JAR_URL=$(curl -i https://repository.sonatype.org/service/local/artifact/maven/redirect\?r\=central-proxy\&g\=com.datadoghq\&a\=dd-java-agent\&v\=LATEST | grep location | cut -d " " -f 2)
 
 LATEST_JAR_FILE=$(echo $LATEST_JAR_URL | rev | cut -d "/" -f 1 | rev)
 
 echo ""
-echo "About to publish a new Lambda layer containing $LATEST_JAR_FILE"
-read -r -p "Continue? [y/N] " response
-if ! [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]
-then
-   echo "OK, exiting!"
-   exit 0
+read -p "Ready to publish layer version $VERSION to regions ${REGIONS[*]} (y/n)?" CONT
+if [ "$CONT" != "y" ]; then
+    echo "Exiting"
+    exit 1
 fi
 
 wget -O $LATEST_JAR_FILE https://dtdg.co/latest-java-tracer
@@ -44,56 +66,49 @@ echo
 echo "Signing layers..."
 ./scripts/sign_layers.sh prod $LAYER_ZIP
 
-
-AVAILABLE_REGIONS=$(aws ec2 describe-regions --output json | jq -r '.[] | .[] | .RegionName')
-
-
-# Check region arg
-if [ -z "$1" ]; then
-    echo "Region parameter not specified, running for all available regions."
-    REGIONS=$AVAILABLE_REGIONS
-else
-    echo "Region parameter specified: $1"
-    if [[ ! "$AVAILABLE_REGIONS" == *"$1"* ]]; then
-        echo "Could not find $1 in available regions: $AVAILABLE_REGIONS"
-        echo ""
-        echo "EXITING SCRIPT."
-        exit 1
-    fi
-    REGIONS=($1)
-fi
-
-echo "Starting publishing layers for regions: $REGIONS"
-
-
 publish_layer() {
     region=$1
-    layer_name="dd-trace-java"
-    aws_version_key=$3
-    layer_path=$4
-    version_nbr=$(aws lambda publish-layer-version --layer-name $layer_name \
+    version_nbr=$(aws lambda publish-layer-version --layer-name $LAYER_NAME \
         --description "Datadog Tracer Lambda Layer for Java" \
         --zip-file "fileb://tracer.zip" \
-        --region $region \
-	--output json \
-                        | jq -r '.Version')
+        --region $region | jq -r '.Version')
 
-    aws lambda add-layer-version-permission --layer-name $layer_name \
+    permission=$(aws lambda add-layer-version-permission --layer-name $LAYER_NAME \
         --version-number $version_nbr \
         --statement-id "release-$version_nbr" \
         --action lambda:GetLayerVersion --principal "*" \
-        --region $region\
-    	--output json
+        --region $region)
 
-    echo "Published layer for region $region, layer_name $layer_name, layer_version $version_nbr"
+    echo $version_nbr
 }
 
 for region in $REGIONS
 do
     echo "Starting publishing layer for region $region..."
+    latest_version=$(aws lambda list-layer-versions --region $region --layer-name $LAYER_NAME --query 'LayerVersions[0].Version || `0`')
+    if [ $latest_version -ge $VERSION ]; then
+        echo "Layer $LAYER_NAME version $VERSION already exists in region $region, skipping..."
+        continue
+    elif [ $latest_version -lt $((VERSION-1)) ]; then
+        read -p "WARNING: The latest version of layer $LAYER_NAME in region $region is $latest_version, publish all the missing versions including $VERSION or EXIT the script (y/n)?" CONT
+        if [ "$CONT" != "y" ]; then
+            echo "Exiting"
+            exit 1
+        fi
+    fi
+    while [ $latest_version -lt $VERSION ]; do
+        latest_version=$(publish_layer $region)
+        echo "Published version $latest_version of layer in region $region"
 
-    publish_layer $region $layer_name $aws_version_key
+        # This shouldn't happen unless someone manually deleted the latest version, say 28, and
+        # then tries to republish 28 again. The published version would actually be 29, because
+        # Lambda layers are immutable and AWS will skip deleted version and use the next number. 
+        if [ $latest_version -gt $VERSION ]; then
+            echo "ERROR: Published version $latest_version is greater than the desired version $VERSION!"
+            echo "Exiting"
+            exit 1
+        fi
+    done
 done
-
 
 echo "Done !"
