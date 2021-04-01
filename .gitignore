@@ -39,3 +39,4 @@ tests/testfunctions/gradle/
 tests/testfunctions/bin/
 tests/testfunctions/.serverless/
 tests/testfunctions/.settings/
+tests/testfunctions/build.gradle

@@ -121,8 +121,24 @@ for handler_name in "${LAMBDA_HANDLERS[@]}"; do
         function_name="${handler_name}_${runtime}"
         function_snapshot_path="./snapshots/logs/$function_name.log"
 
-        # Fetch logs with serverless cli
-        raw_logs=$(serverless logs -f "$function_name" --startTime "$script_start_time" --java-layer-version "$tracing_layer_version")
+        raw_logs=""
+        num_retries=0
+        set +e
+        while [[ num_retries -lt 9 ]]
+        do
+          echo "Attempting to fetch logs for $function_name -- try $num_retries"
+          # Fetch logs with serverless cli
+          raw_logs=$(serverless logs -f "$function_name" --startTime "$script_start_time" --java-layer-version "$tracing_layer_version")
+          # shellcheck disable=SC2181
+          if [[ $? != 0 ]]
+          then
+            num_retries=$((num_retries+1))
+            echo "retrying..."
+          else
+            break
+          fi
+        done
+        set -e
 
         # Replace invocation-specific data like timestamps and IDs with XXXX to normalize logs across executions
         logs=$(
@@ -171,7 +187,10 @@ for handler_name in "${LAMBDA_HANDLERS[@]}"; do
             set +e # Don't exit this script if there is a diff
             diff_output=$(echo "$json_scrubbed_logs" | diff - "$function_snapshot_path")
             if [ $? -eq 1 ]; then
+                output_file=$(mktemp)
+                echo "$json_scrubbed_logs" > "$output_file"
                 echo "Failed: Mismatch found between new $function_name logs (first) and snapshot (second):"
+                echo "Log output written to $output_file"
                 echo "$diff_output"
                 mismatch_found=true
             else
