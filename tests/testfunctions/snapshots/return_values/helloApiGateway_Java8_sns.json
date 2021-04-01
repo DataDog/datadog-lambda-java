@@ -1,42 +1,8 @@
 {
-    "errorMessage": "java.lang.NullPointerException",
-    "errorType": "java.lang.NullPointerException",
-    "stackTrace": [
-        "io.opentracing.propagation.TextMapExtractAdapter.iterator(TextMapExtractAdapter.java:38)",
-        "datadog.trace.bootstrap.instrumentation.api.ContextVisitors$EntrySetContextVisitor.forEachKey(ContextVisitors.java:55)",
-        "datadog.trace.bootstrap.instrumentation.api.ContextVisitors$EntrySetContextVisitor.forEachKey(ContextVisitors.java:49)",
-        "datadog.trace.agent.core.propagation.TagContextExtractor.extract(TagContextExtractor.java:27)",
-        "datadog.trace.agent.core.propagation.HttpCodec$CompoundExtractor.extract(HttpCodec.java:97)",
-        "datadog.trace.agent.core.CoreTracer.extract(CoreTracer.java:405)",
-        "datadog.trace.instrumentation.opentracing32.OTTracer.extract(OTTracer.java:68)",
-        "io.opentracing.util.GlobalTracer.extract(GlobalTracer.java:204)",
-        "com.datadoghq.datadog_lambda_java.DDLambda.startSpan(DDLambda.java:140)",
-        "com.datadoghq.datadog_lambda_java.DDLambda.<init>(DDLambda.java:84)",
-        "com.serverless.ApiGatewayHandler.handleRequest(ApiGatewayHandler.java:19)",
-        "com.serverless.ApiGatewayHandler.handleRequest(ApiGatewayHandler.java:13)"
-    ]
+    "statusCode": 200,
+    "body": "{\"message\":\"Go Serverless v1.x! Your function executed successfully!\",\"input\":null}",
+    "headers": {
+        "X-Powered-By": "AWS Lambda & serverless"
+    },
+    "isBase64Encoded": false
 }
- 
- Error ---------------------------------------------------
- 
-  Error: Invoked function failed
-      at AwsInvoke.log (/snapshot/serverless/lib/plugins/aws/invoke.js:121:13)
-      at Object.invoke:invoke [as hook] (/snapshot/serverless/lib/plugins/aws/invoke.js:21:14)
-      at processTicksAndRejections (internal/process/task_queues.js:97:5)
-      at async PluginManager.invoke (/snapshot/serverless/lib/classes/PluginManager.js:541:9)
- 
-     For debugging logs, run again after setting the "SLS_DEBUG=*" environment variable.
- 
-  Get Support --------------------------------------------
-     Docs:          docs.serverless.com
-     Bugs:          github.com/serverless/serverless/issues
-     Issues:        forum.serverless.com
- 
-  Your Environment Information ---------------------------
-     Operating System:          darwin
-     Node Version:              14.4.0
-     Framework Version:         2.30.3 (standalone)
-     Plugin Version:            4.5.1
-     SDK Version:               4.2.0
-     Components Version:        3.7.4
- 

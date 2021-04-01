@@ -1,13 +1,14 @@
 #!/bin/bash
 
+set -euo pipefail
+IFS=$'\n\t'
+
 # Usage - run commands from repo root:
 #   aws-vault exec sandbox-account-admin -- ./scripts/run_integration_tests.sh
 # To regenerate snapshots:
-#   UPDATE_SNAPSHOTS=true aws-vault exec sandbox-account-admin -- ./scripts/run_integration_tests
+#   UPDATE_SNAPSHOTS=true aws-vault exec sandbox-account-admin -- ./scripts/run_integration_tests.sh
 
-set -e
-
-export SLS_DEPRECATION_DISABLE=*
+export SLS_DEPRECATION_DISABLE="*"
 
 # These values need to be in sync with serverless.yml, where there needs to be a function
 # defined for every handler_runtime combination
@@ -16,18 +17,20 @@ RUNTIMES=("Java8" "Java11")
 
 LOGS_WAIT_SECONDS=60
 
-script_path=${BASH_SOURCE[0]}
-scripts_dir=$(dirname $script_path)
-repo_dir=$(dirname $scripts_dir)
+scripts_dir=$(pwd)/scripts
+repo_dir=$(dirname "$scripts_dir")
 integration_tests_dir="$repo_dir/tests/testfunctions/"
 
 script_start_time=$(date '+%Y%m%dT%H%M%S')
 
 mismatch_found=false
 
-if [ -n "$UPDATE_SNAPSHOTS" ]; then
+UPDATE_SNAPSHOTS=$(echo "${UPDATE_SNAPSHOTS-false}" | tr '[:upper:]' '[:lower:]') # force "TRUE", etc. -> "true". Default to "false"
+if [[ ${UPDATE_SNAPSHOTS} == "true" ]]; then
     echo "Overwriting snapshots in this execution"
 fi
+
+KEEP_STACK=${KEEP_STACK-false}
 
 # Get most recent local version
 local_published_version=$(grep -e "^version" build.gradle | awk ' { print $2 } ' | tr -d "'")
@@ -36,7 +39,7 @@ local_published_version=$(grep -e "^version" build.gradle | awk ' { print $2 } '
 ./gradlew build
 ./gradlew publishToMavenLocal
 
-cd $integration_tests_dir
+cd "$integration_tests_dir"
 # Create a build file from template using most recent local version
 sed "s/REPLACE_ME/$local_published_version/g" template.build.gradle >build.gradle
 
@@ -49,9 +52,8 @@ fi
 echo "Building distriubution"
 ./gradlew build
 
-input_event_files=$(ls ./input_events)
-# Sort event files by name so that snapshots stay consistent
-input_event_files=($(for file_name in ${input_event_files[@]}; do echo $file_name; done | sort))
+input_event_files=()
+while IFS='' read -r line; do input_event_files+=("$line"); done < <(for file_name in input_events/*; do basename "$file_name"; done | sort)
 
 echo "Deploying functions"
 # Get java layer version from local publishedversion and pass to deploy
@@ -59,31 +61,42 @@ tracing_layer_version=$(echo "$local_published_version" | cut -d"." -f2)
 
 serverless deploy --java-layer-version "$tracing_layer_version"
 
+remove_stack() {
+    if [ "$KEEP_STACK" = true ]; then
+        return
+    fi
+    echo "About to remove!"
+    echo serverless remove -- java-layer-version "$tracing_layer_version"
+    serverless remove --java-layer-version "$tracing_layer_version"
+}
+
+trap remove_stack EXIT
+
 echo "Invoking functions"
-set +e # Don't exit this script if an invocation fails or there's a diff
 for handler_name in "${LAMBDA_HANDLERS[@]}"; do
     for runtime in "${RUNTIMES[@]}"; do
         function_name="${handler_name}_${runtime}"
         # Invoke function once for each input event
         for input_event_file in "${input_event_files[@]}"; do
             # Get event name without trailing ".json" so we can build the snapshot file name
-            input_event_name=$(echo "$input_event_file" | sed "s/.json//")
+            input_event_name="${input_event_file//.json/}"
             # Return value snapshot file format is snapshots/return_values/{handler}_{runtime}_{input-event}
             snapshot_path="./snapshots/return_values/${function_name}_${input_event_name}.json"
 
-            return_value=$(serverless invoke -f $function_name --path "./input_events/$input_event_file" --java-layer-version "$tracing_layer_version")
+            return_value=$(serverless invoke -f "$function_name" --path "./input_events/$input_event_file" --java-layer-version "$tracing_layer_version")
 
-            if [ ! -f $snapshot_path ]; then
+            if [ ! -f "$snapshot_path" ]; then
                 # If the snapshot file doesn't exist yet, we create it
                 echo "Writing return value to $snapshot_path because no snapshot exists yet"
-                echo "$return_value" >$snapshot_path
-            elif [ -n "$UPDATE_SNAPSHOTS" ]; then
+                echo "$return_value" >"$snapshot_path"
+            elif [[ "$UPDATE_SNAPSHOTS" == "true" ]]; then
                 # If $UPDATE_SNAPSHOTS is set to true, write the new logs over the current snapshot
                 echo "Overwriting return value snapshot for $snapshot_path"
-                echo "$return_value" >$snapshot_path
+                echo "$return_value" >"$snapshot_path"
             else
                 # Compare new return value to snapshot
-                diff_output=$(echo "$return_value" | diff - $snapshot_path)
+                set +e # don't exit if a diff fails
+                diff_output=$(echo "$return_value" | diff - "$snapshot_path")
                 if [ $? -eq 1 ]; then
                     echo "Failed: Return value for $function_name does not match snapshot:"
                     echo "$diff_output"
@@ -91,13 +104,13 @@ for handler_name in "${LAMBDA_HANDLERS[@]}"; do
                 else
                     echo "Ok: Return value for $function_name with $input_event_name event matches snapshot"
                 fi
+                set -e
             fi
         done
 
     done
 
 done
-set -e
 
 echo "Sleeping $LOGS_WAIT_SECONDS seconds to wait for logs to appear in CloudWatch..."
 sleep $LOGS_WAIT_SECONDS
@@ -109,11 +122,15 @@ for handler_name in "${LAMBDA_HANDLERS[@]}"; do
         function_snapshot_path="./snapshots/logs/$function_name.log"
 
         # Fetch logs with serverless cli
-        raw_logs=$(serverless logs -f $function_name --startTime $script_start_time --java-layer-version "$tracing_layer_version")
+        raw_logs=$(serverless logs -f "$function_name" --startTime "$script_start_time" --java-layer-version "$tracing_layer_version")
 
         # Replace invocation-specific data like timestamps and IDs with XXXX to normalize logs across executions
         logs=$(
             echo "$raw_logs" |
+                sed -E 's/[^^]START/}@START/g' |
+                sed -E 's/[^^]END/}@END/g' |
+                sed -E 's/[^^]REPORT/}@REPORT/g' |
+                tr '@' '\n' | # lazy hack to get around Serverless not putting a newline after every log line
                 # Filter serverless cli errors
                 sed '/Serverless: Recoverable error occurred/d' |
                 # Remove blank lines
@@ -138,18 +155,23 @@ for handler_name in "${LAMBDA_HANDLERS[@]}"; do
                 sed -E "s/(\"system\.pid\"\: )[0-9\.\-]+/\1XXXX/g"
         )
 
-        if [ ! -f $function_snapshot_path ]; then
+        json_scrubbed_logs=$(
+          echo "$logs" | python3 "$scripts_dir"/cleanup_logs.py | sort # lazy hack because the dd-trace-java traces are printed at nondeterministic times
+        )
+
+        if [ ! -f "$function_snapshot_path" ]; then
             # If no snapshot file exists yet, we create one
             echo "Writing logs to $function_snapshot_path because no snapshot exists yet"
-            echo "$logs" >$function_snapshot_path
-        elif [ -n "$UPDATE_SNAPSHOTS" ]; then
+            echo "$json_scrubbed_logs" >"$function_snapshot_path"
+        elif [[ "$UPDATE_SNAPSHOTS" == "true" ]]; then
             # If $UPDATE_SNAPSHOTS is set to true write the new logs over the current snapshot
             echo "Overwriting log snapshot for $function_snapshot_path"
-            echo "$logs" >$function_snapshot_path
+            rm "$function_snapshot_path"
+            echo "$json_scrubbed_logs" >"$function_snapshot_path"
         else
             # Compare new logs to snapshots
             set +e # Don't exit this script if there is a diff
-            diff_output=$(echo "$logs" | diff - $function_snapshot_path)
+            diff_output=$(echo "$json_scrubbed_logs" | diff - "$function_snapshot_path")
             if [ $? -eq 1 ]; then
                 echo "Failed: Mismatch found between new $function_name logs (first) and snapshot (second):"
                 echo "$diff_output"
@@ -162,25 +184,17 @@ for handler_name in "${LAMBDA_HANDLERS[@]}"; do
     done
 done
 
-remove_stack() {
-    if [ "$KEEP_STACK" = true ]; then
-        return
-    fi
-    serverless remove --java-layer-version "$tracing_layer_version"
-}
 
 if [ "$mismatch_found" = true ]; then
     echo "FAILURE: A mismatch between new data and a snapshot was found and printed above."
     echo "If the change is expected, generate new snapshots by running 'UPDATE_SNAPSHOTS=true DD_API_KEY=XXXX ./scripts/run_integration_tests.sh'"
-    remove_stack
     exit 1
 fi
 
-if [ -n "$UPDATE_SNAPSHOTS" ]; then
+if [[ "$UPDATE_SNAPSHOTS" == "true" ]]; then
     echo "SUCCESS: Wrote new snapshots for all functions"
-    remove_stack
     exit 0
 fi
 
-remove_stack
 echo "SUCCESS: No difference found between snapshots and new return values or logs"
+exit 0
