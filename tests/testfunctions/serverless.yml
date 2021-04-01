@@ -1,0 +1,73 @@
+service: Java-integration-test
+# frameworkVersion: '2'
+
+provider:
+  name: aws
+  region: sa-east-1
+  environment:
+    JAVA_TOOL_OPTIONS: "-javaagent:\"/opt/java/lib/dd-java-agent.jar\""
+    DD_LOGS_INJECTION: "true"
+    DD_JMXFETCH_ENABLED: "false"
+    DD_TRACE_ENABLED: "true"
+  # tracing:
+  #   lambda: true
+  #   apiGateway: true
+
+package:
+  artifact: build/distributions/hello.zip
+
+functions:
+  hello_Java8:
+    handler: com.serverless.Handler
+    runtime: java8.al2
+    events:
+      - http:
+          path: users/create
+          method: get
+    layers:
+      - arn:aws:lambda:${self:provider.region}:464622532012:layer:dd-trace-java:${opt:java-layer-version}
+  hello_Java11:
+    handler: com.serverless.Handler
+    runtime: java11
+    events:
+      - http:
+          path: users/create
+          method: get
+    layers:
+      - arn:aws:lambda:${self:provider.region}:464622532012:layer:dd-trace-java:${opt:java-layer-version}
+  helloApiGateway_Java8:
+    handler: com.serverless.ApiGatewayHandler
+    runtime: java8.al2
+    events:
+      - http:
+          path: users/create
+          method: get
+    layers:
+      - arn:aws:lambda:${self:provider.region}:464622532012:layer:dd-trace-java:${opt:java-layer-version}          
+  helloApiGateway_Java11:
+    handler: com.serverless.ApiGatewayHandler
+    runtime: java11
+    events:
+      - http:
+          path: users/create
+          method: get
+    layers:
+      - arn:aws:lambda:${self:provider.region}:464622532012:layer:dd-trace-java:${opt:java-layer-version}          
+  helloApiGatewayV2_Java8:
+    handler: com.serverless.ApiGatewayV2Handler
+    runtime: java8.al2
+    events:
+      - http:
+          path: users/create
+          method: get
+    layers:
+      - arn:aws:lambda:${self:provider.region}:464622532012:layer:dd-trace-java:${opt:java-layer-version}          
+  helloApiGatewayV2_Java11:
+    handler: com.serverless.ApiGatewayV2Handler
+    runtime: java11
+    events:
+      - http:
+          path: users/create
+          method: get
+    layers:
+      - arn:aws:lambda:${self:provider.region}:464622532012:layer:dd-trace-java:${opt:java-layer-version}          

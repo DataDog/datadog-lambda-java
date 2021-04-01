@@ -1,9 +1,6 @@
 # Compiled class file
 *.class
 
-# Log file
-*.log
-
 # BlueJ files
 *.ctxt
 
@@ -32,3 +29,14 @@ keyring
 
 # Ignore intelliJ files
 .idea
+.settings/org.eclipse.buildship.core.prefs
+.settings/org.eclipse.jdt.core.prefs
+tests/testfunctions/.classpath
+tests/testfunctions/gradle/
+.classpath
+.vscode/
+.project
+tests/testfunctions/bin/
+tests/testfunctions/.serverless/
+tests/testfunctions/.settings/
+tests/testfunctions/build.gradle
