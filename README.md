@@ -3,7 +3,7 @@
 [![Slack](https://chat.datadoghq.com/badge.svg?bg=632CA6)](https://chat.datadoghq.com/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](https://github.com/DataDog/datadog-lambda-java/blob/main/LICENSE)
 ![](https://github.com/DataDog/datadog-lambda-java/workflows/Test%20on%20Master%20branch/badge.svg)
-![Bintray](https://img.shields.io/bintray/v/datadog/datadog-maven/datadog-lambda-java)
+![Maven Central](https://img.shields.io/maven-central/v/com.datadoghq/datadog-lambda-java)
 
 The Datadog Lambda Java Client Library for Java (8 and 11) enables [enhanced lambda metrics](https://docs.datadoghq.com/integrations/amazon_lambda/?tab=awsconsole#real-time-enhanced-lambda-metrics) 
 and [distributed tracing](https://docs.datadoghq.com/integrations/amazon_lambda/?tab=awsconsole#tracing-with-datadog-apm) 
@@ -14,7 +14,7 @@ to the Datadog API.
 
 ## Installation
 
-This library will be distributed through JFrog [Bintray](https://bintray.com/beta/#/datadog/datadog-maven/datadog-lambda-java). 
+This library will be distributed through [Maven Central](https://search.maven.org/artifact/com.datadoghq/datadog-lambda-java). 
 Follow the [installation instructions](https://docs.datadoghq.com/serverless/installation/java/), and view your function's enhanced metrics, traces and logs in Datadog. 
 
 ## Environment Variables
