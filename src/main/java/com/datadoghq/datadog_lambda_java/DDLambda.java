@@ -24,6 +24,7 @@ import okhttp3.Request;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.slf4j.MDC;
+
 /**
  * The DDLambda instrumenter is used for getting information about your Lambda into Datadog.
  */
@@ -136,19 +137,26 @@ public class DDLambda {
     /**
      * startSpan is called by the DDLambda constructors. If there is a dd-agent-java present, it will start
      * a span. If not, startSpan is a noop.
+     *
      * @param headers are the headers from the Lambda request. If Headers are null or empty, distributed tracing
      *                is impossible but a span will still start.
-     * @param cxt is the Lambda Context passed to the Handler function.
+     * @param cxt     is the Lambda Context passed to the Handler function.
      */
-    private void startSpan(Map<String,String> headers, Context cxt){
+    private void startSpan(Map<String, String> headers, Context cxt) {
         //If the user has not set DD_TRACE_ENABLED=true, don't start a span
-        if(!checkTraceEnabled()){
+        if (!checkTraceEnabled()) {
             return;
         }
 
         String functionName = "";
-        if (cxt != null){
+        if (cxt != null) {
             functionName = cxt.getFunctionName();
+        }
+
+        if (headers == null) {
+            DDLogger.getLoggerImpl()
+                    .error("The request passed to DDLambda contained null headers. Are you sure the handler signature matches the event provided?");
+            headers = new HashMap<String, String>();
         }
 
         //Get the Datadog tracer, if it exists
@@ -169,10 +177,10 @@ public class DDLambda {
      * layer, you MUST call DDLambda.finish() at the end of your Handler
      * in order to finish spans.
      */
-    public void finish(){
+    public void finish() {
         Span span = GlobalTracer.get().activeSpan();
 
-        if (this.tracingScope == null){
+        if (this.tracingScope == null) {
             DDLogger.getLoggerImpl().debug("Unable to close tracing scope because it is null.");
             return;
         }
@@ -188,8 +196,9 @@ public class DDLambda {
 
     /**
      * addDDTags adds Datadog tags to a span's tags.
+     *
      * @param spanBuilder is the SpanBuilder being used to build the span to which these tags will be applied
-     * @param cxt is the Lambda Context that contains the information necessary to build these tags
+     * @param cxt         is the Lambda Context that contains the information necessary to build these tags
      * @return a SpanBuilder with the necessary tags.
      */
     private SpanBuilder addDDTags(SpanBuilder spanBuilder, Context cxt) {
@@ -218,9 +227,9 @@ public class DDLambda {
         return spanBuilder;
     }
 
-    protected String santitizeFunctionArn(String functionArn){
+    protected String santitizeFunctionArn(String functionArn) {
         String[] arnParts = functionArn.split(":");
-        if (arnParts.length > 7 ) {
+        if (arnParts.length > 7) {
             functionArn = String.join(":", Arrays.copyOfRange(arnParts, 0, 7));
         }
         return functionArn;
@@ -228,14 +237,14 @@ public class DDLambda {
 
     private void addTraceContextToMDC() {
         Map<String, String> traceContext = getTraceContext();
-        if (traceContext == null){
+        if (traceContext == null) {
             return;
         }
 
         String traceId = traceContext.get(tracing.TRACE_ID_KEY);
         String spanId = traceContext.get(tracing.SPAN_ID_KEY);
 
-        if (traceId == null || spanId == null){
+        if (traceId == null || spanId == null) {
             //shouldn't be, but better safe than sorry
             return;
         }
@@ -261,15 +270,16 @@ public class DDLambda {
 
     /**
      * Check to see if the user has set DD_TRACE_ENABLED
+     *
      * @return true if DD_TRACE_ENABLED has been set to "true" (or "TRUE" or "tRuE" or ...), false otherwise
      */
-    protected boolean checkTraceEnabled(){
+    protected boolean checkTraceEnabled() {
         String sysTraceEnabled = System.getenv(TRACE_ENABLED_ENV);
         if (sysTraceEnabled == null) {
             return false;
         }
 
-        if (sysTraceEnabled.toLowerCase().equals("true")){
+        if (sysTraceEnabled.toLowerCase().equals("true")) {
             return true;
         }
         return false;
@@ -321,7 +331,7 @@ public class DDLambda {
     /**
      * Installing dd-java-agent in your lambda environment automatically wraps outbound HTTP calls.
      * This is no longer necessary.
-     *
+     * <p>
      * openConnection calls openConnection on the provided URL, adds the Datadog trace headers, and then returns the
      * resulting URLConnection. This duplicates the usual workflow with a java.net.URLConnection
      *
@@ -339,7 +349,7 @@ public class DDLambda {
     /**
      * Installing dd-java-agent in your lambda environment automatically wraps outbound HTTP calls.
      * This is no longer necessary.
-     *
+     * <p>
      * Adds Datadog trace headers to a java.net.URLConnection, so you can trace downstream HTTP requests.
      *
      * @param urlConnection the URLConnection that will have the trace headers added to it.
@@ -362,7 +372,7 @@ public class DDLambda {
     /**
      * Installing dd-java-agent in your lambda environment automatically wraps outbound HTTP calls.
      * This is no longer necessary.
-     *
+     * <p>
      * Creates an Apache HttpGet instrumented with Datadog trace headers. Please note, this does not _execute_ the HttpGet,
      * it merely creates a default HttpGet with headers added.
      *
@@ -379,7 +389,7 @@ public class DDLambda {
     /**
      * Installing dd-java-agent in your lambda environment automatically wraps outbound HTTP calls.
      * This is no longer necessary.
-     *
+     * <p>
      * Adds Datadog trace header to an org.apache.http.client.methods.HttpUriRequest, so you can trace downstream HTTP requests.
      *
      * @param httpRequest the HttpUriRequest that will have the trace headers added to it.
@@ -402,7 +412,7 @@ public class DDLambda {
     /**
      * Installing dd-java-agent in your lambda environment automatically wraps outbound HTTP calls.
      * This is no longer necessary.
-     *
+     * <p>
      * Create an OKHttp3 request builder with Datadog headers already added.
      *
      * @return Returns an OKHttp3 Request Builder with Datadog trace headers already added.
@@ -419,7 +429,7 @@ public class DDLambda {
     /**
      * Installing dd-java-agent in your lambda environment automatically wraps outbound HTTP calls.
      * This is no longer necessary.
-     *
+     * <p>
      * Adds Datadog trace header to an OKHttp3 request, so you can trace downstream HTTP requests.
      *
      * @param request The OKHttp3 Request that will have the trace headers added to it.
