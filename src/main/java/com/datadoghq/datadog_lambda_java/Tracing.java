@@ -139,6 +139,12 @@ public class Tracing{
 
         return traceHeaders;
     }
+
+    protected String makeOutboundJson(){
+        Map<String, String> headers = makeOutboundHttpTraceHeaders();
+        Gson g = new Gson();
+        return g.toJson(headers);
+    }
 }
 
 

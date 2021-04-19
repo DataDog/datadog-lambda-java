@@ -481,6 +481,34 @@ public class DDLambda {
         return formatTraceContext(this.tracing.TRACE_ID_KEY, traceID, this.tracing.SPAN_ID_KEY, spanID);
     }
 
+    /**
+     * Get the trace context as a JSON string. This can be used to inject tracing context
+     * into message queues. SQS Example:
+     * <pre> {@code
+     * class X {
+     *   // ...
+     *
+     *   public void sendMessageToSQS(DDLambda ddl) {
+     *      SendMessageRequest sendMessageRequest = new SendMessageRequest()
+     *        .withQueueUrl("somewhere")
+     *        .withMessageBody("foobar")
+     *        .withMessageAttributes(Map.of(
+     *          SQSHeaderable.DATADOG_ATTRIBUTE_NAME, new MessageAttributeValue().withStringValue(ddLambda.getTraceContextJSONString())
+     *      ));
+     *      sqs.sendMessage(sendMessageRequest);
+     *   }
+     * }}</pre>
+     * @return a JSON string representation of the current trace context. Empty string if tracing IDs are not found.
+     */
+    public String getTraceContextJSONString() {
+        String json = this.tracing.makeOutboundJson();
+        if (json == null || json.isEmpty()) {
+            DDLogger.getLoggerImpl().debug("No Trace/Log correlation IDs returned");
+            return "";
+        }
+        return json;
+    }
+
     private String formatTraceContext(String traceKey, String trace, String spanKey, String span) {
         return String.format("[%s=%s %s=%s]", traceKey, trace, spanKey, span);
     }
