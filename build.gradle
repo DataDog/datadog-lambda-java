@@ -10,8 +10,9 @@ plugins {
     // Apply the java-library plugin to add support for Java Library
     id 'java-library'
     id 'com.github.johnrengelman.shadow' version '5.2.0'
-    id "com.jfrog.bintray" version "1.8.4"
     id("com.github.gmazzo.buildconfig") version '2.0.2'
+    id 'signing'
+    id 'maven'
 }
 
 repositories {
@@ -47,14 +48,13 @@ targetCompatibility = 1.8
 
 group = 'com.datadoghq'
 version= '0.2.3'
+archivesBaseName = "datadog-lambda-java"
+description = "datadog-lambda-java"
 
 allprojects {
-    repositories {
-        jcenter()
-    }
-    apply plugin: 'maven'
-    apply plugin: 'maven-publish'
-    apply plugin: 'java'
+        apply plugin: 'maven'
+        apply plugin: 'maven-publish'
+        apply plugin: 'java'
 }
 
 publishing {
@@ -68,25 +68,71 @@ publishing {
     }
 }
 
-bintray {
-    user = System.getenv('BINTRAY_USER')
-    key = System.getenv('BINTRAY_API_TOKEN')
-    publications = ['MyPublication']
-    pkg {
-        repo = 'datadog-maven'
-        name = 'datadog-lambda-java'
-        userOrg = 'datadog'
-        licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/DataDog/datadog-lambda-java.git'
-        version {
-            name = project.version.toString()
-            desc = 'Datadog Lambda Java runtime library'
-            vcsTag = project.version.toString()
-            attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin']
-        }
-    }
-}
 
 buildConfig {
     buildConfigField('String', 'datadog_lambda_version', '"' + project.version.toString() + '"')
+}
+
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: System.getenv('SONATYPE_USERNAME'), password: System.getenv('SONATYPE_PASSWORD'))
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: System.getenv('SONATYPE_USERNAME'), password: System.getenv('SONATYPE_PASSWORD'))
+            }
+
+            pom.project {
+                name 'Datadog Lambda Java library'
+                packaging 'jar'
+                // optionally artifactId can be defined here
+                description 'A library for instrumenting your AWS Lambda functions written in Java and sending the telemetry to Datadog'
+                url 'http://datadoghq.com'
+
+                scm {
+                    connection 'scm:git@github.com:DataDog/datadog-lambda-java.git'
+                    developerConnection 'scm:git@github.com:DataDog/datadog-lambda-java.git'
+                    url 'https://github.com/DataDog/datadog-lambda-java'
+                }
+
+                licenses {
+                    license {
+                        name 'The Apache License, Version 2.0'
+                        url 'https://github.com/DataDog/datadog-lambda-java/blob/main/LICENSE'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'serverless'
+                        name 'Datadog Serverless Team'
+                        email 'support@datadoghq.com'
+                    }
+                }
+            }
+        }
+    }
 }
