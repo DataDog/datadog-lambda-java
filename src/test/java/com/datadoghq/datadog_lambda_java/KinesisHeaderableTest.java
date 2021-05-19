@@ -41,6 +41,25 @@ public class KinesisHeaderableTest {
     }
 
     @Test
+    public void testParsingKinesisEventFirstRecordHasNoDatadogAttributesButHasOtherAttributes_returnsEmptyHeaders() {
+        KinesisEvent event = new KinesisEvent();
+        KinesisEventRecord kinesisEventRecord = new KinesisEventRecord();
+        KinesisEvent.Record record = new KinesisEvent.Record();
+        String payload = "{"
+                + "    \"payload\": {"
+                + "        \"foo\": \"bar\""
+                + "    }"
+                + "}";
+        record.setData(ByteBuffer.wrap(payload.getBytes(StandardCharsets.UTF_8)));
+        kinesisEventRecord.setKinesis(record);
+        event.setRecords(singletonList(kinesisEventRecord));
+
+        Map<String, String> headers = new KinesisHeaderable(event).getHeaders();
+
+        assertTrue(headers.isEmpty());
+    }
+
+    @Test
     public void testParsingKinesisEventWithRecordWithDatadogAttributes_returnsHeaders() {
         KinesisEvent event = new KinesisEvent();
         KinesisEventRecord kinesisEventRecord = new KinesisEventRecord();
