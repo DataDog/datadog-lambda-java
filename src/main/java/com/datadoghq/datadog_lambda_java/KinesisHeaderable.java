@@ -31,7 +31,11 @@ public class KinesisHeaderable implements Headerable {
             try {
                 String payloadStr = new String(firstRecordPayload.array(), StandardCharsets.UTF_8);
                 KinesisPayload payload = g.fromJson(payloadStr, KinesisPayload.class);
-                this.headers = payload.datadogTracingInfo.asMap();
+                if (payload == null || payload.datadogTracingInfo == null) {
+                    this.headers = Collections.emptyMap();
+                } else {
+                    this.headers = payload.datadogTracingInfo.asMap();
+                }
             } catch (JsonSyntaxException jse) {
                 this.headers = Collections.emptyMap();
             }
