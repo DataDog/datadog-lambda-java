@@ -42,6 +42,8 @@ public final class DDLambda {
     private transient boolean enhanced = true;
     private transient Scope tracingScope;
 
+    private static final Tracer tracer = GlobalTracer.get();
+
     /**
      * Create a new DDLambda instrumenter given some Lambda context
      *
@@ -155,7 +157,6 @@ public final class DDLambda {
         }
 
         //Get the Datadog tracer, if it exists
-        Tracer tracer = GlobalTracer.get();
         //Datadog tracer will be able to extract datadog trace headers from an incoming request
         SpanContext parentContext = tracer.extract(Builtin.HTTP_HEADERS, new TextMapAdapter(headers));
 
