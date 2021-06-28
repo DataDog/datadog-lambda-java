@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2ProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
@@ -356,7 +355,9 @@ class XRayTraceContext{
     String traceId;
     String parentId;
 
-    static final int EXPECTED_TRACE_HEADER_PARTS = 3;
+    static final int EXPECTED_XRAY_TRACE_HEADER_PARTS = 3;
+    static final int EXPECTED_APM_TRACE_ID_PARTS = 3;
+    static final int EXPECTED_APM_TRACE_HEADER_LENGTH = 24;
 
     public XRayTraceContext(){
         //Root=1-5e41a79d-e6a0db584029dba86a594b7e;Parent=8c34f5ad8f92d510;Sampled=1
@@ -366,7 +367,7 @@ class XRayTraceContext{
             return;
         }
         String[] traceParts = traceId.split(";");
-        if(traceParts.length != EXPECTED_TRACE_HEADER_PARTS){
+        if(traceParts.length != EXPECTED_XRAY_TRACE_HEADER_PARTS){
             DDLogger.getLoggerImpl().error ("Unexpected number of xray trace header parts: "+ traceId);
             return;
         }
@@ -387,7 +388,7 @@ class XRayTraceContext{
      */
     protected XRayTraceContext(String traceId){
         String[] traceParts = traceId.split(";");
-        if(traceParts.length != EXPECTED_TRACE_HEADER_PARTS){
+        if(traceParts.length != EXPECTED_XRAY_TRACE_HEADER_PARTS){
             DDLogger.getLoggerImpl().error("Unexpected number of xray trace header parts in dummy constructor: "+ traceId);
             return;
         }
@@ -443,33 +444,34 @@ class XRayTraceContext{
 
     public String getAPMTraceID(){
         //trace ID looks like 1-5e41a79d-e6a0db584029dba86a594b7e
-        String bigid = "";
-        try {
-            bigid = this.traceId.split("-")[2];
+        if (this.traceId == null){
+            DDLogger.getLoggerImpl().debug("Null APM trace ID found" + this.traceId);
+            return "";
         }
-        catch (ArrayIndexOutOfBoundsException | NullPointerException ai){
-            DDLogger.getLoggerImpl().debug("Unexpected format for the trace ID. Unable to parse it. " + this.traceId);
+        String[] idParts = this.traceId.split("-");
+        if (idParts.length != EXPECTED_APM_TRACE_ID_PARTS){
+            DDLogger.getLoggerImpl().error("Malformed APM trace ID found " + this.traceId);
             return "";
         }
 
+        String bigId = idParts[2];
         //just to verify
-        if (bigid.length() != 24){
-            DDLogger.getLoggerImpl().debug("Got an unusual traceid from x-ray. Unable to convert that to an APM id. " + this.traceId);
+        if (bigId.length() != EXPECTED_APM_TRACE_HEADER_LENGTH){
+            DDLogger.getLoggerImpl().error("Got an unusual traceid from x-ray. Unable to convert that to an APM id. " + this.traceId);
             return "";
         }
 
-        String last16 = bigid.substring(bigid.length()-16); // should be the last 16 characters of the big id
+        String last16 = bigId.substring(bigId.length()-16); // should be the last 16 characters of the big id
 
-        Long parsed = 0L;
         try {
-            parsed = Long.parseUnsignedLong(last16, 16); //unsigned because parseLong throws a numberformatexception at anything greater than 0x7FFFF...
+            Long parsed = Long.parseUnsignedLong(last16, 16); //unsigned because parseLong throws a numberformatexception at anything greater than 0x7FFFF...
+            parsed = parsed & 0x7FFFFFFFFFFFFFFFL; //take care of that pesky first bit...
+            return parsed.toString();
         }
         catch (NumberFormatException ne){
             DDLogger.getLoggerImpl().debug("Got a NumberFormatException trying to parse the traceID. Unable to convert to an APM id. " + this.traceId);
             return "";
         }
-        parsed = parsed & 0x7FFFFFFFFFFFFFFFL; //take care of that pesky first bit...
-        return parsed.toString();
     }
 }
 
