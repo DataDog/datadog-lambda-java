@@ -31,7 +31,71 @@ class XraySubsegment {
 
         md.trace = mdt;
         m.datadog = md;
-        this.metadata = m;
+        this.setMetadata(m);
+    }
+
+    public Double getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Double startTime) {
+        this.startTime = startTime;
+    }
+
+    public metadata_cl getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(metadata_cl metadata) {
+        this.metadata = metadata;
+    }
+
+    public String getTraceId() {
+        return traceId;
+    }
+
+    public void setTraceId(String traceId) {
+        this.traceId = traceId;
+    }
+
+    public String getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(String parentId) {
+        this.parentId = parentId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Double getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Double endTime) {
+        this.endTime = endTime;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
 
@@ -43,52 +107,52 @@ class XraySubsegment {
         }
 
         public XraySubsegmentBuilder startTime(Double startTime) {
-            this.xrs.startTime = startTime;
+            this.xrs.setStartTime(startTime);
             return this;
         }
 
         public XraySubsegmentBuilder endTime(Double endTime) {
-            this.xrs.endTime = endTime;
+            this.xrs.setEndTime(endTime);
             return this;
         }
 
         public XraySubsegmentBuilder traceId(String traceId) {
-            this.xrs.traceId = traceId;
+            this.xrs.setTraceId(traceId);
             return this;
         }
 
         public XraySubsegmentBuilder parentId(String parentId) {
-            this.xrs.parentId = parentId;
+            this.xrs.setParentId(parentId);
             return this;
         }
 
         public XraySubsegmentBuilder name(String name) {
-            this.xrs.name = name;
+            this.xrs.setName(name);
             return this;
         }
 
         public XraySubsegmentBuilder id(String id) {
-            this.xrs.id = id;
+            this.xrs.setId(id);
             return this;
         }
 
         public XraySubsegmentBuilder type(String type) {
-            this.xrs.type = type;
+            this.xrs.setType(type);
             return this;
         }
 
         public XraySubsegmentBuilder ddTraceId(String traceId){
-            this.xrs.metadata.datadog.trace.traceId = traceId;
+            this.xrs.getMetadata().datadog.trace.traceId = traceId;
             return this;
         }
 
         public XraySubsegmentBuilder ddSamplingPriority (String samplingPriority){
-            this.xrs.metadata.datadog.trace.samplingPriority = samplingPriority;
+            this.xrs.getMetadata().datadog.trace.samplingPriority = samplingPriority;
             return this;
         }
 
         public XraySubsegmentBuilder ddParentId (String parentId){
-            this.xrs.metadata.datadog.trace.parentId = parentId;
+            this.xrs.getMetadata().datadog.trace.parentId = parentId;
             return this;
         }
 
@@ -99,25 +163,25 @@ class XraySubsegment {
     }
 
     @SerializedName("start_time")
-    public Double startTime;
+    private Double startTime;
 
     @SerializedName("metadata")
-    public metadata_cl metadata;
+    private metadata_cl metadata;
 
     @SerializedName("trace_id")
-    public String traceId;
+    private String traceId;
 
     @SerializedName("parent_id")
-    public String parentId;
+    private String parentId;
 
-    public String name;
+    private String name;
 
     @SerializedName("end_time")
-    public Double endTime;
+    private Double endTime;
 
-    public String id;
+    private String id;
 
-    public String type;
+    private String type;
 }
 
 class metadata_datadog_trace {

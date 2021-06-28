@@ -3,8 +3,6 @@ package com.datadoghq.datadog_lambda_java;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 public class XraySubsegmenBuilderTest {
 
     @Test
@@ -42,16 +40,16 @@ public class XraySubsegmenBuilderTest {
                 .ddParentId("ghijk")
                 .build();
 
-        Assert.assertEquals(xrs.startTime, Double.valueOf(1500000000));
-        Assert.assertEquals(xrs.endTime, Double.valueOf(1500000001));
-        Assert.assertEquals(xrs.traceId, "1-5e41b3ba-9b515c884a780c0c63b74010");
-        Assert.assertEquals(xrs.parentId, "30652c287aaff114");
-        Assert.assertEquals(xrs.name, "datadog-metadata");
-        Assert.assertEquals(xrs.id, "30652c287aaff114");
-        Assert.assertEquals(xrs.type, "subsegment");
-        Assert.assertEquals(xrs.metadata.datadog.trace.traceId, "abcdef");
-        Assert.assertEquals(xrs.metadata.datadog.trace.samplingPriority, "1");
-        Assert.assertEquals(xrs.metadata.datadog.trace.parentId, "ghijk");
+        Assert.assertEquals(xrs.getStartTime(), Double.valueOf(1500000000));
+        Assert.assertEquals(xrs.getEndTime(), Double.valueOf(1500000001));
+        Assert.assertEquals(xrs.getTraceId(), "1-5e41b3ba-9b515c884a780c0c63b74010");
+        Assert.assertEquals(xrs.getParentId(), "30652c287aaff114");
+        Assert.assertEquals(xrs.getName(), "datadog-metadata");
+        Assert.assertEquals(xrs.getId(), "30652c287aaff114");
+        Assert.assertEquals(xrs.getType(), "subsegment");
+        Assert.assertEquals(xrs.getMetadata().datadog.trace.traceId, "abcdef");
+        Assert.assertEquals(xrs.getMetadata().datadog.trace.samplingPriority, "1");
+        Assert.assertEquals(xrs.getMetadata().datadog.trace.parentId, "ghijk");
     }
 
 }
