@@ -352,9 +352,11 @@ class DDTraceContext {
 
 
 class XRayTraceContext{
-    String traceIdHeader;
+    transient String traceIdHeader;
     String traceId;
     String parentId;
+
+    static final int EXPECTED_TRACE_HEADER_PARTS = 3;
 
     public XRayTraceContext(){
         //Root=1-5e41a79d-e6a0db584029dba86a594b7e;Parent=8c34f5ad8f92d510;Sampled=1
@@ -364,7 +366,7 @@ class XRayTraceContext{
             return;
         }
         String[] traceParts = traceId.split(";");
-        if(traceParts.length != 3){
+        if(traceParts.length != EXPECTED_TRACE_HEADER_PARTS){
             DDLogger.getLoggerImpl().error ("Malformed _X_AMZN_TRACE_ID value: "+ traceId);
             return;
         }
