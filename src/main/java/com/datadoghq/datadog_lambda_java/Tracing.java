@@ -367,7 +367,7 @@ class XRayTraceContext{
         }
         String[] traceParts = traceId.split(";");
         if(traceParts.length != EXPECTED_TRACE_HEADER_PARTS){
-            DDLogger.getLoggerImpl().error ("Malformed _X_AMZN_TRACE_ID value: "+ traceId);
+            DDLogger.getLoggerImpl().error ("Unexpected number of xray trace header parts: "+ traceId);
             return;
         }
 
@@ -375,7 +375,7 @@ class XRayTraceContext{
             this.traceId = traceParts[0].split("=")[1];
             parentId = traceParts[1].split("=")[1];
         } catch (Exception e){
-            DDLogger.getLoggerImpl().error("Malformed _X_AMZN_TRACE_ID value: "+ traceId);
+            DDLogger.getLoggerImpl().error("Unable to split Root or Parent in _X_AMZN_TRACE_ID: "+ traceId);
             return;
         }
         this.traceIdHeader = traceId;
@@ -387,8 +387,8 @@ class XRayTraceContext{
      */
     protected XRayTraceContext(String traceId){
         String[] traceParts = traceId.split(";");
-        if(traceParts.length != 3){
-            DDLogger.getLoggerImpl().error("Malformed _X_AMZN_TRACE_ID value: "+ traceId);
+        if(traceParts.length != EXPECTED_TRACE_HEADER_PARTS){
+            DDLogger.getLoggerImpl().error("Unexpected number of xray trace header parts in dummy constructor: "+ traceId);
             return;
         }
 
@@ -396,7 +396,7 @@ class XRayTraceContext{
             this.traceId = traceParts[0].split("=")[1];
             parentId = traceParts[1].split("=")[1];
         } catch (Exception e){
-            DDLogger.getLoggerImpl().error("Malformed _X_AMZN_TRACE_ID value: "+ traceId);
+            DDLogger.getLoggerImpl().error("Unable to split Root or Parent in _X_AMZN_TRACE_ID in dummy constructor: "+ traceId);
             return;
         }
         this.traceIdHeader = traceId;
