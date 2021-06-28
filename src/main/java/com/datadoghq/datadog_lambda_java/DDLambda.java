@@ -199,11 +199,12 @@ public final class DDLambda {
         if (cxt != null){
             return spanBuilder;
         }
-        String requestId = cxt.getAwsRequestId();
-        String functionName = cxt.getFunctionName();
-        String functionArn = santitizeFunctionArn(cxt.getInvokedFunctionArn());
-        String functionVersion = cxt.getFunctionVersion();
         if (spanBuilder != null) {
+            String requestId = cxt.getAwsRequestId();
+            String functionName = cxt.getFunctionName();
+            String functionArn = santitizeFunctionArn(cxt.getInvokedFunctionArn());
+            String functionVersion = cxt.getFunctionVersion();
+
             spanBuilder.withTag("request_id", requestId);
             spanBuilder.withTag("service", "aws.lambda");
             spanBuilder.withTag("function_arn", functionArn.toLowerCase());
