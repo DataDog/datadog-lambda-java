@@ -7,17 +7,33 @@ import java.util.HashMap;
 import java.util.Map;
 
 class EnhancedMetric {
+    private static final int EXPECTED_REGION_ARN_PART = 3;
+    private static final int EXPECTED_ACCOUNT_ARN_PART = 4;
+    private static final int EXPECTED_ALIAS_ARN_PART=7;
+
     public static Map<String, Object> makeTagsFromContext(Context ctx) {
         Map<String, Object> m = new HashMap<String, Object>();
         if (ctx != null) {
             String[] arnParts = ctx.getInvokedFunctionArn().split(":");
-            String region = "";
-            String accountId = "";
-            String alias = "";
+            String region;
+            String accountId;
+            String alias;
 
-            if (arnParts.length > 3) region = arnParts[3];
-            if (arnParts.length > 4) accountId = arnParts[4];
-            if (arnParts.length > 7) alias = arnParts[7];
+            if (arnParts.length > EXPECTED_REGION_ARN_PART) {
+                region = arnParts[EXPECTED_REGION_ARN_PART];
+            } else {
+                region = "";
+            }
+            if (arnParts.length > EXPECTED_ACCOUNT_ARN_PART) {
+                accountId = arnParts[EXPECTED_ACCOUNT_ARN_PART];
+            } else {
+                accountId = "";
+            }
+            if (arnParts.length > EXPECTED_ALIAS_ARN_PART) {
+                alias = arnParts[EXPECTED_ALIAS_ARN_PART];
+            } else {
+                alias = "";
+            }
 
             if (!alias.isEmpty()){
                 // Drop $ from tag if it is $Latest
