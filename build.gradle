@@ -13,7 +13,8 @@ plugins {
     id("com.github.gmazzo.buildconfig") version '2.0.2'
     id 'signing'
     id 'maven'
-    id "com.github.spotbugs" version "4.2.3"
+//    id "com.github.spotbugs" version "4.2.3"
+    id 'pmd'
 }
 
 repositories {
@@ -23,18 +24,19 @@ repositories {
     mavenCentral()
 }
 
-spotbugs {
-    toolVersion = '4.2.3'
-}
-spotbugsMain {
-    reports {
-        html {
-            enabled = true
-            destination = file("$buildDir/reports/spotbugs/main/spotbugs.html")
-            stylesheet = 'fancy-hist.xsl'
-        }
-    }
-}
+//spotbugs {
+//    toolVersion = '4.2.3'
+//    onlyAnalyze = [ 'com.datadoghq.datadog-lambda-java.*']
+//}
+//spotbugsMain {
+//    reports {
+//        html {
+//            enabled = true
+//            destination = file("$buildDir/reports/spotbugs/main/spotbugs.html")
+//            stylesheet = 'fancy-hist.xsl'
+//        }
+//    }
+//}
 
 
 dependencies {

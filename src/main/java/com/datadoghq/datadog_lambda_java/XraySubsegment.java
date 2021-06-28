@@ -142,17 +142,17 @@ class XraySubsegment {
         }
 
         public XraySubsegmentBuilder ddTraceId(String traceId){
-            this.xrs.getMetadata().datadog.trace.traceId = traceId;
+            this.xrs.getMetadata().datadog.trace.setTraceId(traceId);
             return this;
         }
 
         public XraySubsegmentBuilder ddSamplingPriority (String samplingPriority){
-            this.xrs.getMetadata().datadog.trace.samplingPriority = samplingPriority;
+            this.xrs.getMetadata().datadog.trace.setSamplingPriority(samplingPriority);
             return this;
         }
 
         public XraySubsegmentBuilder ddParentId (String parentId){
-            this.xrs.getMetadata().datadog.trace.parentId = parentId;
+            this.xrs.getMetadata().datadog.trace.setParentId(parentId);
             return this;
         }
 
@@ -186,13 +186,37 @@ class XraySubsegment {
 
 class metadata_datadog_trace {
     @SerializedName("trace-id")
-    public String traceId;
+    private String traceId;
 
     @SerializedName("sampling-priority")
-    public String samplingPriority;
+    private String samplingPriority;
 
     @SerializedName("parent-id")
-    public String parentId;
+    private String parentId;
+
+    public String getTraceId() {
+        return traceId;
+    }
+
+    public void setTraceId(String traceId) {
+        this.traceId = traceId;
+    }
+
+    public String getSamplingPriority() {
+        return samplingPriority;
+    }
+
+    public void setSamplingPriority(String samplingPriority) {
+        this.samplingPriority = samplingPriority;
+    }
+
+    public String getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(String parentId) {
+        this.parentId = parentId;
+    }
 }
 
 class metadata_datadog {

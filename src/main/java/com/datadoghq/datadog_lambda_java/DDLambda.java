@@ -30,17 +30,17 @@ import org.slf4j.MDC;
  */
 public class DDLambda {
 
-    private String ENHANCED_ENV = "DD_ENHANCED_METRICS";
-    private String ENHANCED_PREFIX = "aws.lambda.enhanced.";
-    private String INVOCATION = "invocations";
-    private String ERROR = "errors";
-    private String MDC_TRACE_CONTEXT_FIELD = "dd.trace_context";
-    private String JSON_TRACE_ID = "dd.trace_id";
-    private String JSON_SPAN_ID = "dd.span_id";
-    private String TRACE_ENABLED_ENV = "DD_TRACE_ENABLED";
-    private Tracing tracing;
-    private boolean enhanced = true;
-    private Scope tracingScope;
+    private transient String ENHANCED_ENV = "DD_ENHANCED_METRICS";
+    private transient String ENHANCED_PREFIX = "aws.lambda.enhanced.";
+    private transient String INVOCATION = "invocations";
+    private transient String ERROR = "errors";
+    private transient String MDC_TRACE_CONTEXT_FIELD = "dd.trace_context";
+    private transient String JSON_TRACE_ID = "dd.trace_id";
+    private transient String JSON_SPAN_ID = "dd.span_id";
+    private transient String TRACE_ENABLED_ENV = "DD_TRACE_ENABLED";
+    private transient Tracing tracing;
+    private transient boolean enhanced = true;
+    private transient Scope tracingScope;
 
     /**
      * Create a new DDLambda instrumenter given some Lambda context

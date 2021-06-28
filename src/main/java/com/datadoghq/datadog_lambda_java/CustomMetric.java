@@ -11,10 +11,10 @@ import java.util.Map;
  * All the information for a custom Datadog distribution metric.
  */
 public class CustomMetric {
-    private String name;
-    private double value;
-    private Map<String, Object> tags;
-    private Date time;
+    private transient String name;
+    private transient double value;
+    private transient Map<String, Object> tags;
+    private transient Date time;
 
     /**
      * Create a custom distribution metric
@@ -60,17 +60,17 @@ public class CustomMetric {
 
 class PersistedCustomMetric{
     public PersistedCustomMetric(String m, double v, Map<String, Object>t, Date e){
-        this.setMetric(m);
-        this.setValue(v);
+        this.metric = m;
+        this.value = v;
 
         //First we need to turn the tags into an array of colon-delimited strings
         ArrayList<String> tagsList = new java.util.ArrayList<String>();
         if (t != null) {
             t.forEach((k, val) -> tagsList.add(String.format("%s:%s", k, val.toString())));
         }
-        this.setTags(tagsList);
+        this.tags = tagsList;
         long unixTime  = e.getTime() / 1000; // To Unix seconds instead of millis
-        this.setEventTime(unixTime);
+        this.eventTime = unixTime;
     }
 
     @SerializedName("m")

@@ -47,9 +47,9 @@ public class XraySubsegmenBuilderTest {
         Assert.assertEquals(xrs.getName(), "datadog-metadata");
         Assert.assertEquals(xrs.getId(), "30652c287aaff114");
         Assert.assertEquals(xrs.getType(), "subsegment");
-        Assert.assertEquals(xrs.getMetadata().datadog.trace.traceId, "abcdef");
-        Assert.assertEquals(xrs.getMetadata().datadog.trace.samplingPriority, "1");
-        Assert.assertEquals(xrs.getMetadata().datadog.trace.parentId, "ghijk");
+        Assert.assertEquals(xrs.getMetadata().datadog.trace.getTraceId(), "abcdef");
+        Assert.assertEquals(xrs.getMetadata().datadog.trace.getSamplingPriority(), "1");
+        Assert.assertEquals(xrs.getMetadata().datadog.trace.getParentId(), "ghijk");
     }
 
 }

@@ -26,8 +26,8 @@ class ColdStart {
         return false;
     }
 
+    @SuppressWarnings("PMD")
     public synchronized static void resetColdStart(){
         coldRequestID = null;
     }
-
 }
