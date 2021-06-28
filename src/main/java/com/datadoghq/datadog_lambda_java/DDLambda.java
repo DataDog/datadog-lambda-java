@@ -28,12 +28,12 @@ import org.slf4j.MDC;
 /**
  * The DDLambda instrumenter is used for getting information about your Lambda into Datadog.
  */
-public class DDLambda {
+public final class DDLambda {
 
     private transient String ENHANCED_ENV = "DD_ENHANCED_METRICS";
     private transient String ENHANCED_PREFIX = "aws.lambda.enhanced.";
     private transient String INVOCATION = "invocations";
-    private transient String ERROR = "errors";
+    private transient String ERROR_STRING = "errors";
     private transient String MDC_TRACE_CONTEXT_FIELD = "dd.trace_context";
     private transient String JSON_TRACE_ID = "dd.trace_id";
     private transient String JSON_SPAN_ID = "dd.span_id";
@@ -310,7 +310,7 @@ public class DDLambda {
      * @param cxt The AWS Context provided to your handler
      */
     public void error(Context cxt) {
-        recordEnhanced(ERROR, cxt);
+        recordEnhanced(ERROR_STRING, cxt);
     }
 
     private void recordEnhanced(String basename, Context cxt) {
