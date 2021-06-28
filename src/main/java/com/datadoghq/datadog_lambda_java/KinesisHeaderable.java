@@ -56,11 +56,43 @@ public class KinesisHeaderable implements Headerable {
 
     private static class KinesisPayload {
 
+        public DatadogTracingInfo getDatadogTracingInfo() {
+            return datadogTracingInfo;
+        }
+
+        public void setDatadogTracingInfo(DatadogTracingInfo datadogTracingInfo) {
+            this.datadogTracingInfo = datadogTracingInfo;
+        }
+
         @SerializedName(value = "_datadog")
         private DatadogTracingInfo datadogTracingInfo;
     }
 
     private static class DatadogTracingInfo {
+
+        public String getTraceID() {
+            return traceID;
+        }
+
+        public String getParentID() {
+            return parentID;
+        }
+
+        public String getSamplingPriority() {
+            return samplingPriority;
+        }
+
+        public void setTraceID(String traceID) {
+            this.traceID = traceID;
+        }
+
+        public void setParentID(String parentID) {
+            this.parentID = parentID;
+        }
+
+        public void setSamplingPriority(String samplingPriority) {
+            this.samplingPriority = samplingPriority;
+        }
 
         @SerializedName(value = "x-datadog-trace-id")
         private String traceID;
