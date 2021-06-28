@@ -16,11 +16,10 @@ import datadog.trace.api.CorrelationIdentifier;
 
 public class Tracing{
 
-    protected DDTraceContext cxt;
-    protected XRayTraceContext xrt;
-
-    protected String TRACE_ID_KEY = "dd.trace_id";
-    protected String SPAN_ID_KEY = "dd.span_id";
+    protected transient DDTraceContext cxt;
+    protected transient XRayTraceContext xrt;
+    protected static final String TRACE_ID_KEY = "dd.trace_id";
+    protected static final String SPAN_ID_KEY = "dd.span_id";
 
     public Tracing(){
         this.xrt = new XRayTraceContext();
@@ -43,7 +42,7 @@ public class Tracing{
 
     /**
      * Test constructor that can take a dummy _X_AMZN_TRACE_ID value
-     * @param xrayTraceInfo
+     * @param xrayTraceInfo is a dummy _X_AMZN_TRACE_ID used for testing
      */
     protected Tracing(String xrayTraceInfo){
         this.xrt = new XRayTraceContext(xrayTraceInfo);
@@ -162,13 +161,13 @@ class ConverterSubsegment {
         this.end_time = end_time;
     }
 
-    private String name;
-    private String id;
-    private Double start_time;
-    private Double end_time;
-    private String type;
-    private DDTraceContext ddt;
-    private XRayTraceContext xrt;
+    private transient String name;
+    private transient String id;
+    private transient Double start_time;
+    private transient Double end_time;
+    private transient String type;
+    private transient DDTraceContext ddt;
+    private transient XRayTraceContext xrt;
 
     public ConverterSubsegment(DDTraceContext ctx, XRayTraceContext xrt){
         this.start_time = ((double) new Date().getTime()) /1000d;
@@ -276,9 +275,9 @@ class ConverterSubsegment {
 }
 
 class DDTraceContext {
-    protected String traceID;
-    protected String parentID;
-    protected String samplingPriority;
+    protected transient String traceID;
+    protected transient String parentID;
+    protected transient String samplingPriority;
 
     public String getTraceID() {
         return traceID;
@@ -292,9 +291,9 @@ class DDTraceContext {
         return samplingPriority;
     }
 
-    protected String ddTraceKey = "x-datadog-trace-id";
-    protected String ddParentKey = "x-datadog-parent-id";
-    protected String ddSamplingKey = "x-datadog-sampling-priority";
+    protected static final String ddTraceKey = "x-datadog-trace-id";
+    protected static final String ddParentKey = "x-datadog-parent-id";
+    protected static final String ddSamplingKey = "x-datadog-sampling-priority";
 
     public DDTraceContext(){
     }
