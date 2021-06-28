@@ -65,8 +65,8 @@ public class Tracing{
 
     public Map<String,String> getLogCorrelationTraceAndSpanIDsMap(){
         String traceId = String.valueOf(CorrelationIdentifier.getTraceId());
-        String spanId = String.valueOf(CorrelationIdentifier.getSpanId());
         if (traceId != null && ! (traceId.equals("") || traceId.equals("0") )){
+            String spanId = String.valueOf(CorrelationIdentifier.getSpanId());
             Map<String, String> out  = new HashMap<String, String>();
             out.put(TRACE_ID_KEY, traceId);
             out.put(SPAN_ID_KEY, spanId);
@@ -74,7 +74,7 @@ public class Tracing{
         }
         if (this.cxt != null){
             traceId = this.cxt.getTraceID();
-            spanId = this.cxt.getParentID();
+            String spanId = this.cxt.getParentID();
             Map<String, String> out  = new HashMap<String, String>();
             out.put(TRACE_ID_KEY, traceId);
             out.put(SPAN_ID_KEY, spanId);
@@ -82,7 +82,7 @@ public class Tracing{
         }
         if (this.xrt != null){
             traceId = this.xrt.getAPMTraceID();
-            spanId = this.xrt.getAPMParentID();
+            String spanId = this.xrt.getAPMParentID();
             Map<String, String> out  = new HashMap<String, String>();
             out.put(TRACE_ID_KEY, traceId);
             out.put(SPAN_ID_KEY, spanId);
@@ -97,13 +97,13 @@ public class Tracing{
     }
 
     private static DDTraceContext populateDDContext(Map<String,String> headers){
-        DDTraceContext ctx = null;
         try{
-            ctx = new DDTraceContext(headers);
+            DDTraceContext ctx = new DDTraceContext(headers);
+            return ctx;
         } catch (Exception e) {
             DDLogger.getLoggerImpl().debug("Unable to extract DD Trace Context from event headers");
         }
-        return ctx;
+        return null;
     }
 
 
