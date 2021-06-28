@@ -2,6 +2,8 @@ package com.datadoghq.datadog_lambda_java;
 
 import java.io.IOException;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -174,8 +176,7 @@ class ConverterSubsegment {
         this.type = "subsegment";
 
         byte[] idBytes = new byte[8];
-        Random rnd = new Random();
-        rnd.nextBytes(idBytes);
+        TracingRandom.getRandom().nextBytes(idBytes);
         this.id = "";
         for (byte b : idBytes){
             this.id = this.id + String.format("%02x", b);
@@ -253,7 +254,7 @@ class ConverterSubsegment {
         Gson g = new Gson();
         String s_payload = g.toJson(prefixMap) + "\n" + s_message;
 
-        byte[] payload = s_payload.getBytes();
+        byte[] payload = s_payload.getBytes(StandardCharsets.UTF_8);
         DatagramPacket packet = new DatagramPacket(payload, payload.length, daemon_address, daemon_port);
 
         DatagramSocket socket;
@@ -477,5 +478,12 @@ class XRayTraceContext{
         }
         parsed = parsed & 0x7FFFFFFFFFFFFFFFL; //take care of that pesky first bit...
         return parsed.toString();
+    }
+}
+
+class TracingRandom{
+    static final SecureRandom rnd = new SecureRandom();
+    static SecureRandom getRandom(){
+        return rnd;
     }
 }

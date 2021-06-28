@@ -1,5 +1,6 @@
 package com.datadoghq.datadog_lambda_java;
 
+import com.datadoghq.datadog_lambda_java.DDLogger.Level;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -21,7 +22,7 @@ public class DDLoggerTest {
         outContent.reset();
 
         DDLogger ddldebug = DDLogger.getLoggerImpl();
-        ddldebug.setLevel(DDLogger.level.DEBUG);
+        ddldebug.setLevel(Level.DEBUG);
         ddldebug.debug("foo");
         Assert.assertEquals("{\"level\":\"DEBUG\",\"message\":\"datadog: foo\"}\n", outContent.toString());
 
@@ -35,13 +36,13 @@ public class DDLoggerTest {
     public void error() {
         outContent.reset();
         DDLogger ddLogger = DDLogger.getLoggerImpl();
-        ddLogger.setLevel(DDLogger.level.DEBUG);
+        ddLogger.setLevel(Level.DEBUG);
 
         ddLogger.error("bad news!");
         Assert.assertEquals("{\"level\":\"ERROR\",\"message\":\"datadog: bad news!\"}\n", outContent.toString());
         outContent.reset();
 
-        ddLogger.setLevel(DDLogger.level.ERROR);
+        ddLogger.setLevel(Level.ERROR);
         ddLogger.error("more bad news!");
         Assert.assertEquals("{\"level\":\"ERROR\",\"message\":\"datadog: more bad news!\"}\n", outContent.toString());
         outContent.reset();

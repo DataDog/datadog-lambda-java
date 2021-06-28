@@ -8,45 +8,45 @@ import java.util.HashMap;
 import java.util.Map;
 
 class DDLogger {
-    public enum level {
+    public enum Level {
         DEBUG,
         ERROR
     }
 
-    private static level g_level;
-    private level l_level;
+    private static Level global_level;
+    private Level local_level;
 
     @NotNull
     @Contract(" -> new")
     public static DDLogger getLoggerImpl(){
 
-        if (g_level != null) return new DDLogger();
+        if (global_level != null) return new DDLogger();
 
         String env_level = System.getenv("DD_LOG_LEVEL");
-        if (env_level == null) env_level = level.ERROR.toString();
+        if (env_level == null) env_level = Level.ERROR.toString();
 
-        if (env_level.toUpperCase().equals(level.DEBUG.toString())){
-            g_level = level.DEBUG;
+        if (env_level.toUpperCase().equals(Level.DEBUG.toString())){
+            global_level = Level.DEBUG;
         }
 
         return new DDLogger();
     }
 
     private DDLogger(){
-        this.l_level = g_level;
+        this.local_level = global_level;
     }
 
     public void debug(String logMessage, Object ... args){
-        if (this.l_level == level.DEBUG){
-            doLog(level.DEBUG, logMessage, args);
+        if (this.local_level == Level.DEBUG){
+            doLog(Level.DEBUG, logMessage, args);
         }
     }
 
     public void error(String logMessage, Object... args){
-        doLog(level.ERROR, logMessage, args);
+        doLog(Level.ERROR, logMessage, args);
     }
 
-    private void doLog(level l, String logMessage, Object[] args){
+    private void doLog(Level l, String logMessage, Object[] args){
         StringBuilder argsSB = new StringBuilder("datadog: ");
         argsSB.append(logMessage);
         if (args != null) {
@@ -66,7 +66,7 @@ class DDLogger {
 
     }
 
-    public void setLevel(level l){
-        this.l_level = l;
+    public void setLevel(Level l){
+        this.local_level = l;
     }
 }

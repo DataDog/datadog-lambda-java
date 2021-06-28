@@ -37,7 +37,7 @@ public class CustomMetric {
         this.name = name;
         this.value = value;
         this.tags = tags;
-        this.time = time;
+        this.time = (Date) time.clone();
     }
 
     /**

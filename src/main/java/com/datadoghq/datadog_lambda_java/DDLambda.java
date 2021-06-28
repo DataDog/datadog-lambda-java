@@ -148,11 +148,6 @@ public class DDLambda {
             return;
         }
 
-        String functionName = "";
-        if (cxt != null) {
-            functionName = cxt.getFunctionName();
-        }
-
         if (headers == null) {
             DDLogger.getLoggerImpl()
                     .error("The request passed to DDLambda contained null headers. Are you sure the handler signature matches the event provided?");
