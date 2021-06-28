@@ -312,13 +312,14 @@ public final class DDLambda {
     }
 
     private void recordEnhanced(String basename, Context cxt) {
-        String metricName = basename;
-        Map<String, Object> tags = null;
-        if (this.enhanced) {
-            metricName = ENHANCED_PREFIX + basename;
-            tags = EnhancedMetric.makeTagsFromContext(cxt);
+        if (!this.enhanced){
+            String metricName = basename;
+            new CustomMetric(metricName, 1, null).write();
+        } else {
+            String metricName = ENHANCED_PREFIX + basename;
+            Map<String, Object> tags = EnhancedMetric.makeTagsFromContext(cxt);
+            new CustomMetric(metricName, 1, tags).write();
         }
-        new CustomMetric(metricName, 1, tags).write();
     }
 
     /**

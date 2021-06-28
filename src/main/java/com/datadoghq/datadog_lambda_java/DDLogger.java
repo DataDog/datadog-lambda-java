@@ -14,7 +14,7 @@ class DDLogger {
     }
 
     private static Level global_level;
-    private Level local_level;
+    private transient Level local_level;
 
     @NotNull
     @Contract(" -> new")
@@ -25,7 +25,7 @@ class DDLogger {
         String env_level = System.getenv("DD_LOG_LEVEL");
         if (env_level == null) env_level = Level.ERROR.toString();
 
-        if (env_level.toUpperCase().equals(Level.DEBUG.toString())){
+        if (env_level.equalsIgnoreCase(Level.DEBUG.toString())){
             global_level = Level.DEBUG;
         }
 
