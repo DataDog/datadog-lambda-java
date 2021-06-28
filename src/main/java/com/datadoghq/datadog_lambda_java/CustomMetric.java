@@ -60,33 +60,65 @@ public class CustomMetric {
 
 class PersistedCustomMetric{
     public PersistedCustomMetric(String m, double v, Map<String, Object>t, Date e){
-        this.metric = m;
-        this.value = v;
+        this.setMetric(m);
+        this.setValue(v);
 
         //First we need to turn the tags into an array of colon-delimited strings
         ArrayList<String> tagsList = new java.util.ArrayList<String>();
         if (t != null) {
             t.forEach((k, val) -> tagsList.add(String.format("%s:%s", k, val.toString())));
         }
-        this.tags = tagsList;
+        this.setTags(tagsList);
         long unixTime  = e.getTime() / 1000; // To Unix seconds instead of millis
-        this.eventTime = unixTime;
+        this.setEventTime(unixTime);
     }
 
     @SerializedName("m")
-    public String metric;
+    private String metric;
 
     @SerializedName("v")
-    public Double value;
+    private Double value;
 
     @SerializedName("t")
-    public ArrayList<String> tags;
+    private ArrayList<String> tags;
 
     @SerializedName("e")
-    public long eventTime;
+    private long eventTime;
 
     public String toJsonString(){
         Gson g  =  new Gson();
         return g.toJson(this);
+    }
+
+    public String getMetric() {
+        return metric;
+    }
+
+    public void setMetric(String metric) {
+        this.metric = metric;
+    }
+
+    public Double getValue() {
+        return value;
+    }
+
+    public void setValue(Double value) {
+        this.value = value;
+    }
+
+    public ArrayList<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(ArrayList<String> tags) {
+        this.tags = tags;
+    }
+
+    public long getEventTime() {
+        return eventTime;
+    }
+
+    public void setEventTime(long eventTime) {
+        this.eventTime = eventTime;
     }
 }

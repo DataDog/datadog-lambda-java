@@ -33,14 +33,14 @@ public class LambdaInstrumenterTest {
         Gson g = new Gson();
         PersistedCustomMetric writtenMetric = g.fromJson(omw.CM.toJson(), PersistedCustomMetric.class);
 
-        Assert.assertEquals( "aws.lambda.enhanced.invocations", writtenMetric.metric.toString());
-        Assert.assertTrue(writtenMetric.tags.contains("cold_start:true"));
+        Assert.assertEquals( "aws.lambda.enhanced.invocations", writtenMetric.getMetric().toString());
+        Assert.assertTrue(writtenMetric.getTags().contains("cold_start:true"));
 
         EnhancedMetricTest.MockContext mc2 = new EnhancedMetricTest.MockContext();
         DDLambda li2 = new DDLambda(mc2);
 
         PersistedCustomMetric writtenMetric2 = g.fromJson(omw.CM.toJson(), PersistedCustomMetric.class);
-        Assert.assertTrue(writtenMetric2.tags.contains("cold_start:false"));
+        Assert.assertTrue(writtenMetric2.getTags().contains("cold_start:false"));
     }
 
     @Test public void TestLambdaInstrumentorWithNullContext(){
@@ -61,7 +61,7 @@ public class LambdaInstrumenterTest {
 
         Gson g = new Gson();
         PersistedCustomMetric pcm = g.fromJson(omw.CM.toJson(), PersistedCustomMetric.class);
-        Assert.assertEquals("aws.lambda.enhanced.errors", pcm.metric);
+        Assert.assertEquals("aws.lambda.enhanced.errors", pcm.getMetric());
     }
 
     @Test public void TestLambdaInstrumentorCustomMetric(){
@@ -75,8 +75,8 @@ public class LambdaInstrumenterTest {
 
         Gson g = new Gson();
         PersistedCustomMetric pcm = g.fromJson(omw.CM.toJson(), PersistedCustomMetric.class);
-        Assert.assertEquals("my_custom_metric", pcm.metric);
-        Assert.assertEquals(Double.valueOf(37.1), pcm.value);
+        Assert.assertEquals("my_custom_metric", pcm.getMetric());
+        Assert.assertEquals(Double.valueOf(37.1), pcm.getValue());
     }
 
     @Test public void TestLambdaInstrumentorCustomMetricWithDate(){
@@ -92,10 +92,10 @@ public class LambdaInstrumenterTest {
 
         Gson g = new Gson();
         PersistedCustomMetric pcm = g.fromJson(omw.CM.toJson(), PersistedCustomMetric.class);
-        Assert.assertEquals("my_custom_metric", pcm.metric);
-        Assert.assertEquals(Double.valueOf(37.1), pcm.value);
-        Assert.assertEquals(Double.valueOf(37.1), pcm.value);
-        Assert.assertEquals(1590420166, pcm.eventTime);
+        Assert.assertEquals("my_custom_metric", pcm.getMetric());
+        Assert.assertEquals(Double.valueOf(37.1), pcm.getValue());
+        Assert.assertEquals(Double.valueOf(37.1), pcm.getValue());
+        Assert.assertEquals(1590420166, pcm.getEventTime());
     }
 
     @Test public void TestLambdaInstrumentorCountsColdStartErrors(){
@@ -109,9 +109,9 @@ public class LambdaInstrumenterTest {
 
         Gson g  = new Gson();
         PersistedCustomMetric pcm = g.fromJson(omw.CM.toJson(), PersistedCustomMetric.class);
-        Assert.assertEquals("aws.lambda.enhanced.errors", pcm.metric);
+        Assert.assertEquals("aws.lambda.enhanced.errors", pcm.getMetric());
 
-        Assert.assertTrue(pcm.tags.contains("cold_start:true"));
+        Assert.assertTrue(pcm.getTags().contains("cold_start:true"));
     }
 
     @Test
