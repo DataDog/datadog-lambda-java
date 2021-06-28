@@ -12,6 +12,7 @@ import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import com.amazonaws.services.lambda.runtime.Context;
@@ -207,7 +208,7 @@ public final class DDLambda {
 
             spanBuilder.withTag("request_id", requestId);
             spanBuilder.withTag("service", "aws.lambda");
-            spanBuilder.withTag("function_arn", functionArn.toLowerCase());
+            spanBuilder.withTag("function_arn", functionArn.toLowerCase(Locale.US));
             spanBuilder.withTag("cold_start", ColdStart.getColdStart(cxt));
             spanBuilder.withTag("datadog_lambda", BuildConfig.datadog_lambda_version);
             spanBuilder.withTag("resource_names", functionName);
@@ -252,7 +253,7 @@ public final class DDLambda {
             return true;
         }
 
-        if (sysEnhanced.toLowerCase().equals("false")) {
+        if (sysEnhanced.equalsIgnoreCase("false")) {
             return false;
         }
         return true;
@@ -269,7 +270,7 @@ public final class DDLambda {
             return false;
         }
 
-        if (sysTraceEnabled.toLowerCase().equals("true")) {
+        if (sysTraceEnabled.equalsIgnoreCase("true")) {
             return true;
         }
         return false;
