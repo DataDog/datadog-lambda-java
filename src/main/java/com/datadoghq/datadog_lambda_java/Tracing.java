@@ -119,23 +119,18 @@ public class Tracing{
 
     protected Map<String,String> makeOutboundHttpTraceHeaders(){
         Map<String, String> traceHeaders  = new HashMap<String, String>();
-
-        String apmParent = null;
-        if (this.xrt != null) {
-            apmParent = this.xrt.getAPMParentID();
-        }
         if(this.cxt == null
                 || this.xrt == null
                 || this.cxt.getTraceID() == null
                 || this.cxt.getSamplingPriority() == null
-                || apmParent == null){
+                || this.xrt.getAPMParentID() == null){
             DDLogger.getLoggerImpl().debug("Cannot make outbound trace headers -- some required fields are null");
             return traceHeaders;
         }
 
-        traceHeaders.put(this.cxt.ddTraceKey, this.cxt.getTraceID());
-        traceHeaders.put(this.cxt.ddSamplingKey, this.cxt.getSamplingPriority());
-        traceHeaders.put(this.cxt.ddParentKey, this.xrt.getAPMParentID());
+        traceHeaders.put(DDTraceContext.ddTraceKey, this.cxt.getTraceID());
+        traceHeaders.put(DDTraceContext.ddSamplingKey, this.cxt.getSamplingPriority());
+        traceHeaders.put(DDTraceContext.ddParentKey, this.xrt.getAPMParentID());
 
         return traceHeaders;
     }
@@ -167,6 +162,8 @@ class ConverterSubsegment {
     private transient String type;
     private transient DDTraceContext ddt;
     private transient XRayTraceContext xrt;
+
+    private static final int EXPECTED_ENDPOINT_PARTS = 2;
 
     public ConverterSubsegment(DDTraceContext ctx, XRayTraceContext xrt){
         this.start_time = ((double) new Date().getTime()) /1000d;
@@ -211,14 +208,14 @@ class ConverterSubsegment {
 
         String s_daemon_ip;
         String s_daemon_port;
-        String daemon_address_port = System.getenv("AWS_XRAY_DAEMON_ADDRESS");
-        if (daemon_address_port != null){
-            if (daemon_address_port.split(":").length != 2){
-                DDLogger.getLoggerImpl().error("Unexpected AWS_XRAY_DAEMON_ADDRESS value: ", daemon_address_port);
+        String daemon_endpoint = System.getenv("AWS_XRAY_DAEMON_ADDRESS");
+        if (daemon_endpoint != null){
+            if (daemon_endpoint.split(":").length != EXPECTED_ENDPOINT_PARTS){
+                DDLogger.getLoggerImpl().error("Unexpected AWS_XRAY_DAEMON_ADDRESS value: ", daemon_endpoint);
                 return false;
             }
-            s_daemon_ip = daemon_address_port.split(":")[0];
-            s_daemon_port = daemon_address_port.split(":")[1];
+            s_daemon_ip = daemon_endpoint.split(":")[0];
+            s_daemon_port = daemon_endpoint.split(":")[1];
             DDLogger.getLoggerImpl().debug("AWS XRay Address: ", s_daemon_ip);
             DDLogger.getLoggerImpl().debug("AWS XRay Port: ", s_daemon_port);
         } else {
