@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
@@ -315,14 +316,14 @@ class DDTraceContext {
     }
 
     private  Map<String,String> toLowerKeys(Map<String,String> headers){
-        Map<String, String> headers2  = new HashMap<String, String>();
+        Map<String, String> lowerCaseHeaders  = new HashMap<String, String>();
         for (Map.Entry<String, String> entry : headers.entrySet()) {
             String k = entry.getKey();
             String v = entry.getValue();
-            headers2.put(k,v);
-            headers2.put(k.toLowerCase(), v);
+            lowerCaseHeaders.put(k,v);
+            lowerCaseHeaders.put(k.toLowerCase(Locale.US), v);
         }
-        return headers2;
+        return lowerCaseHeaders;
     }
 
     public Map<String, String> toJSONMap(){
