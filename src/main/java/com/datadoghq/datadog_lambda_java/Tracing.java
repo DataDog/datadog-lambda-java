@@ -223,46 +223,40 @@ class ConverterSubsegment {
             return false;
         }
 
-        InetAddress daemon_address;
-
         try {
-            daemon_address = InetAddress.getByName(s_daemon_ip);
+            InetAddress daemon_address = InetAddress.getByName(s_daemon_ip);
+            int daemon_port = Integer.parseInt(s_daemon_port);
+
+            Map<String, Object> prefixMap  = new HashMap<String, Object>();
+            prefixMap.put("format", "json");
+            prefixMap.put("version", 1);
+
+            String s_message = this.toJSONString();
+
+            Gson g = new Gson();
+            String s_payload = g.toJson(prefixMap) + "\n" + s_message;
+
+            byte[] payload = s_payload.getBytes(StandardCharsets.UTF_8);
+            DatagramPacket packet = new DatagramPacket(payload, payload.length, daemon_address, daemon_port);
+            DatagramSocket socket;
+            socket = new DatagramSocket();
+            try {
+                socket.send(packet);
+            } catch (IOException e) {
+                DDLogger.getLoggerImpl().error("Couldn't send packet! " + e.getMessage());
+                return false;
+            } finally {
+                socket.close();
+            }
         } catch (UnknownHostException e) {
             DDLogger.getLoggerImpl().error("Unexpected exception looking up the AWS_XRAY_DAEMON_ADDRESS. This address should be a dotted quad and not require host resolution.");
             return false;
-        }
-
-        int daemon_port;
-        try {
-            daemon_port = Integer.parseInt(s_daemon_port);
         } catch (NumberFormatException ne) {
             DDLogger.getLoggerImpl().error("Excepting parsing daemon port" + ne.getMessage());
             return false;
-        }
 
-        Map<String, Object> prefixMap  = new HashMap<String, Object>();
-        prefixMap.put("format", "json");
-        prefixMap.put("version", 1);
-
-        String s_message = this.toJSONString();
-
-        Gson g = new Gson();
-        String s_payload = g.toJson(prefixMap) + "\n" + s_message;
-
-        byte[] payload = s_payload.getBytes(StandardCharsets.UTF_8);
-        DatagramPacket packet = new DatagramPacket(payload, payload.length, daemon_address, daemon_port);
-
-        DatagramSocket socket;
-        try {
-            socket = new DatagramSocket();
         } catch (SocketException e) {
             DDLogger.getLoggerImpl().error("Unable to bind to an available socket! " + e.getMessage());
-            return false;
-        }
-        try {
-            socket.send(packet);
-        } catch (IOException e) {
-            DDLogger.getLoggerImpl().error("Couldn't send packet! " + e.getMessage());
             return false;
         }
         return true;
