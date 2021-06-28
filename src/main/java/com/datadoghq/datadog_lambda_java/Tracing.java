@@ -98,8 +98,7 @@ public class Tracing{
 
     private static DDTraceContext populateDDContext(Map<String,String> headers){
         try{
-            DDTraceContext ctx = new DDTraceContext(headers);
-            return ctx;
+            return new DDTraceContext(headers);
         } catch (Exception e) {
             DDLogger.getLoggerImpl().debug("Unable to extract DD Trace Context from event headers");
         }
