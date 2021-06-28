@@ -174,19 +174,17 @@ public final class DDLambda {
      * in order to finish spans.
      */
     public void finish() {
-        Span span = GlobalTracer.get().activeSpan();
-
         if (this.tracingScope == null) {
             DDLogger.getLoggerImpl().debug("Unable to close tracing scope because it is null.");
             return;
         }
         this.tracingScope.close();
 
+        Span span = tracer.activeSpan();
         if (span != null) {
             span.finish();
         } else {
             DDLogger.getLoggerImpl().debug("Unable to finish span because it is null.");
-            return;
         }
     }
 
@@ -198,18 +196,13 @@ public final class DDLambda {
      * @return a SpanBuilder with the necessary tags.
      */
     private SpanBuilder addDDTags(SpanBuilder spanBuilder, Context cxt) {
-        String requestId = "";
-        String functionName = "";
-        String functionArn = "";
-        String functionVersion = "";
-        if (cxt != null) {
-            requestId = cxt.getAwsRequestId();
-            functionName = cxt.getFunctionName();
-            functionArn = santitizeFunctionArn(cxt.getInvokedFunctionArn());
-            functionVersion = cxt.getFunctionVersion();
-        } else {
+        if (cxt != null){
             return spanBuilder;
         }
+        String requestId = cxt.getAwsRequestId();
+        String functionName = cxt.getFunctionName();
+        String functionArn = santitizeFunctionArn(cxt.getInvokedFunctionArn());
+        String functionVersion = cxt.getFunctionVersion();
         if (spanBuilder != null) {
             spanBuilder.withTag("request_id", requestId);
             spanBuilder.withTag("service", "aws.lambda");
