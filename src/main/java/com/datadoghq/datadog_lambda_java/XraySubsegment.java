@@ -100,6 +100,15 @@ class XraySubsegment {
 
 
     public static class XraySubsegmentBuilder {
+
+        public XraySubsegment getXrs() {
+            return xrs;
+        }
+
+        public void setXrs(XraySubsegment xrs) {
+            this.xrs = xrs;
+        }
+
         private XraySubsegment xrs;
 
         public XraySubsegmentBuilder() {
@@ -220,9 +229,27 @@ class metadata_datadog_trace {
 }
 
 class metadata_datadog {
+
+    public metadata_datadog_trace getTrace() {
+        return trace;
+    }
+
+    public void setTrace(metadata_datadog_trace trace) {
+        this.trace = trace;
+    }
+
     public metadata_datadog_trace trace;
 }
 
 class metadata_cl {
+
+    public metadata_datadog getDatadog() {
+        return datadog;
+    }
+
+    public void setDatadog(metadata_datadog datadog) {
+        this.datadog = datadog;
+    }
+
     public metadata_datadog datadog;
 }
