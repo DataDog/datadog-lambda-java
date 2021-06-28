@@ -31,17 +31,19 @@ import org.slf4j.MDC;
  */
 public final class DDLambda {
 
-    private transient String ENHANCED_ENV = "DD_ENHANCED_METRICS";
-    private transient String ENHANCED_PREFIX = "aws.lambda.enhanced.";
-    private transient String INVOCATION = "invocations";
-    private transient String ERROR_STRING = "errors";
-    private transient String MDC_TRACE_CONTEXT_FIELD = "dd.trace_context";
-    private transient String JSON_TRACE_ID = "dd.trace_id";
-    private transient String JSON_SPAN_ID = "dd.span_id";
-    private transient String TRACE_ENABLED_ENV = "DD_TRACE_ENABLED";
+    private final transient String ENHANCED_ENV = "DD_ENHANCED_METRICS";
+    private final transient String ENHANCED_PREFIX = "aws.lambda.enhanced.";
+    private final transient String INVOCATION = "invocations";
+    private final transient String ERROR_STRING = "errors";
+    private final transient String MDC_TRACE_CONTEXT_FIELD = "dd.trace_context";
+    private final transient String JSON_TRACE_ID = "dd.trace_id";
+    private final transient String JSON_SPAN_ID = "dd.span_id";
+    private final transient String TRACE_ENABLED_ENV = "DD_TRACE_ENABLED";
+    private final transient int EXPECTED_ARN_LENGTH = 7;
     private transient Tracing tracing;
     private transient boolean enhanced = true;
     private transient Scope tracingScope;
+
 
     private static final Tracer tracer = GlobalTracer.get();
 
@@ -220,7 +222,7 @@ public final class DDLambda {
 
     protected String santitizeFunctionArn(String functionArn) {
         String[] arnParts = functionArn.split(":");
-        if (arnParts.length > 7) {
+        if (arnParts.length > EXPECTED_ARN_LENGTH) {
             functionArn = String.join(":", Arrays.copyOfRange(arnParts, 0, 7));
         }
         return functionArn;
