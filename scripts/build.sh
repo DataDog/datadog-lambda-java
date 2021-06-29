@@ -6,7 +6,11 @@ IFS=$'\n\t'
 # No need for a Dockerfile.
 
 # The build target runs tests as well.
-docker run --rm -v $(pwd):/datadog-lambda-java -w /datadog-lambda-java gradle:7.1.0-jdk8 ./gradlew clean GenerateBuildConfig build
+docker run --rm \
+  -v $(pwd):/datadog-lambda-java \
+  -w /datadog-lambda-java \
+  gradle:7.1.0-jdk8 \
+  ./gradlew clean GenerateBuildConfig build
 
 echo ""
 echo "Build succeeded."
