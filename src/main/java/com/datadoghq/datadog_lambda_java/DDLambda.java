@@ -1,5 +1,6 @@
 package com.datadoghq.datadog_lambda_java;
 
+import com.amazonaws.services.lambda.runtime.events.KinesisEvent;
 import io.opentracing.Scope;
 import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
@@ -112,6 +113,23 @@ public class DDLambda {
         this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
         SQSHeaderable headerable = new SQSHeaderable(event);
+        this.tracing = new Tracing(headerable);
+        this.tracing.submitSegment();
+        addTraceContextToMDC();
+        startSpan(headerable.getHeaders(), cxt);
+    }
+
+    /**
+     * Create a trace-enabled DDLambda instrumenter given an KinesisEvent and a Lambda context
+     *
+     * @param event Your Datadog trace headers are pulled from the SQS Event and sent to XRay for consumption by the
+     *            Datadog Xray Crawler
+     * @param cxt Enhanced Metrics pulls information from the Lambda context.
+     */
+    public DDLambda(KinesisEvent event, Context cxt) {
+        this.enhanced = checkEnhanced();
+        recordEnhanced(INVOCATION, cxt);
+        KinesisHeaderable headerable = new KinesisHeaderable(event);
         this.tracing = new Tracing(headerable);
         this.tracing.submitSegment();
         addTraceContextToMDC();

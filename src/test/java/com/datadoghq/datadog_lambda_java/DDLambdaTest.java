@@ -10,9 +10,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.Rule;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 
-public class LambdaInstrumenterTest {
+public class DDLambdaTest {
     @Rule
     public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
 
@@ -21,7 +23,7 @@ public class LambdaInstrumenterTest {
         ColdStart.resetColdStart();
     }
 
-    @Test public void TestLambdaInstrumentor(){
+    @Test public void TestDDLambda(){
         ColdStart.resetColdStart();
         EnhancedMetricTest.MockContext mc = new EnhancedMetricTest.MockContext();
         ObjectMetricWriter omw = new ObjectMetricWriter();
@@ -43,7 +45,7 @@ public class LambdaInstrumenterTest {
         Assert.assertTrue(writtenMetric2.tags.contains("cold_start:false"));
     }
 
-    @Test public void TestLambdaInstrumentorWithNullContext(){
+    @Test public void TestDDLambdaWithNullContext(){
         ObjectMetricWriter omw = new ObjectMetricWriter();
         MetricWriter.setMetricWriter(omw);
 
@@ -51,7 +53,7 @@ public class LambdaInstrumenterTest {
         Assert.assertNotNull(omw.CM);
     }
 
-    @Test public void TestLambdaInstrumentorError(){
+    @Test public void TestDDLambdaError(){
         EnhancedMetricTest.MockContext mc = new EnhancedMetricTest.MockContext();
         ObjectMetricWriter omw = new ObjectMetricWriter();
         MetricWriter.setMetricWriter(omw);
@@ -64,7 +66,7 @@ public class LambdaInstrumenterTest {
         Assert.assertEquals("aws.lambda.enhanced.errors", pcm.metric);
     }
 
-    @Test public void TestLambdaInstrumentorCustomMetric(){
+    @Test public void TestDDLambdaCustomMetric(){
         ObjectMetricWriter omw = new ObjectMetricWriter();
         MetricWriter.setMetricWriter(omw);
 
@@ -79,7 +81,7 @@ public class LambdaInstrumenterTest {
         Assert.assertEquals(Double.valueOf(37.1), pcm.value);
     }
 
-    @Test public void TestLambdaInstrumentorCustomMetricWithDate(){
+    @Test public void TestDDLambdaCustomMetricWithDate(){
         ObjectMetricWriter omw = new ObjectMetricWriter();
         MetricWriter.setMetricWriter(omw);
 
@@ -98,7 +100,7 @@ public class LambdaInstrumenterTest {
         Assert.assertEquals(1590420166, pcm.eventTime);
     }
 
-    @Test public void TestLambdaInstrumentorCountsColdStartErrors(){
+    @Test public void TestDDLambdaCountsColdStartErrors(){
         ColdStart.resetColdStart();
         ObjectMetricWriter omw = new ObjectMetricWriter();
         MetricWriter.setMetricWriter(omw);
@@ -172,3 +174,4 @@ class ObjectMetricWriter extends MetricWriter{
         this.CM = null;
     }
 }
+
