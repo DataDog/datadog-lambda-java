@@ -23,6 +23,7 @@ build: &build
   rules:
     - when: on_success
   script:
+    - gradle wrapper
     - ./gradlew clean build 
   artifacts:
     paths:
