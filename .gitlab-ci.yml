@@ -15,7 +15,7 @@ variables:
 
 .gradle_build: &gradle_build
   <<: *common
-  image: gradle:6.9.0-jdk8
+  image: gradle:7.1.1-jdk8
 
 build: &build
   <<: *gradle_build
@@ -23,8 +23,7 @@ build: &build
   rules:
     - when: on_success
   script:
-    - gradle wrapper
-    - ./gradlew clean build 
+    - ./gradlew clean test
   artifacts:
     paths:
       - 'workspace/datadog-lambda-java/build/libs/*.jar'
