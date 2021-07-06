@@ -13,13 +13,6 @@ variables:
 .common: &common
   tags: [ "runner:main", "size:large" ]
 
-cache: &default_cache
-  key: '$CI_SERVER_VERSION' # Reset the cache every time gitlab is upgraded.  ~Every couple months
-  paths:
-    - .gradle/wrapper
-    - .gradle/caches
-  policy: pull
-
 .gradle_build: &gradle_build
   <<: *common
   image: gradle:6.9.0-jdk8
@@ -28,25 +21,12 @@ build: &build
   <<: *gradle_build
   stage: build
   rules:
-    - if: '$POPULATE_CACHE'
-      when: never
     - when: on_success
   script:
     - ./gradlew clean build 
   artifacts:
     paths:
       - 'workspace/datadog-lambda-java/build/libs/*.jar'
-
-build_with_cache:
-  <<: *build
-  rules:
-    - if: '$POPULATE_CACHE'
-      when: on_success
-    - when: manual
-      allow_failure: true
-  cache:
-    <<: *default_cache
-    policy: push
 
 deploy_to_sonatype:
   <<: *gradle_build
