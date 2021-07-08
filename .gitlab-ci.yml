@@ -28,7 +28,7 @@ build: &build
   rules:
     - when: on_success
   script:
-    - gradle clean test build
+    - gradle clean test build -x signArchives
   artifacts:
     paths:
       - 'workspace/datadog-lambda-java/build/libs/*.jar'
