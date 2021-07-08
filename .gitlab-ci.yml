@@ -29,9 +29,10 @@ build: &build
     - when: on_success
   script:
     - gradle clean test build -x signArchives
+    - ls
   artifacts:
     paths:
-      - 'workspace/datadog-lambda-java/build/libs/*.jar'
+      - 'build/libs/*.jar'
 
 deploy_to_sonatype:
   <<: *gradle_build
