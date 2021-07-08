@@ -23,6 +23,8 @@ build: &build
   rules:
     - when: on_success
   script:
+    - pwd
+    - ls
     - ./gradlew clean test
   artifacts:
     paths:
