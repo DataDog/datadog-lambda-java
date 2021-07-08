@@ -11,7 +11,7 @@ variables:
     value: "false"
     description: "Set to true to override rules in the reliability-env pipeline (e.g. override 'only deploy master')"
 
-image: gradle:7.1.1-jdk8
+image: gradle:6.9.0-jdk8
 
 before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
