@@ -28,9 +28,7 @@ build: &build
   rules:
     - when: on_success
   script:
-    - pwd
-    - ls
-    - gradle clean test
+    - gradle clean test build
   artifacts:
     paths:
       - 'workspace/datadog-lambda-java/build/libs/*.jar'
