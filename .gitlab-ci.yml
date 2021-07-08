@@ -6,16 +6,21 @@ stages:
 variables:
   REGISTRY: 486234852809.dkr.ecr.us-east-1.amazonaws.com
   SONATYPE_USERNAME: robot-datadog-serverless
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
   FORCE_TRIGGER:
     value: "false"
     description: "Set to true to override rules in the reliability-env pipeline (e.g. override 'only deploy master')"
+
+image: gradle:7.1.1-jdk8
+
+before_script:
+  - export GRADLE_USER_HOME=`pwd`/.gradle
 
 .common: &common
   tags: [ "runner:main", "size:large" ]
 
 .gradle_build: &gradle_build
   <<: *common
-  image: gradle:7.1.1-jdk8
 
 build: &build
   <<: *gradle_build
@@ -25,7 +30,7 @@ build: &build
   script:
     - pwd
     - ls
-    - ./gradlew clean test
+    - gradle clean test
   artifacts:
     paths:
       - 'workspace/datadog-lambda-java/build/libs/*.jar'
