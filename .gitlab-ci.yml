@@ -45,7 +45,7 @@ deploy_to_sonatype:
     - export SONATYPE_PASSWORD=$(aws ssm get-parameter --region us-east-1 --name ci.datadog-lambda-java.sonatype_password --with-decryption --query "Parameter.Value" --out text)
     - export GPG_PRIVATE_KEY=$(aws ssm get-parameter --region us-east-1 --name ci.datadog-lambda-java.signing.gpg_private_key --with-decryption --query "Parameter.Value" --out text)
     - export GPG_PASSWORD=$(aws ssm get-parameter --region us-east-1 --name ci.datadog-lambda-java.signing.gpg_passphrase --with-decryption --query "Parameter.Value" --out text)
-    - ./gradlew clean generateBuildConfig build uploadArchives
+    - gradle clean generateBuildConfig build uploadArchives
 
 create_key:
   stage: generate-signing-key
