@@ -1,0 +1,66 @@
+stages:
+  - build
+  - deploy
+  - generate-signing-key
+
+variables:
+  REGISTRY: 486234852809.dkr.ecr.us-east-1.amazonaws.com
+  SONATYPE_USERNAME: robot-datadog-serverless
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+  FORCE_TRIGGER:
+    value: "false"
+    description: "Set to true to override rules in the reliability-env pipeline (e.g. override 'only deploy master')"
+
+image: gradle:6.9.0-jdk8
+
+before_script:
+  - export GRADLE_USER_HOME=`pwd`/.gradle
+
+.common: &common
+  tags: [ "runner:main", "size:large" ]
+
+.gradle_build: &gradle_build
+  <<: *common
+
+build: &build
+  <<: *gradle_build
+  stage: build
+  rules:
+    - when: on_success
+  script:
+    - gradle clean test build -x signArchives
+  artifacts:
+    paths:
+      - 'build/libs/*.jar'
+
+deploy_to_sonatype:
+  <<: *gradle_build
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v.*/'
+      when: on_success
+    - when: manual
+      allow_failure: true
+  script:
+    - apt-get -y update
+    - apt-get -y install awscli
+    - export SONATYPE_PASSWORD=$(aws ssm get-parameter --region us-east-1 --name ci.datadog-lambda-java.sonatype_password --with-decryption --query "Parameter.Value" --out text)
+    - export GPG_PRIVATE_KEY=$(aws ssm get-parameter --region us-east-1 --name ci.datadog-lambda-java.signing.gpg_private_key --with-decryption --query "Parameter.Value" --out text)
+    - export GPG_PASSWORD=$(aws ssm get-parameter --region us-east-1 --name ci.datadog-lambda-java.signing.gpg_passphrase --with-decryption --query "Parameter.Value" --out text)
+    - gradle clean generateBuildConfig build uploadArchives
+
+create_key:
+  stage: generate-signing-key
+  when: manual
+  needs: []
+  tags: [ "runner:docker", "size:large" ]
+  variables:
+    PROJECT_NAME: "datadog-lambda-java"
+    EXPORT_TO_KEYSERVER: "true"
+  image: $REGISTRY/ci/agent-key-management-tools/gpg:1
+  script:
+    - /create.sh
+  artifacts:
+    expire_in: 13 mos
+    paths:
+      - pubkeys
