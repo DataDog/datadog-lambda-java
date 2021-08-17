@@ -52,7 +52,6 @@ def cleanup_json_line(json_line: object):
     elif "e" in json_line:
         # probably a metric
         json_line["e"] = 1234567890
-        # < {"m": "aws.lambda.enhanced.invocations", "v": 1.0, "t": ["memorysize:1024", "account_id:XXXX", "resource:Java-integration-test-dev-helloApiGatewayV2_Java8", "functionname:Java-integration-test-dev-helloApiGatewayV2_Java8", "runtime:java1.8.0_292", "region:sa-east-1", "datadog_lambda:0.3.1", "cold_start:false"], "e": 1234567890}
     if json_line["t"]:
         for tag in json_line["t"]:
             if "runtime:" in tag:
