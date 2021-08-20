@@ -239,6 +239,7 @@ public class DDLambda {
             spanBuilder.withTag("cold_start", ColdStart.getColdStart(cxt));
             spanBuilder.withTag("datadog_lambda", BuildConfig.datadog_lambda_version);
             spanBuilder.withTag("resource_names", functionName);
+            spanBuilder.withTag("functionname", functionName.toLowerCase());
             spanBuilder.withTag("function_version", functionVersion);
             spanBuilder.withTag("resource.name", functionName);
         }

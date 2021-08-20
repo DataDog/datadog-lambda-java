@@ -52,6 +52,12 @@ def cleanup_json_line(json_line: object):
     elif "e" in json_line:
         # probably a metric
         json_line["e"] = 1234567890
+        if json_line["t"]:
+            for tag in json_line["t"]:
+                if "runtime:" in tag:
+                    newTag = "runtime:xxxx"
+                    json_line["t"].remove(tag)
+                    json_line["t"].append(newTag)
     return json_line
 
 
