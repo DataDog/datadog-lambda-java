@@ -68,7 +68,7 @@ echo "Signing layers..."
 
 publish_layer() {
     region=$1
-    version_nbr=$(aws lambda publish-layer-version --layer-name $LAYER_NAME \
+    l=$(aws lambda publish-layer-version --layer-name $LAYER_NAME \
         --description "Datadog Tracer Lambda Layer for Java" \
         --zip-file "fileb://tracer.zip" \
         --region $region | jq -r '.Version')
@@ -110,5 +110,8 @@ do
         fi
     done
 done
+
+# Open a PR to the documentation repo to automatically bump layer version
+VERSION=$VERSION LAYER=datadog-lambda-java ./scripts/create_documentation_pr.sh
 
 echo "Done !"
