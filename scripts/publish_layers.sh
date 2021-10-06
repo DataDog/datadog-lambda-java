@@ -66,9 +66,9 @@ echo
 echo "Signing layers..."
 ./scripts/sign_layers.sh prod $LAYER_ZIP
 
-publish_layer() {
+publish_layer() {ivan.topolcic/create-documentation-pr-automatically
     region=$1
-    l=$(aws lambda publish-layer-version --layer-name $LAYER_NAME \
+    version_nbr=$(aws lambda publish-layer-version --layer-name $LAYER_NAME \
         --description "Datadog Tracer Lambda Layer for Java" \
         --zip-file "fileb://tracer.zip" \
         --region $region | jq -r '.Version')
