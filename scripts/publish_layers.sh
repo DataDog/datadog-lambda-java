@@ -111,4 +111,7 @@ do
     done
 done
 
+# Open a PR to the documentation repo to automatically bump layer version
+VERSION=$VERSION LAYER=datadog-lambda-java ./scripts/create_documentation_pr.sh
+
 echo "Done !"

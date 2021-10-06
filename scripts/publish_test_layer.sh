@@ -5,7 +5,7 @@
 # This product includes software developed at Datadog (https://www.datadoghq.com/).
 # Copyright 2021 Datadog, Inc.
 
-# Publish the datadog python lambda layer across regions, using the AWS CLI
+# Publish the datadog java lambda layer across regions, using the AWS CLI
 # Usage: publish_test_layer.sh path/to/layer.jar [region]
 # Specifying the region and layer arg will publish the specified layer to the specified region
 set -e
@@ -85,5 +85,8 @@ echo "Starting publishing layer for region $REGION..."
 
 publish_layer $REGION "$aws_version_key"
 rm $LAYER_ZIP
+
+# Uncomment the following line to test the PR-posting functionality
+# VERSION=$version_nbr LAYER=datadog-lambda-java ./scripts/create_documentation_pr.sh
 
 echo "Done !"
