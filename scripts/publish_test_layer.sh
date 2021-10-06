@@ -86,7 +86,7 @@ echo "Starting publishing layer for region $REGION..."
 publish_layer $REGION "$aws_version_key"
 rm $LAYER_ZIP
 
-# Open a PR to the documentation repo to automatically bump layer version
-VERSION=$version_nbr LAYER=datadog-lambda-java ./scripts/create_documentation_pr.sh
+# Uncomment the following line to test the PR-posting functionality
+# VERSION=$version_nbr LAYER=datadog-lambda-java ./scripts/create_documentation_pr.sh
 
 echo "Done !"
