@@ -37,7 +37,7 @@ git pull
 
 print_color "Checking out new branch that has version changes"
 git checkout -b $USER/bump-$LAYER-version-$VERSION
-sed -i '' -e '/.*"python"/{' -e 'n;s/.*/    '"$VERSION"'/' -e '}' $DOCUMENTATION_FILE
+sed -i '' -e '/.*"java"/{' -e 'n;s/.*/    '"$VERSION"'/' -e '}' $DOCUMENTATION_FILE
 git add $DOCUMENTATION_FILE
 
 print_color "Creating commit -- please tap your Yubikey if prompted"
