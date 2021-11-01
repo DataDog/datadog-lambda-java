@@ -15,12 +15,12 @@ class Extension {
 
     public static boolean setup() {
         boolean shouldUseExtension = false;
-        if(isExtensionRuning(EXTENSION_PATH)) {
+        if(isExtensionRunning(EXTENSION_PATH)) {
             DDLogger.getLoggerImpl().debug("Extension has been detected");
             if(hitHelloRoute(AGENT_URL, HELLO_PATH)) {
                 shouldUseExtension = true;
             } else {
-                DDLogger.getLoggerImpl().debug("Impossible to call the hello route");
+                DDLogger.getLoggerImpl().debug("Could not call the hello route");
             }
         }
         return shouldUseExtension;
@@ -28,11 +28,11 @@ class Extension {
 
     public static void flush() {
         if(!hitFlushRoute(AGENT_URL, FLUSH_PATH)) {
-            DDLogger.getLoggerImpl().debug("Impossible to flush");
+            DDLogger.getLoggerImpl().debug("Could not call the flush routeg");
         }
     }
 
-    public static boolean isExtensionRuning(final String extensionPath) {
+    public static boolean isExtensionRunning(final String extensionPath) {
         File f = new File(extensionPath);
         return (f.exists() && !f.isDirectory());
     }

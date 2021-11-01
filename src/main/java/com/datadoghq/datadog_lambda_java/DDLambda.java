@@ -364,9 +364,8 @@ public class DDLambda {
         if (this.enhanced) {
             metricName = ENHANCED_PREFIX + basename;
             tags = EnhancedMetric.makeTagsFromContext(cxt);
+            new CustomMetric(metricName, 1, tags).write();
         }
-
-        new CustomMetric(metricName, 1, tags).write();
     }
 
     /**
