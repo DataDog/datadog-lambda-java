@@ -13,7 +13,7 @@ class Extension {
     private final static String FLUSH_PATH = "/lambda/flush";
     private final static String EXTENSION_PATH = "/opt/extensions/datadog-agent";
 
-    public static boolean setup() {
+    protected static boolean setup() {
         boolean shouldUseExtension = false;
         if(isExtensionRunning(EXTENSION_PATH)) {
             DDLogger.getLoggerImpl().debug("Extension has been detected");
