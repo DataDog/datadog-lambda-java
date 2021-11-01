@@ -66,6 +66,7 @@ public class CustomMetricTest {
                 DatagramPacket dp = new DatagramPacket(msg, msg.length);
                 DatagramSocket ds = null;
                 try {
+                    text[0] = "notYetReceived";
                     ds = new DatagramSocket(8125);
                     ds.receive(dp);
                     text[0] = new String(dp.getData());
@@ -83,10 +84,20 @@ public class CustomMetricTest {
 
         ddm.write();
 
-        try {
-            Thread.sleep(1000);
-            assertTrue(text[0].startsWith("foo:24.3|d|#firsttag:firsttagvaluesecondtag:100.34"));
-        } catch (InterruptedException e) {
+        int i = 0;
+        for(; i < 10; ++i) {
+            try {
+                if (text[0].equals("notYetReceived")) {
+                    Thread.sleep(1000);
+                } else {
+                    assertTrue(text[0].startsWith("foo:24.3|d|#firsttag:firsttagvaluesecondtag:100.34"));
+                    break;
+                }
+            } catch (InterruptedException e) {
+                fail();
+            }
+        }
+        if( i == 10) {
             fail();
         }
     }
