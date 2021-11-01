@@ -87,7 +87,7 @@ public class CustomMetricTest {
         int i = 0;
         for(; i < 10; ++i) {
             try {
-                if (text[0].equals("notYetReceived")) {
+                if (null== text[0] || text[0].equals("notYetReceived")) {
                     Thread.sleep(1000);
                 } else {
                     assertTrue(text[0].startsWith("foo:24.3|d|#firsttag:firsttagvaluesecondtag:100.34"));
