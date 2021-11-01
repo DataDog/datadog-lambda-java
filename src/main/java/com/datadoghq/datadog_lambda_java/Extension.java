@@ -17,7 +17,7 @@ class Extension {
         boolean shouldUseExtension = false;
         if(isExtensionRuning(EXTENSION_PATH)) {
             DDLogger.getLoggerImpl().debug("Extension has been detected");
-            if(hitHelloRoute(AGENT_URL, FLUSH_PATH)) {
+            if(hitHelloRoute(AGENT_URL, HELLO_PATH)) {
                 shouldUseExtension = true;
             } else {
                 DDLogger.getLoggerImpl().debug("Impossible to call the hello route");

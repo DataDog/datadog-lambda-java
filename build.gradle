@@ -34,7 +34,8 @@ dependencies {
     implementation 'org.jetbrains:annotations:15.0'
     implementation 'io.opentracing:opentracing-api:0.33.0'
     implementation 'io.opentracing:opentracing-util:0.33.0'
-    implementation 'com.datadoghq:dd-trace-api:0.72.0'
+    implementation 'com.datadoghq:dd-trace-api:0.89.0'
+    implementation 'com.datadoghq:java-dogstatsd-client:2.13.0'
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'

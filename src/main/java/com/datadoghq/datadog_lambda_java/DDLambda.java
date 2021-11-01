@@ -50,6 +50,11 @@ public class DDLambda {
      */
     private DDLambda() {
         this.shouldUseExtension = Extension.setup();
+        if(this.shouldUseExtension) {
+            DDLogger.getLoggerImpl().debug("Setting the writer to extension");
+            ExtensionMetricWriter emw = new ExtensionMetricWriter();
+            MetricWriter.setMetricWriter(emw);
+        }
     }
 
     /**
@@ -360,6 +365,7 @@ public class DDLambda {
             metricName = ENHANCED_PREFIX + basename;
             tags = EnhancedMetric.makeTagsFromContext(cxt);
         }
+
         new CustomMetric(metricName, 1, tags).write();
     }
 

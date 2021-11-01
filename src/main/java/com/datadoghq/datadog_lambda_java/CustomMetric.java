@@ -56,6 +56,18 @@ public class CustomMetric {
         MetricWriter writer = MetricWriter.getMetricWriterImpl();
         writer.write(this);
     }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public double getValue() {
+        return this.value;
+    }
+
+    public Map<String, Object> getTags() {
+        return this.tags;
+    }
 }
 
 class PersistedCustomMetric{
