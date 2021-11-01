@@ -19,11 +19,11 @@ public class ExtensionTest {
     @Test public void testDetectExtensionSuccess() {
         Path resourceDirectory = Paths.get("src","test","resources");
         String fakeExtensionPath = resourceDirectory.toFile().getAbsolutePath() + "/fakeExtension";
-        Assert.assertTrue(Extension.isExtensionRuning(fakeExtensionPath));
+        Assert.assertTrue(Extension.isExtensionRunning(fakeExtensionPath));
     }
     @Test public void testDetectExtensionFailure() {
         String invalidPath = "/fakeExtension";
-        Assert.assertFalse(Extension.isExtensionRuning(invalidPath));
+        Assert.assertFalse(Extension.isExtensionRunning(invalidPath));
     }
 
     @Test public void testHitHelloRouteIncorrectUrl() {
