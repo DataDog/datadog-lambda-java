@@ -26,18 +26,18 @@ class Extension {
         return shouldUseExtension;
     }
 
-    public static void flush() {
+    protected static void flush() {
         if(!hitFlushRoute(AGENT_URL, FLUSH_PATH)) {
             DDLogger.getLoggerImpl().debug("Could not call the flush routeg");
         }
     }
 
-    public static boolean isExtensionRunning(final String extensionPath) {
+    protected static boolean isExtensionRunning(final String extensionPath) {
         File f = new File(extensionPath);
         return (f.exists() && !f.isDirectory());
     }
 
-    public static boolean hitHelloRoute(final String agentUrl, final String helloPath) {
+    protected static boolean hitHelloRoute(final String agentUrl, final String helloPath) {
         try {
             URL url = new URL(agentUrl + helloPath);
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
@@ -49,7 +49,7 @@ class Extension {
         }
     }
 
-    public static boolean hitFlushRoute(final String agentUrl, final String flushPath) {
+    protected static boolean hitFlushRoute(final String agentUrl, final String flushPath) {
         try {
             URL url = new URL(agentUrl + flushPath);
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
