@@ -42,6 +42,15 @@ public class DDLambda {
     private Tracing tracing;
     private boolean enhanced = true;
     private Scope tracingScope;
+    private boolean shouldUseExtension = false;
+
+
+    /**
+     * Private constructor, called from existing constructors to detect whether the extension is present
+     */
+    private DDLambda() {
+        this.shouldUseExtension = Extension.setup();
+    }
 
     /**
      * Create a new DDLambda instrumenter given some Lambda context
@@ -49,6 +58,7 @@ public class DDLambda {
      * @param cxt Enhanced Metrics pulls information from the Lambda context.
      */
     public DDLambda(Context cxt) {
+        this();
         this.tracing = new Tracing();
         this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
@@ -63,6 +73,7 @@ public class DDLambda {
      * @param xrayTraceInfo This would normally be the contents of the "_X_AMZN_TRACE_ID" env var
      */
     protected DDLambda(Context cxt, String xrayTraceInfo) {
+        this();
         this.tracing = new Tracing(xrayTraceInfo);
         this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
@@ -78,6 +89,7 @@ public class DDLambda {
      * @param cxt Enhanced Metrics pulls information from the Lambda context.
      */
     public DDLambda(APIGatewayProxyRequestEvent req, Context cxt) {
+        this();
         this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
         this.tracing = new Tracing(req);
@@ -94,6 +106,7 @@ public class DDLambda {
      * @param cxt Enhanced Metrics pulls information from the Lambda context.
      */
     public DDLambda(APIGatewayV2ProxyRequestEvent req, Context cxt) {
+        this();
         this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
         this.tracing = new Tracing(req);
@@ -110,6 +123,7 @@ public class DDLambda {
      * @param cxt Enhanced Metrics pulls information from the Lambda context.
      */
     public DDLambda(SQSEvent event, Context cxt) {
+        this();
         this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
         SQSHeaderable headerable = new SQSHeaderable(event);
@@ -127,6 +141,7 @@ public class DDLambda {
      * @param cxt Enhanced Metrics pulls information from the Lambda context.
      */
     public DDLambda(KinesisEvent event, Context cxt) {
+        this();
         this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
         KinesisHeaderable headerable = new KinesisHeaderable(event);
@@ -144,6 +159,7 @@ public class DDLambda {
      * @param cxt Enhanced Metrics pulls information from the Lambda context.
      */
     public DDLambda(Headerable req, Context cxt) {
+        this();
         this.enhanced = checkEnhanced();
         recordEnhanced(INVOCATION, cxt);
         this.tracing = new Tracing(req);
@@ -197,18 +213,18 @@ public class DDLambda {
      */
     public void finish() {
         Span span = GlobalTracer.get().activeSpan();
-
         if (this.tracingScope == null) {
             DDLogger.getLoggerImpl().debug("Unable to close tracing scope because it is null.");
-            return;
-        }
-        this.tracingScope.close();
-
-        if (span != null) {
-            span.finish();
         } else {
-            DDLogger.getLoggerImpl().debug("Unable to finish span because it is null.");
-            return;
+            this.tracingScope.close();
+            if (span != null) {
+                span.finish();
+            } else {
+                DDLogger.getLoggerImpl().debug("Unable to finish span because it is null.");
+            }
+        }
+        if(this.shouldUseExtension) {
+            Extension.flush();
         }
     }
 

@@ -43,6 +43,8 @@ dependencies {
     testImplementation 'com.github.stefanbirkner:system-rules:1.19.0'
     testImplementation 'com.amazonaws:aws-java-sdk-kinesis:1.11.980'
 
+    // Use wiremock for stubing http calls
+    testCompile 'com.github.tomakehurst:wiremock-jre8:2.31.0'
 }
 
 sourceCompatibility = 1.8
