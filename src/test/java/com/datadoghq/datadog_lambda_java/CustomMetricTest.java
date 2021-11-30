@@ -5,9 +5,17 @@ package com.datadoghq.datadog_lambda_java;
 
 import org.junit.Test;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -41,6 +49,57 @@ public class CustomMetricTest {
 
         assertNotNull(smw.getMetricsWritten());
         assertEquals("{\"m\":\"foo\",\"v\":24.3,\"t\":[],\"e\":1559152800}",smw.getMetricsWritten());
+    }
+
+    @Test public void testExtensionMetricWriter() {
+        Map<String, Object> map = new LinkedHashMap<>(); // to save the order to avoid flaky test
+        map.put("firstTag", "firstTagValue");
+        map.put("secondTag", 100.34);
+        CustomMetric ddm = new CustomMetric("foo", 24.3, map);
+        ExtensionMetricWriter emw = new ExtensionMetricWriter();
+        MetricWriter.setMetricWriter(emw);
+        final String[] text = new String[1];
+
+        new Thread(new Runnable() {
+            public void run() {
+                byte[] msg = new byte[256];
+                DatagramPacket dp = new DatagramPacket(msg, msg.length);
+                DatagramSocket ds = null;
+                try {
+                    text[0] = "notYetReceived";
+                    ds = new DatagramSocket(8125);
+                    ds.receive(dp);
+                    text[0] = new String(dp.getData());
+                } catch (SocketException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    if (ds != null) {
+                        ds.close();
+                    }
+                }
+            }
+        }).start();
+
+        ddm.write();
+
+        int i = 0;
+        for(; i < 10; ++i) {
+            try {
+                if (null== text[0] || text[0].equals("notYetReceived")) {
+                    Thread.sleep(1000);
+                } else {
+                    assertTrue(text[0].startsWith("foo:24.3|d|#firsttag:firsttagvaluesecondtag:100.34"));
+                    break;
+                }
+            } catch (InterruptedException e) {
+                fail();
+            }
+        }
+        if( i == 10) {
+            fail();
+        }
     }
 
     /**

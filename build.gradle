@@ -35,6 +35,7 @@ dependencies {
     implementation 'io.opentracing:opentracing-api:0.33.0'
     implementation 'io.opentracing:opentracing-util:0.33.0'
     implementation 'com.datadoghq:dd-trace-api:0.90.0'
+    implementation 'com.datadoghq:java-dogstatsd-client:2.13.0'
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.13.2'
@@ -43,6 +44,8 @@ dependencies {
     testImplementation 'com.github.stefanbirkner:system-rules:1.19.0'
     testImplementation 'com.amazonaws:aws-java-sdk-kinesis:1.11.980'
 
+    // Use wiremock for stubbing http calls
+    testCompile 'com.github.tomakehurst:wiremock-jre8:2.31.0'
 }
 
 sourceCompatibility = 1.8
