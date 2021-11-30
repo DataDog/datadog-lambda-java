@@ -1,5 +1,7 @@
 package com.datadoghq.datadog_lambda_java;
 
+import com.timgroup.statsd.NonBlockingStatsDClientBuilder;
+import com.timgroup.statsd.StatsDClient;
 
 abstract class MetricWriter {
     private static MetricWriter IMPL;
@@ -27,6 +29,34 @@ class StdoutMetricWriter extends MetricWriter{
     @Override
     public void write(CustomMetric cm){
        System.out.println(cm.toJson());
+    }
+
+    @Override
+    public void flush(){}
+}
+
+class ExtensionMetricWriter extends MetricWriter{
+
+    private StatsDClient client;
+
+    public ExtensionMetricWriter() {
+        this.client = new NonBlockingStatsDClientBuilder()
+                .prefix("")
+                .hostname("127.0.0.1")
+                .port(8125)
+                .build();
+    }
+
+    @Override
+    public void write(CustomMetric cm){
+        StringBuilder tagsSb = new StringBuilder();
+        if (cm.getTags() != null) {
+            cm.getTags().forEach((k, val) ->
+                    tagsSb.append(k.toLowerCase())
+                            .append(":")
+                            .append(val.toString().toLowerCase()));
+        }
+        client.distribution(cm.getName(), cm.getValue(), tagsSb.toString());
     }
 
     @Override
