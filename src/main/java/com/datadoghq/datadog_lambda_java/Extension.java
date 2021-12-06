@@ -28,7 +28,7 @@ class Extension {
 
     protected static void flush() {
         if(!hitFlushRoute(AGENT_URL, FLUSH_PATH)) {
-            DDLogger.getLoggerImpl().debug("Could not call the flush routeg");
+            DDLogger.getLoggerImpl().debug("Could not call the flush route");
         }
     }
 
