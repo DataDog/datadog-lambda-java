@@ -82,22 +82,24 @@ public class CustomMetricTest {
             }
         }).start();
 
-        ddm.write();
-
-        int i = 0;
-        for(; i < 10; ++i) {
-            try {
-                if (null== text[0] || text[0].equals("notYetReceived")) {
+        try {
+            Thread.sleep(1000);
+            ddm.write();
+            int i = 0;
+            for (; i < 10; ++i) {
+                if (null == text[0] || text[0].equals("notYetReceived")) {
                     Thread.sleep(1000);
                 } else {
                     assertTrue(text[0].startsWith("foo:24.3|d|#firsttag:firsttagvaluesecondtag:100.34"));
                     break;
                 }
-            } catch (InterruptedException e) {
+            }
+
+            if (i == 10) {
                 fail();
             }
         }
-        if( i == 10) {
+        catch (InterruptedException e) {
             fail();
         }
     }
