@@ -23,24 +23,24 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.amazonaws:aws-lambda-java-log4j:1.0.0'
-    implementation 'com.amazonaws:aws-lambda-java-events:2.2.7'
-    compileOnly 'com.amazonaws:aws-java-sdk-kinesis:1.11.980'
-    implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'org.apache.httpcomponents:httpclient:4.5.11'
-    implementation 'com.squareup.okhttp3:okhttp:4.4.0'
-    implementation 'org.apache.commons:commons-lang3:3.10'
-    implementation 'org.slf4j:slf4j-log4j12:1.7.28'
-    implementation 'org.jetbrains:annotations:15.0'
+    implementation 'com.amazonaws:aws-lambda-java-log4j:1.0.1'
+    implementation 'com.amazonaws:aws-lambda-java-events:3.10.0'
+    compileOnly 'com.amazonaws:aws-java-sdk-kinesis:1.12.100'
+    implementation 'com.google.code.gson:gson:2.8.9'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.2'
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+    implementation 'org.slf4j:slf4j-log4j12:1.7.32'
+    implementation 'org.jetbrains:annotations:22.0.0'
     implementation 'io.opentracing:opentracing-api:0.33.0'
     implementation 'io.opentracing:opentracing-util:0.33.0'
-    implementation 'com.datadoghq:dd-trace-api:0.89.0'
+    implementation 'com.datadoghq:dd-trace-api:0.90.0'
     implementation 'com.datadoghq:java-dogstatsd-client:2.13.0'
 
     // Use JUnit test framework
-    testImplementation 'junit:junit:4.12'
-    testImplementation 'org.apache.logging.log4j:log4j-api:2.13.3'
-    testImplementation 'org.apache.logging.log4j:log4j-core:2.13.3'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.apache.logging.log4j:log4j-api:2.14.1'
+    testImplementation 'org.apache.logging.log4j:log4j-core:2.14.1'
     testImplementation 'com.github.stefanbirkner:system-rules:1.19.0'
     testImplementation 'com.amazonaws:aws-java-sdk-kinesis:1.11.980'
 
