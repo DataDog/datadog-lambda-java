@@ -40,23 +40,36 @@ class ExtensionMetricWriter extends MetricWriter{
     private StatsDClient client;
 
     public ExtensionMetricWriter() {
-        this.client = new NonBlockingStatsDClientBuilder()
-                .prefix("")
-                .hostname("127.0.0.1")
-                .port(8125)
-                .build();
+        try {
+            this.client = new NonBlockingStatsDClientBuilder()
+                    .prefix("")
+                    .hostname("127.0.0.1")
+                    .port(8125)
+                    .enableTelemetry(false)
+                    .telemetryFlushInterval(0)
+                    .build();
+        } catch (Exception e) {
+            DDLogger.getLoggerImpl().error("Could not create StatsDClient " + e.getMessage());
+            this.client = null;
+        }
     }
+
+
 
     @Override
     public void write(CustomMetric cm){
-        StringBuilder tagsSb = new StringBuilder();
-        if (cm.getTags() != null) {
-            cm.getTags().forEach((k, val) ->
-                    tagsSb.append(k.toLowerCase())
-                            .append(":")
-                            .append(val.toString().toLowerCase()));
+        if(null != client) {
+            StringBuilder tagsSb = new StringBuilder();
+            if (cm.getTags() != null) {
+                cm.getTags().forEach((k, val) ->
+                        tagsSb.append(k.toLowerCase())
+                                .append(":")
+                                .append(val.toString().toLowerCase()));
+            }
+            client.distribution(cm.getName(), cm.getValue(), tagsSb.toString());
+        } else {
+            DDLogger.getLoggerImpl().error("Could not write the metric because the client is null");
         }
-        client.distribution(cm.getName(), cm.getValue(), tagsSb.toString());
     }
 
     @Override
