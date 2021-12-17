@@ -11,6 +11,9 @@ between serverful and serverless environments, as well as letting you send
 [custom metrics](https://docs.datadoghq.com/integrations/amazon_lambda/?tab=awsconsole#custom-metrics) 
 to the Datadog API.
 
+:warning: Older versions of `datadog-lambda-java` include `log4j <= 2.14.0` as a transitive dependency. 
+We recommend you upgrade to `datadog-lambda-java 0.3.4` or greater, or `1.4.1` or greater.
+[Additional upgrade instructions](https://docs.datadoghq.com/serverless/installation/java/?tab=maven#upgrading) are available on our docs site.
 
 ## Installation
 
