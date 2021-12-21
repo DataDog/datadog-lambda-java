@@ -39,8 +39,8 @@ dependencies {
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.apache.logging.log4j:log4j-api:2.16.0'
-    testImplementation 'org.apache.logging.log4j:log4j-core:2.16.0'
+    testImplementation 'org.apache.logging.log4j:log4j-api:2.17.0'
+    testImplementation 'org.apache.logging.log4j:log4j-core:2.17.0'
     testImplementation 'com.github.stefanbirkner:system-rules:1.19.0'
     testImplementation 'com.amazonaws:aws-java-sdk-kinesis:1.11.980'
 
