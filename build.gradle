@@ -23,7 +23,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.amazonaws:aws-lambda-java-log4j2:1.4.0'
+    implementation 'com.amazonaws:aws-lambda-java-core:1.2.1'
     implementation 'com.amazonaws:aws-lambda-java-events:3.10.0'
     compileOnly 'com.amazonaws:aws-java-sdk-kinesis:1.12.100'
     implementation 'com.google.code.gson:gson:2.8.9'
@@ -39,6 +39,7 @@ dependencies {
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.13.2'
+    //log4j imported for running unit tests. Doesn't get bundled with the build artifact.
     testImplementation 'org.apache.logging.log4j:log4j-api:2.17.0'
     testImplementation 'org.apache.logging.log4j:log4j-core:2.17.0'
     testImplementation 'com.github.stefanbirkner:system-rules:1.19.0'
@@ -52,7 +53,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 group = 'com.datadoghq'
-version= '1.4.2'
+version= '1.4.3'
 archivesBaseName = "datadog-lambda-java"
 description = "datadog-lambda-java"
 
