@@ -40,8 +40,8 @@ dependencies {
     // Use JUnit test framework
     testImplementation 'junit:junit:4.13.2'
     //log4j imported for running unit tests. Doesn't get bundled with the build artifact.
-    testImplementation 'org.apache.logging.log4j:log4j-api:2.17.0'
-    testImplementation 'org.apache.logging.log4j:log4j-core:2.17.0'
+    testImplementation 'org.apache.logging.log4j:log4j-api:2.17.1'
+    testImplementation 'org.apache.logging.log4j:log4j-core:2.17.1'
     testImplementation 'com.github.stefanbirkner:system-rules:1.19.0'
     testImplementation 'com.amazonaws:aws-java-sdk-kinesis:1.11.980'
 
