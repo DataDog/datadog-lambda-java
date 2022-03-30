@@ -67,8 +67,8 @@ class ExtensionMetricWriter extends MetricWriter{
                     .stream()
                     .map(tag -> String.format("%s:%s", tag.getKey(), tag.getValue()))
                     .collect(joining(","));
+                client.distribution(cm.getName(), cm.getValue(), tagsString);
             }
-            client.distribution(cm.getName(), cm.getValue(), tagsString);
         } else {
             DDLogger.getLoggerImpl().error("Could not write the metric because the client is null");
         }
