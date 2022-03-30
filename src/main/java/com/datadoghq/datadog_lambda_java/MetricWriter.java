@@ -2,6 +2,7 @@ package com.datadoghq.datadog_lambda_java;
 
 import com.timgroup.statsd.NonBlockingStatsDClientBuilder;
 import com.timgroup.statsd.StatsDClient;
+import static java.util.stream.Collectors.joining;
 
 abstract class MetricWriter {
     private static MetricWriter IMPL;
@@ -61,12 +62,13 @@ class ExtensionMetricWriter extends MetricWriter{
         if(null != client) {
             StringBuilder tagsSb = new StringBuilder();
             if (cm.getTags() != null) {
-                cm.getTags().forEach((k, val) ->
-                        tagsSb.append(k.toLowerCase())
-                                .append(":")
-                                .append(val.toString().toLowerCase()));
+                Map<String, Object> tags = new HashMap<String, Object>();
+                String tagsString = cm.getTags().entrySet()
+                    .stream()
+                    .map(tag -> String.format("%s:%s", tag.getKey(), tag.getValue()))
+                    .collect(joining(","));
             }
-            client.distribution(cm.getName(), cm.getValue(), tagsSb.toString());
+            client.distribution(cm.getName(), cm.getValue(), tagsString);
         } else {
             DDLogger.getLoggerImpl().error("Could not write the metric because the client is null");
         }
