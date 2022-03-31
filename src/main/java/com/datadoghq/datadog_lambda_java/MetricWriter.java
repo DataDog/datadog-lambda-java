@@ -3,6 +3,8 @@ package com.datadoghq.datadog_lambda_java;
 import com.timgroup.statsd.NonBlockingStatsDClientBuilder;
 import com.timgroup.statsd.StatsDClient;
 
+import java.util.stream.Collectors;
+
 abstract class MetricWriter {
     private static MetricWriter IMPL;
     public static synchronized MetricWriter getMetricWriterImpl(){
@@ -59,14 +61,17 @@ class ExtensionMetricWriter extends MetricWriter{
     @Override
     public void write(CustomMetric cm){
         if(null != client) {
-            StringBuilder tagsSb = new StringBuilder();
+            String tags = "";
             if (cm.getTags() != null) {
-                cm.getTags().forEach((k, val) ->
-                        tagsSb.append(k.toLowerCase())
-                                .append(":")
-                                .append(val.toString().toLowerCase()));
+                tags = cm
+                    .getTags()
+                    .entrySet()
+                    .stream()
+                    .map(
+                        entry -> entry.getKey().toLowerCase() + ":" + entry.getValue().toString().toLowerCase()
+                    ).collect(Collectors.joining(","));
             }
-            client.distribution(cm.getName(), cm.getValue(), tagsSb.toString());
+            client.distribution(cm.getName(), cm.getValue(), tags);
         } else {
             DDLogger.getLoggerImpl().error("Could not write the metric because the client is null");
         }
