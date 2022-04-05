@@ -90,7 +90,7 @@ public class CustomMetricTest {
                 if (null == text[0] || text[0].equals("notYetReceived")) {
                     Thread.sleep(1000);
                 } else {
-                    assertTrue(text[0].startsWith("foo:24.3|d|#firsttag:firsttagvaluesecondtag:100.34"));
+                    assertTrue(text[0].startsWith("foo:24.3|d|#firsttag:firsttagvalue,secondtag:100.34"));
                     break;
                 }
             }
