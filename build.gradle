@@ -30,7 +30,7 @@ dependencies {
     implementation 'org.apache.httpcomponents:httpclient:4.5.13'
     implementation 'com.squareup.okhttp3:okhttp:4.9.2'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
-    implementation 'org.slf4j:slf4j-log4j12:1.7.32'
+    implementation 'org.slf4j:slf4j-api:1.7.32'
     implementation 'org.jetbrains:annotations:22.0.0'
     implementation 'io.opentracing:opentracing-api:0.33.0'
     implementation 'io.opentracing:opentracing-util:0.33.0'
@@ -40,6 +40,7 @@ dependencies {
     // Use JUnit test framework
     testImplementation 'junit:junit:4.13.2'
     //log4j imported for running unit tests. Doesn't get bundled with the build artifact.
+    testImplementation 'org.slf4j:slf4j-log4j12:1.7.32'
     testImplementation 'org.apache.logging.log4j:log4j-api:2.17.1'
     testImplementation 'org.apache.logging.log4j:log4j-core:2.17.1'
     testImplementation 'com.github.stefanbirkner:system-rules:1.19.0'
