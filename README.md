@@ -5,7 +5,7 @@
 ![](https://github.com/DataDog/datadog-lambda-java/workflows/Test%20on%20Master%20branch/badge.svg)
 ![Maven Central](https://img.shields.io/maven-central/v/com.datadoghq/datadog-lambda-java)
 
-:warning:THIS LIBRARY IS NO LONGER REQUIRED WHEN USING THE LATEST VERSION OF THE DATADOG LAMBDA EXTENSION. THIS LIBRARY AND THE README ARE ONLY REVELANT IF YOU WANT TO KEEP INSTRUMENTING USING THE DATADOG FORWARDER.:warning:
+:warning:THIS LIBRARY IS NO LONGER REQUIRED WHEN USING THE LATEST VERSION OF THE DATADOG LAMBDA EXTENSION. THIS README IS ONLY REVELANT IF YOU WANT TO KEEP INSTRUMENTING USING THE DATADOG FORWARDER.:warning:
 
 :warning: Older versions of `datadog-lambda-java` include `log4j <= 2.14.0` as a transitive dependency. 
 We recommend you upgrade to `datadog-lambda-java 0.3.4` or greater, or `1.4.1` or greater.
