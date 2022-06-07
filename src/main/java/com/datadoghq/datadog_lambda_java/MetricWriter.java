@@ -39,20 +39,30 @@ class StdoutMetricWriter extends MetricWriter{
 
 class ExtensionMetricWriter extends MetricWriter{
 
-    private StatsDClient client;
+    private static StatsDClient client;
+    private static ExtensionMetricWriter emw;
 
-    public ExtensionMetricWriter() {
-        try {
-            this.client = new NonBlockingStatsDClientBuilder()
-                    .prefix("")
-                    .hostname("127.0.0.1")
-                    .port(8125)
-                    .enableTelemetry(false)
-                    .telemetryFlushInterval(0)
-                    .build();
-        } catch (Exception e) {
-            DDLogger.getLoggerImpl().error("Could not create StatsDClient " + e.getMessage());
-            this.client = null;
+    public static ExtensionMetricWriter GetInstance(){
+        if (null == emw){
+            emw = new ExtensionMetricWriter();
+        }
+        return emw;
+    }
+
+    private ExtensionMetricWriter() {
+        if (null == client) {
+            try {
+                client = new NonBlockingStatsDClientBuilder()
+                        .prefix("")
+                        .hostname("127.0.0.1")
+                        .port(8125)
+                        .enableTelemetry(false)
+                        .telemetryFlushInterval(0)
+                        .build();
+            } catch (Exception e) {
+                DDLogger.getLoggerImpl().error("Could not create StatsDClient " + e.getMessage());
+                client = null;
+            }
         }
     }
 
