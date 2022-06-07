@@ -56,7 +56,7 @@ public class CustomMetricTest {
         map.put("firstTag", "firstTagValue");
         map.put("secondTag", 100.34);
         CustomMetric ddm = new CustomMetric("foo", 24.3, map);
-        ExtensionMetricWriter emw = new ExtensionMetricWriter();
+        ExtensionMetricWriter emw = ExtensionMetricWriter.GetInstance();
         MetricWriter.setMetricWriter(emw);
         final String[] text = new String[1];
 

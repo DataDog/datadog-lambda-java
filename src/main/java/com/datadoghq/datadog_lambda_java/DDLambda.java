@@ -52,7 +52,7 @@ public class DDLambda {
         this.shouldUseExtension = Extension.setup();
         if(this.shouldUseExtension) {
             DDLogger.getLoggerImpl().debug("Setting the writer to extension");
-            ExtensionMetricWriter emw = new ExtensionMetricWriter();
+            ExtensionMetricWriter emw = ExtensionMetricWriter.GetInstance();
             MetricWriter.setMetricWriter(emw);
         }
     }
