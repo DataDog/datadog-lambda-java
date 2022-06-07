@@ -54,7 +54,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 group = 'com.datadoghq'
-version= '1.4.4'
+version= '1.4.5'
 archivesBaseName = "datadog-lambda-java"
 description = "datadog-lambda-java"
 
