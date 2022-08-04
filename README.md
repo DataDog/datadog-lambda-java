@@ -1,3 +1,5 @@
+:warning:THIS LIBRARY IS NO LONGER REQUIRED WHEN USING THE DATADOG LAMBDA EXTENSION VERSION 25 OR ABOVE. FOLLOW THE [INSTRUCTIONS TO UPGRADE](https://docs.datadoghq.com/serverless/guide/upgrade_java_instrumentation)
+
 # datadog-lambda-java
 
 [![Slack](https://chat.datadoghq.com/badge.svg?bg=632CA6)](https://chat.datadoghq.com/)
@@ -11,7 +13,7 @@ between serverful and serverless environments, as well as letting you send
 [custom metrics](https://docs.datadoghq.com/integrations/amazon_lambda/?tab=awsconsole#custom-metrics) 
 to the Datadog API.
 
-:warning: Older versions of `datadog-lambda-java` include `log4j <= 2.14.0` as a transitive dependency. 
+Older versions of `datadog-lambda-java` include `log4j <= 2.14.0` as a transitive dependency. 
 We recommend you upgrade to `datadog-lambda-java 0.3.4` or greater, or `1.4.1` or greater.
 [Additional upgrade instructions](https://docs.datadoghq.com/serverless/installation/java/?tab=maven#upgrading) are available on our docs site.
 
