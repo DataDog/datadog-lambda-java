@@ -373,7 +373,7 @@ class XRayTraceContext{
             return;
         }
         String[] traceParts = traceId.split(";");
-        if(traceParts.length != 3){
+        if(hasInvalidXrayHeader(traceParts)){
             DDLogger.getLoggerImpl().error ("Malformed _X_AMZN_TRACE_ID value: "+ traceId);
             return;
         }
@@ -388,13 +388,17 @@ class XRayTraceContext{
         this.traceIdHeader = traceId;
     }
 
+    private static boolean hasInvalidXrayHeader(String[] traceParts) {
+        return traceParts.length < 3;
+    }
+
     /**
      * Test constructor that can take a dummy _X_AMZN_TRACE_ID value rather than reading from env vars
      * @param traceId
      */
     protected XRayTraceContext(String traceId){
         String[] traceParts = traceId.split(";");
-        if(traceParts.length != 3){
+        if(hasInvalidXrayHeader(traceParts)){
             DDLogger.getLoggerImpl().error("Malformed _X_AMZN_TRACE_ID value: "+ traceId);
             return;
         }
