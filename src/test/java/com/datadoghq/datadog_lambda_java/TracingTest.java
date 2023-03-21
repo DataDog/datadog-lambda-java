@@ -4,10 +4,13 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.HashMap;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class TracingTest {
 
@@ -29,10 +32,10 @@ public class TracingTest {
 
         Map<String, String> headers = t.makeOutboundHttpTraceHeaders();
 
-        Assert.assertEquals(3, headers.size());
-        Assert.assertEquals("2", headers.get(cxt.ddSamplingKey));
-        Assert.assertEquals("12344567890", headers.get(cxt.ddTraceKey));
-        Assert.assertEquals("6023947403358210776", headers.get(cxt.ddParentKey));
+        assertEquals(3, headers.size());
+        assertEquals("2", headers.get(cxt.ddSamplingKey));
+        assertEquals("12344567890", headers.get(cxt.ddTraceKey));
+        assertEquals("6023947403358210776", headers.get(cxt.ddParentKey));
     }
 
     @Test
@@ -53,7 +56,7 @@ public class TracingTest {
 
         Map<String, String> headers = t.makeOutboundHttpTraceHeaders();
 
-        Assert.assertEquals(0, headers.size());
+        assertEquals(0, headers.size());
     }
 
     @Test
@@ -83,6 +86,24 @@ public class TracingTest {
         expectedTracingInfo.put(cxt.ddParentKey, "6023947403358210776");
         expectedTracingInfo.put(cxt.ddSamplingKey, cxt.samplingPriority);
 
-        Assert.assertEquals(expectedTracingInfo, tracingInfo);
+        assertEquals(expectedTracingInfo, tracingInfo);
     }
+
+    @Test
+    public void shouldSupportAtLeastThreePartsIn_X_AMZN_TRACE_ID() {
+        XRayTraceContext xRayTraceContextBefore2023March14 = new XRayTraceContext("Root=1-5e41a79d-e6a0db584029dba86a594b7e;Parent=8c34f5ad8f92d510;Sampled=1");
+        assertEquals("1-5e41a79d-e6a0db584029dba86a594b7e", xRayTraceContextBefore2023March14.getTraceId());
+        assertEquals("8c34f5ad8f92d510", xRayTraceContextBefore2023March14.getParentId());
+
+        XRayTraceContext xRayTraceContextSince2023March14 = new XRayTraceContext("Root=1-5e41a79d-e6a0db584029dba86a594b7e;Parent=8c34f5ad8f92d510;Sampled=0;Lineage=f627d631:0");
+        assertEquals("1-5e41a79d-e6a0db584029dba86a594b7e", xRayTraceContextSince2023March14.getTraceId());
+        assertEquals("8c34f5ad8f92d510", xRayTraceContextSince2023March14.getParentId());
+    }
+
+    @Test
+    public void shouldIgnoreLessThanThreePartsIn_X_AMZN_TRACE_ID() {
+        XRayTraceContext xRayTraceContextLessThanThreeParts = new XRayTraceContext("Root=1-5e41a79d-e6a0db584029dba86a594b7e;Parent=8c34f5ad8f92d510");
+        assertNull(xRayTraceContextLessThanThreeParts.getTraceId());
+        assertNull(xRayTraceContextLessThanThreeParts.getParentId());
+     }
 }
