@@ -37,9 +37,6 @@ else
     echo "Layer version specified: $VERSION"
 fi
 
-LATEST_JAR_URL=$(curl -i https://repository.sonatype.org/service/local/artifact/maven/redirect\?r\=central-proxy\&g\=com.datadoghq\&a\=dd-java-agent\&v\=LATEST | grep location | cut -d " " -f 2)
-
-LATEST_JAR_FILE=$(echo $LATEST_JAR_URL | rev | cut -d "/" -f 1 | rev)
 
 echo ""
 read -p "Ready to publish layer version $VERSION to regions ${REGIONS[*]} (y/n)?" CONT
@@ -48,13 +45,14 @@ if [ "$CONT" != "y" ]; then
     exit 1
 fi
 
-wget -O $LATEST_JAR_FILE https://dtdg.co/latest-java-tracer
+rm -f dd-java-agent.jar
+wget -O dd-java-agent.jar https://dtdg.co/latest-java-tracer
 
 LAYER_ZIP="tracer.zip"
 
 rm -rf layer
 mkdir -p layer/java/lib
-cp "$LATEST_JAR_FILE" layer/java/lib/dd-java-agent.jar
+cp dd-java-agent.jar layer/java/lib/dd-java-agent.jar
 cd layer
 zip -r ../$LAYER_ZIP java
 cd ..
@@ -102,7 +100,7 @@ do
 
         # This shouldn't happen unless someone manually deleted the latest version, say 28, and
         # then tries to republish 28 again. The published version would actually be 29, because
-        # Lambda layers are immutable and AWS will skip deleted version and use the next number. 
+        # Lambda layers are immutable and AWS will skip deleted version and use the next number.
         if [ $latest_version -gt $VERSION ]; then
             echo "ERROR: Published version $latest_version is greater than the desired version $VERSION!"
             echo "Exiting"
