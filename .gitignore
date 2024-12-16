@@ -40,3 +40,5 @@ tests/testfunctions/bin/
 tests/testfunctions/.serverless/
 tests/testfunctions/.settings/
 tests/testfunctions/build.gradle
+
+.gitlab/build-pipeline.yaml
