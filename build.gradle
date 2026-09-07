@@ -10,7 +10,7 @@ plugins {
     // Apply the java-library plugin to add support for Java Library
     id 'java-library'
     id 'com.github.johnrengelman.shadow' version '5.2.0'
-    id("com.github.gmazzo.buildconfig") version '2.1.0'
+    id("com.github.gmazzo.buildconfig") version '6.0.10'
     id 'signing'
     id 'maven'
 }
