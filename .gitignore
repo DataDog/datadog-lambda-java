@@ -40,3 +40,9 @@ tests/testfunctions/bin/
 tests/testfunctions/.serverless/
 tests/testfunctions/.settings/
 tests/testfunctions/build.gradle
+
+# GitLab CI layer build output
+.gitlab/build-pipeline.yaml
+.layers/
+jar-temp/
+layer-temp/
