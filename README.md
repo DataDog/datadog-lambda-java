@@ -17,6 +17,10 @@ Older versions of `datadog-lambda-java` include `log4j <= 2.14.0` as a transitiv
 We recommend you upgrade to `datadog-lambda-java 0.3.4` or greater, or `1.4.1` or greater.
 [Additional upgrade instructions](https://docs.datadoghq.com/serverless/installation/java/?tab=maven#upgrading) are available on our docs site.
 
+### Java tracer version
+
+When you **run a new pipeline** from the GitLab UI, use the **Variables** section: **`TRACER_VERSION`** should appear prefilled (empty by default). Set a Maven version (e.g. `1.47.2`) to pin `dd-java-agent` from Maven Central, or leave it empty for the [latest Java tracer](https://dtdg.co/latest-java-tracer).
+
 ## Installation
 
 This library will be distributed through [Maven Central](https://search.maven.org/artifact/com.datadoghq/datadog-lambda-java). 
@@ -67,8 +71,10 @@ Also consider using provisioned concurrency to keep your lambda function warm.
 
 ### Compatible Java runtimes
 
-- java8.al2 (aka Java 8 (Corretto))
-- java11 (aka Java 11 (Corretto))
+- java11
+- java17
+- java21
+- java25
 
 If your lambda function is using Java 8, please change it to Java 8 Corretto.
 It's called java8.al2 if you're editing serverless.yaml.
