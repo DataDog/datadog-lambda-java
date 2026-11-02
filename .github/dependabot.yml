@@ -8,6 +8,17 @@ updates:
   - package-ecosystem: gradle # See documentation for possible values
     directory: / # Location of package manifests
     schedule:
-      interval: "weekly"
+      interval: monthly
+    cooldown:
+      default-days: 2
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      gh-actions-packages:
+        patterns:
+          - "*"
     cooldown:
       default-days: 2
