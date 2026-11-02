@@ -14,7 +14,7 @@ publish_layer() {
 
     version_nbr=$(aws lambda publish-layer-version --layer-name $LAYER_NAME \
         --description "Datadog Tracer Lambda Layer for Java" \
-        --compatible-runtimes "java8" "java11" "java17" "java21" \
+        --compatible-runtimes "java11" "java17" "java21" "java25" \
         --compatible-architectures "x86_64" "arm64" \
         --zip-file "fileb://.layers/${LAYER_FILE}" \
         --region $region \
@@ -101,7 +101,7 @@ fi
 latest_version=$(aws lambda list-layer-versions --region $REGION --layer-name $LAYER_NAME --query 'LayerVersions[0].Version || `0`')
 if [ $latest_version -ge $VERSION ]; then
     printf "[$REGION] Layer $LAYER_NAME version $VERSION already exists in region $REGION, skipping...\n"
-    exit 1
+    exit 0
 elif [ $latest_version -lt $((VERSION-1)) ]; then
     printf "[$REGION][WARNING] The latest version of layer $LAYER_NAME in region $REGION is $latest_version, this will publish all the missing versions including $VERSION\n"
 fi

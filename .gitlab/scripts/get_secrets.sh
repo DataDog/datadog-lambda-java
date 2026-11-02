@@ -25,10 +25,11 @@ EXTERNAL_ID=$(vault kv get -field=$EXTERNAL_ID_NAME kv/k8s/gitlab-runner/datadog
 
 printf "Assuming role...\n"
 
-export $(printf "AWS_ACCESS_KEY_ID=%s AWS_SECRET_ACCESS_KEY=%s AWS_SESSION_TOKEN=%s" \
-    $(aws sts assume-role \
-    --role-arn "arn:aws:iam::$AWS_ACCOUNT:role/$ROLE_TO_ASSUME"  \
+ASSUMED_ROLE_CREDENTIALS=$(aws sts assume-role \
+    --role-arn "arn:aws:iam::$AWS_ACCOUNT:role/$ROLE_TO_ASSUME" \
     --role-session-name "ci.datadog-lambda-java-$CI_JOB_ID-$CI_JOB_STAGE" \
     --query "Credentials.[AccessKeyId,SecretAccessKey,SessionToken]" \
-    --external-id $EXTERNAL_ID \
-    --output text))
+    --external-id "$EXTERNAL_ID" \
+    --output text)
+read -r AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN <<< "$ASSUMED_ROLE_CREDENTIALS"
+export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN

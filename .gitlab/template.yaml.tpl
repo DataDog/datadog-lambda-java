@@ -37,7 +37,7 @@ sign layer:
   tags: ["arch:amd64"]
   image: ${CI_DOCKER_TARGET_IMAGE}:${CI_DOCKER_TARGET_VERSION}
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^v.*/'
+    - if: '$CI_COMMIT_TAG =~ /^v[0-9]+$/'
       when: manual
   needs:
     - build layer
@@ -63,7 +63,7 @@ publish layer {{ $environment.name }}:
     - if: '"{{ $environment.name }}" =~ /^(sandbox|staging)/'
       when: manual
       allow_failure: true
-    - if: '$CI_COMMIT_TAG =~ /^v.*/'
+    - if: '$CI_COMMIT_TAG =~ /^v[0-9]+$/'
   needs:
     {{ if eq $environment.name "prod" }}
     - sign layer
