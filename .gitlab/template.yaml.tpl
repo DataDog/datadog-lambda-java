@@ -10,9 +10,7 @@ default:
       - runner_system_failure
 
 variables:
-  # TODO: switch to registry.ddbuild.io/ci/datadog-lambda-java once the "ci image" job
-  # has built and signed it on main. Until then, reuse the identical image from datadog-lambda-java-ci.
-  CI_DOCKER_TARGET_IMAGE: registry.ddbuild.io/ci/datadog-lambda-java-ci
+  CI_DOCKER_TARGET_IMAGE: registry.ddbuild.io/ci/datadog-lambda-java
   CI_DOCKER_TARGET_VERSION: latest
 
 build layer:
