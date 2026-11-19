@@ -11,7 +11,9 @@
 #
 # LAYER_FILE=dd-trace-java-123456.zip .gitlab/scripts/sign_layers.sh sandbox
 
-set -e
+# pipefail: without it, `$(aws ... | jq ...)` takes jq's exit status, so a failed
+# aws call is silently ignored and the script continues with an empty value.
+set -eo pipefail
 
 SIGNING_PROFILE_NAME="DatadogLambdaSigningProfile"
 VALID_ACCOUNTS=("sandbox" "prod")
