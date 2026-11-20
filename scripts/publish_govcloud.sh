@@ -4,7 +4,7 @@
 # Download button on the `layer` job. This will be a zip file containing the
 # layer (there is only 1 layer for the entire Java release). Run this script as follows:
 #
-# CI_COMMIT_TAG=<vX> ENVIRONMENT=[us1-staging-fed|us1-fed|us2-fed] [REGIONS=us-gov-west-1] ./publish_govcloud.sh <layer-bundle.zip>
+# CI_COMMIT_TAG=<vX> ENVIRONMENT=[us1-staging-fed|us1-fed|us2-fed] [REGIONS=us-gov-west-1] ./scripts/publish_govcloud.sh <layer-bundle.zip>
 # Download layer from the 'build layer' job's release artifacts in Gitlab.
 #
 # protip: you can drag the zip file from finder into your terminal to insert
